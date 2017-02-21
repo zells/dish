@@ -42,22 +42,33 @@ public class Dish implements SignalListener {
     }
 
     private boolean deliver(Delivery delivery) {
-        if (delivered.contains(delivery)) {
-            return false;
-        }
-        delivered.add(delivery);
+        return !alreadyDelivered(delivery)
+                && (deliverLocally(delivery)
+                || deliverRemotely(delivery));
+    }
 
-        if (culture.containsKey(delivery.getReceiver())) {
-            culture.get(delivery.getReceiver()).receive(delivery.getMessage());
+    private boolean alreadyDelivered(Delivery delivery) {
+        if (delivered.contains(delivery)) {
             return true;
         }
+        delivered.add(delivery);
+        return false;
+    }
 
+    private boolean deliverLocally(Delivery delivery) {
+        if (!culture.containsKey(delivery.getReceiver())) {
+            return false;
+        }
+        culture.get(delivery.getReceiver()).receive(delivery.getMessage());
+        return true;
+    }
+
+    private boolean deliverRemotely(Delivery delivery) {
         for (Peer peer : peers) {
             if (peer.deliver(delivery)) {
                 return true;
             }
         }
-
         return false;
     }
 
