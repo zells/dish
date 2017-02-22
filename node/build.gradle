@@ -1,0 +1,17 @@
+version '0.1'
+sourceCompatibility = 1.5
+
+dependencies {
+    compile 'org.msgpack:msgpack-core:0.8.12'
+    compile 'org.msgpack:jackson-dataformat-msgpack:0.8.12'
+}
+
+task buildNode(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'zells messaging protocol (zmp) client library'
+    }
+    baseName = 'dish-node'
+    destinationDir = file("$rootDir/build")
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
