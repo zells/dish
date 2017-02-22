@@ -4,9 +4,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.ReceiverNotFoundException;
-import org.zells.dish.fakes.FakeDish;
+import org.zells.dish.fakes.FakeEncoding;
+import org.zells.dish.fakes.FakeServer;
+import org.zells.dish.fakes.FakeUuidGenerator;
 import org.zells.dish.fakes.FakeZell;
 import org.zells.dish.delivery.messages.StringMessage;
+import org.zells.dish.network.Connection;
+import org.zells.dish.network.encoding.EncodingRepository;
+
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 public class DeliverMessagesTest {
 
@@ -106,5 +113,31 @@ public class DeliverMessagesTest {
         dishTwo.send(anAddress, new StringMessage("a asString"));
 
         assert aZell.received.asString().equals("a asString");
+    }
+
+    static class FakeDish extends Dish {
+
+        final Connection connection;
+
+        private static int lastId = 0;
+        private static Map<Integer, Connection> connections = new IdentityHashMap<Integer, Connection>();
+
+        FakeDish() {
+            super(server(), new FakeUuidGenerator(), encodings());
+            connection = connections.get(lastId);
+            lastId++;
+        }
+
+        private static FakeServer server() {
+            FakeServer server = new FakeServer();
+            connections.put(lastId, server.getConnection());
+            return server;
+        }
+
+        private static EncodingRepository encodings() {
+            EncodingRepository repository = new EncodingRepository();
+            repository.add(new FakeEncoding());
+            return repository;
+        }
     }
 }

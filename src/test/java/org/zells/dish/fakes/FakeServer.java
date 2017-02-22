@@ -1,9 +1,6 @@
 package org.zells.dish.fakes;
 
-import org.zells.dish.network.Connection;
-import org.zells.dish.network.Packet;
-import org.zells.dish.network.Server;
-import org.zells.dish.network.SignalListener;
+import org.zells.dish.network.*;
 
 public class FakeServer implements Server {
 
@@ -20,7 +17,7 @@ public class FakeServer implements Server {
         return new FakeConnection(this);
     }
 
-    public Packet receive(Packet packet) {
-        return new FakePacket(listener.respond(((FakePacket)packet).getSignal()));
+    Packet receive(Packet packet) {
+        return new FakePacket(listener.respondTo(((FakePacket)packet).getSignal()));
     }
 }

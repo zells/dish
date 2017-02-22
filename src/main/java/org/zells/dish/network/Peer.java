@@ -1,29 +1,26 @@
-package org.zells.dish;
+package org.zells.dish.network;
 
 import org.zells.dish.delivery.Delivery;
-import org.zells.dish.network.Connection;
-import org.zells.dish.network.Packet;
-import org.zells.dish.network.Signal;
 import org.zells.dish.network.encoding.EncodingRepository;
-import org.zells.dish.network.signals.DeliverySignal;
+import org.zells.dish.network.signals.DeliverSignal;
 import org.zells.dish.network.signals.JoinSignal;
 import org.zells.dish.network.signals.OkSignal;
 
-class Peer {
+public class Peer {
 
     private Connection connection;
     private EncodingRepository encodings;
 
-    Peer(Connection connection, EncodingRepository encodings) {
+    public Peer(Connection connection, EncodingRepository encodings) {
         this.connection = connection;
         this.encodings = encodings;
     }
 
-    boolean deliver(Delivery delivery) {
-        return signal(new DeliverySignal(delivery)) instanceof OkSignal;
+    public boolean deliver(Delivery delivery) {
+        return signal(new DeliverSignal(delivery)) instanceof OkSignal;
     }
 
-    void join(Connection connection) {
+    public void join(Connection connection) {
         signal(new JoinSignal(connection));
     }
 

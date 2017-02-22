@@ -2,7 +2,7 @@ package org.zells.dish.network.encoding;
 
 import org.zells.dish.network.Packet;
 import org.zells.dish.network.Signal;
-import org.zells.dish.network.signals.DeliverySignal;
+import org.zells.dish.network.signals.DeliverSignal;
 import org.zells.dish.network.signals.JoinSignal;
 
 import java.util.ArrayList;
@@ -17,10 +17,10 @@ public class EncodingRepository {
     }
 
     public Packet encode(Signal signal) {
-        if (signal instanceof DeliverySignal) {
-            return encodings.get(0).encode((DeliverySignal) signal);
+        if (signal instanceof DeliverSignal) {
+            return encodings.get(0).encode(signal);
         } else if (signal instanceof JoinSignal) {
-            return encodings.get(0).encode((JoinSignal) signal);
+            return encodings.get(0).encode(signal);
         }
 
         throw new RuntimeException("Unknown signal");
