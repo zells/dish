@@ -10,7 +10,7 @@ task buildNode(type: Jar) {
     manifest {
         attributes 'Implementation-Title': 'zells messaging protocol (zmp) client library'
     }
-    baseName = 'dish-node'
+    baseName = 'dish'
     destinationDir = file("$rootDir/build")
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
