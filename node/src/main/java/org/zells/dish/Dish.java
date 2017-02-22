@@ -5,12 +5,14 @@ import org.zells.dish.delivery.Delivery;
 import org.zells.dish.delivery.Message;
 import org.zells.dish.delivery.ReceiverNotFoundException;
 import org.zells.dish.network.*;
+import org.zells.dish.network.connections.TcpSocketServer;
 import org.zells.dish.network.encoding.EncodingRepository;
+import org.zells.dish.util.BasicUuidGenerator;
 import org.zells.dish.util.UuidGenerator;
 
 import java.util.*;
 
-class Dish {
+public class Dish {
 
     private Server server;
     private UuidGenerator generator;
@@ -21,7 +23,7 @@ class Dish {
     private List<Peer> peers = new ArrayList<Peer>();
     private Set<Delivery> delivered = new HashSet<Delivery>();
 
-    Dish(Server server, UuidGenerator generator, EncodingRepository encodings, ConnectionRepository connections) {
+    public Dish(Server server, UuidGenerator generator, EncodingRepository encodings, ConnectionRepository connections) {
         this.server = server;
         this.generator = generator;
         this.encodings = encodings;
@@ -30,7 +32,16 @@ class Dish {
         server.start(new DishSignalListener());
     }
 
-    void send(Address receiver, Message message) {
+    public static Dish buildDefault(String host, int port) {
+        EncodingRepository encodings = new EncodingRepository().addAll(EncodingRepository.supportedEncodings());
+        ConnectionRepository connections = new ConnectionRepository().addAll(ConnectionRepository.supportedConnections());
+        TcpSocketServer server = new TcpSocketServer(host, port, encodings);
+        BasicUuidGenerator generator = new BasicUuidGenerator();
+
+        return new Dish(server, generator, encodings, connections);
+    }
+
+    public void send(Address receiver, Message message) {
         if (!deliver(new Delivery(generator.generate(), receiver, message))) {
             throw new ReceiverNotFoundException();
         }
@@ -67,7 +78,7 @@ class Dish {
         return false;
     }
 
-    Address add(Zell zell) {
+    public Address add(Zell zell) {
         Address address = new Address(generator.generate());
         culture.put(address, zell);
         return address;
