@@ -21,7 +21,7 @@ public abstract class Message {
         return isTrue() ? 1 : 0;
     }
 
-    public byte[] asBinary() {
+    public byte[] asBytes() {
         return isNull() ? new byte[0] : (isTrue() ? new byte[]{1} : new byte[]{0});
     }
 

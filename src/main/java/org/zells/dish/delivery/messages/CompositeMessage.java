@@ -21,7 +21,7 @@ public class CompositeMessage extends Message {
     }
 
     @Override
-    public byte[] asBinary() {
+    public byte[] asBytes() {
         return asString().getBytes();
     }
 
@@ -33,5 +33,16 @@ public class CompositeMessage extends Message {
     @Override
     public Message read(String key) {
         return map.get(key);
+    }
+
+    @Override
+    public int hashCode() {
+        return map.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof CompositeMessage
+                && map.equals(((CompositeMessage) obj).map);
     }
 }

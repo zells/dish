@@ -1,6 +1,9 @@
 package org.zells.dish.delivery.messages;
 
+import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
+
+import java.util.Arrays;
 
 public class BinaryMessage extends Message {
 
@@ -16,7 +19,23 @@ public class BinaryMessage extends Message {
     }
 
     @Override
-    public byte[] asBinary() {
+    public byte[] asBytes() {
         return value;
+    }
+
+    @Override
+    public Address asAddress() {
+        return Address.fromBytes(value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(value);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof BinaryMessage
+                && Arrays.equals(value, ((BinaryMessage) obj).value);
     }
 }

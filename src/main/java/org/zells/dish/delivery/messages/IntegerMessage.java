@@ -28,7 +28,18 @@ public class IntegerMessage extends Message {
     }
 
     @Override
-    public byte[] asBinary() {
+    public byte[] asBytes() {
         return ByteBuffer.allocate(4).putInt(value).array();
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode() + value;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof IntegerMessage
+                && value == ((IntegerMessage) obj).value;
     }
 }

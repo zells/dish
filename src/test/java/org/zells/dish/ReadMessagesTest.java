@@ -17,7 +17,7 @@ public class ReadMessagesTest {
         assert !m.isTrue();
         assert m.asString() == null;
         assert m.asInteger() == 0;
-        assert Arrays.equals(m.asBinary(), new byte[0]);
+        assert Arrays.equals(m.asBytes(), new byte[0]);
         assert m.keys().isEmpty();
     }
 
@@ -29,7 +29,7 @@ public class ReadMessagesTest {
         assert m.isTrue();
         assert m.asString().equals("true");
         assert m.asInteger() == 1;
-        assert Arrays.equals(m.asBinary(), new byte[]{1});
+        assert Arrays.equals(m.asBytes(), new byte[]{1});
         assert m.keys().isEmpty();
     }
 
@@ -41,7 +41,7 @@ public class ReadMessagesTest {
         assert !m.isTrue();
         assert m.asString().equals("");
         assert m.asInteger() == 0;
-        assert Arrays.equals(m.asBinary(), new byte[]{0});
+        assert Arrays.equals(m.asBytes(), new byte[]{0});
         assert m.keys().isEmpty();
     }
 
@@ -53,7 +53,7 @@ public class ReadMessagesTest {
         assert !m.isTrue();
         assert m.asString().equals("");
         assert m.asInteger() == 0;
-        assert Arrays.equals(m.asBinary(), new byte[0]);
+        assert Arrays.equals(m.asBytes(), new byte[0]);
         assert m.keys().isEmpty();
     }
 
@@ -65,7 +65,7 @@ public class ReadMessagesTest {
         assert m.isTrue();
         assert m.asString().equals("foo");
         assert m.asInteger() == 1;
-        assert Arrays.equals(m.asBinary(), "foo".getBytes());
+        assert Arrays.equals(m.asBytes(), "foo".getBytes());
         assert m.keys().isEmpty();
     }
 
@@ -77,7 +77,7 @@ public class ReadMessagesTest {
         assert m.isTrue();
         assert m.asString().equals("42");
         assert m.asInteger() == 42;
-        assert Arrays.equals(m.asBinary(), new byte[]{0, 0, 0, 42});
+        assert Arrays.equals(m.asBytes(), new byte[]{0, 0, 0, 42});
         assert m.keys().isEmpty();
     }
 
@@ -89,7 +89,7 @@ public class ReadMessagesTest {
         assert !m.isTrue();
         assert m.asString().equals("0");
         assert m.asInteger() == 0;
-        assert Arrays.equals(m.asBinary(), new byte[]{0, 0, 0, 0});
+        assert Arrays.equals(m.asBytes(), new byte[]{0, 0, 0, 0});
         assert m.keys().isEmpty();
     }
 
@@ -101,7 +101,7 @@ public class ReadMessagesTest {
         assert m.isTrue();
         assert m.asString().equals("foo");
         assert m.asInteger() == 1;
-        assert Arrays.equals(m.asBinary(), "foo".getBytes());
+        assert Arrays.equals(m.asBytes(), "foo".getBytes());
         assert m.keys().isEmpty();
     }
 
@@ -113,21 +113,14 @@ public class ReadMessagesTest {
         assert !m.isTrue();
         assert m.asString() == null;
         assert m.asInteger() == 0;
-        assert Arrays.equals(m.asBinary(), new byte[0]);
+        assert Arrays.equals(m.asBytes(), new byte[0]);
         assert m.keys().isEmpty();
     }
 
     @Test
-    public void addressMessage() {
-        Message m = new AddressMessage(Address.fromString("aa"));
-
-        assert !m.isNull();
-        assert m.isTrue();
-        assert m.asString().equals("aa");
-        assert m.asInteger() == 1;
-        assert Arrays.equals(m.asBinary(), Address.fromString("aa").toBytes());
-        assert m.keys().isEmpty();
-        assert m.asAddress().equals(Address.fromString("aa"));
+    public void addressBinaryMessage() {
+        Message m = new BinaryMessage(Address.fromString("dada").toBytes());
+        assert m.asAddress().equals(Address.fromString("dada"));
     }
 
     @Test
@@ -141,7 +134,7 @@ public class ReadMessagesTest {
         assert m.isTrue();
         assert m.asString().equals("{and={two=2}, one=uno}");
         assert m.asInteger() == 1;
-        assert Arrays.equals(m.asBinary(), "{and={two=2}, one=uno}".getBytes());
+        assert Arrays.equals(m.asBytes(), "{and={two=2}, one=uno}".getBytes());
 
         assert m.keys().contains("one");
         assert m.keys().contains("and");

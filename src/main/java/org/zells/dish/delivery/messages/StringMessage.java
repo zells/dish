@@ -15,8 +15,8 @@ public class StringMessage extends Message {
     }
 
     @Override
-    public byte[] asBinary() {
-        return isNull() ? super.asBinary() : value.getBytes();
+    public byte[] asBytes() {
+        return isNull() ? super.asBytes() : value.getBytes();
     }
 
     @Override

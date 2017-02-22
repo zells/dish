@@ -7,8 +7,7 @@ import org.msgpack.jackson.dataformat.MessagePackFactory;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Delivery;
 import org.zells.dish.delivery.Message;
-import org.zells.dish.delivery.messages.NullMessage;
-import org.zells.dish.delivery.messages.StringMessage;
+import org.zells.dish.delivery.messages.*;
 import org.zells.dish.network.Packet;
 import org.zells.dish.network.Signal;
 import org.zells.dish.network.encoding.Encoding;
@@ -20,7 +19,9 @@ import org.zells.dish.util.Uuid;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MsgpackEncoding implements Encoding {
 
@@ -67,10 +68,19 @@ public class MsgpackEncoding implements Encoding {
         if (message instanceof NullMessage) {
             return null;
         } else if (message instanceof StringMessage) {
-            List<Object> list = new ArrayList<Object>();
-            list.add("s");
-            list.add(message.asString());
-            return list;
+            return message.asString();
+        } else if (message instanceof BooleanMessage) {
+            return message.isTrue();
+        } else if (message instanceof IntegerMessage) {
+            return message.asInteger();
+        } else if (message instanceof BinaryMessage) {
+            return message.asBytes();
+        } else if (message instanceof CompositeMessage) {
+            HashMap<String, Object> map = new HashMap<String, Object>();
+            for (String key : message.keys()) {
+                map.put(key, deflateMessage(message.read(key)));
+            }
+            return map;
         }
 
         throw new RuntimeException("unsupported message type: " + message.getClass());
@@ -126,13 +136,20 @@ public class MsgpackEncoding implements Encoding {
     private Message inflateMessage(Object object) {
         if (object == null) {
             return new NullMessage();
-        } else if (object instanceof List) {
-            List list = ((List) object);
-            if (!list.isEmpty()) {
-                if (list.get(0).equals("s") && list.size() == 2) {
-                    return new StringMessage((String) list.get(1));
-                }
+        } else if (object instanceof String) {
+            return new StringMessage((String) object);
+        } else if (object instanceof Boolean) {
+            return new BooleanMessage((Boolean) object);
+        } else if (object instanceof Integer) {
+            return new IntegerMessage((Integer) object);
+        } else if (object instanceof byte[]) {
+            return new BinaryMessage((byte[]) object);
+        } else if (object instanceof Map) {
+            CompositeMessage message = new CompositeMessage();
+            for (Object key : ((Map) object).keySet()) {
+                message.put((String) key, inflateMessage(((Map) object).get(key)));
             }
+            return message;
         }
 
         throw new RuntimeException("unsupported message type");

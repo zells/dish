@@ -4,8 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Delivery;
-import org.zells.dish.delivery.messages.NullMessage;
-import org.zells.dish.delivery.messages.StringMessage;
+import org.zells.dish.delivery.Message;
+import org.zells.dish.delivery.messages.*;
 import org.zells.dish.network.Signal;
 import org.zells.dish.network.encoding.Encoding;
 import org.zells.dish.network.encoding.EncodingRepository;
@@ -28,19 +28,10 @@ public class EncodeSignalsTest {
 
     @Test
     public void encodingFailsForUnknownSignal() {
-        Signal signal = new Signal() {
-        };
-
         for (Encoding encoding : encodings) {
-            Exception caught = null;
-            try {
-                encoding.encode(signal);
-            } catch (Exception e) {
-                caught = e;
-            }
-
+            Exception caught = tryToEncode(encoding);
             assert caught != null;
-            assert caught.getMessage().equals("unsupported signal type: " + signal.getClass());
+            assert caught.getMessage().startsWith("unsupported signal type");
         }
     }
 
@@ -57,13 +48,34 @@ public class EncodeSignalsTest {
 
     @Test
     public void deliver() {
-        assertEncodeDecode(new DeliverSignal(new Delivery(Uuid.fromString("01"), Address.fromString("aa"), new NullMessage())));
-        assertEncodeDecode(new DeliverSignal(new Delivery(Uuid.fromString("02"), Address.fromString("ab"), new StringMessage("message"))));
+        assertEncodeDecode(deliverSignal(new NullMessage()));
+        assertEncodeDecode(deliverSignal(new StringMessage("message")));
+        assertEncodeDecode(deliverSignal(new BooleanMessage(true)));
+        assertEncodeDecode(deliverSignal(new IntegerMessage(42)));
+        assertEncodeDecode(deliverSignal(new BinaryMessage(new byte[]{1, 42, 27})));
+        assertEncodeDecode(deliverSignal(new CompositeMessage()
+                .put("one", new StringMessage("uno"))
+                .put("and", new CompositeMessage()
+                        .put("two", new IntegerMessage(2)))));
+    }
+
+    private DeliverSignal deliverSignal(Message message) {
+        return new DeliverSignal(new Delivery(Uuid.fromString("01"), Address.fromString("aa"), message));
     }
 
     @Test
     public void join() {
         assertEncodeDecode(new JoinSignal("foo:connection"));
+    }
+
+    private Exception tryToEncode(Encoding encoding) {
+        try {
+            encoding.encode(new Signal() {
+            });
+            return null;
+        } catch (Exception e) {
+            return e;
+        }
     }
 
     private void assertEncodeDecode(Signal signal) {
