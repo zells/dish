@@ -2,7 +2,6 @@ package org.zells.dish;
 
 import org.junit.Test;
 import org.zells.dish.delivery.Address;
-import org.zells.dish.delivery.messages.NullMessage;
 import org.zells.dish.delivery.messages.StringMessage;
 import org.zells.dish.fakes.FakeUuidGenerator;
 import org.zells.dish.fakes.FakeZell;

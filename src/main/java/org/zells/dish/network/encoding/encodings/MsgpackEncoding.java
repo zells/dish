@@ -39,6 +39,19 @@ public class MsgpackEncoding implements Encoding {
         }
     }
 
+    public Signal decode(Packet packet) {
+        try {
+            Object payload = objectMapper.readValue(packet.getBytes(), new TypeReference<List<Object>>() {
+            });
+            if (!(payload instanceof List)) {
+                throw new RuntimeException("invalid format");
+            }
+            return inflate((List) payload);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private Object deflate(Signal signal) {
         List<Object> payload = new ArrayList<Object>();
 
@@ -62,41 +75,6 @@ public class MsgpackEncoding implements Encoding {
         }
 
         return payload;
-    }
-
-    private Object deflateMessage(Message message) {
-        if (message instanceof NullMessage) {
-            return null;
-        } else if (message instanceof StringMessage) {
-            return message.asString();
-        } else if (message instanceof BooleanMessage) {
-            return message.isTrue();
-        } else if (message instanceof IntegerMessage) {
-            return message.asInteger();
-        } else if (message instanceof BinaryMessage) {
-            return message.asBytes();
-        } else if (message instanceof CompositeMessage) {
-            HashMap<String, Object> map = new HashMap<String, Object>();
-            for (String key : message.keys()) {
-                map.put(key, deflateMessage(message.read(key)));
-            }
-            return map;
-        }
-
-        throw new RuntimeException("unsupported message type: " + message.getClass());
-    }
-
-    public Signal decode(Packet packet) {
-        try {
-            Object payload = objectMapper.readValue(packet.getBytes(), new TypeReference<List<Object>>() {
-            });
-            if (!(payload instanceof List)) {
-                throw new RuntimeException("invalid format");
-            }
-            return inflate((List) payload);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private Signal inflate(List payload) {
@@ -131,6 +109,28 @@ public class MsgpackEncoding implements Encoding {
         } else {
             throw new RuntimeException("unsupported signal: " + payload.get(0));
         }
+    }
+
+    private Object deflateMessage(Message message) {
+        if (message instanceof NullMessage) {
+            return null;
+        } else if (message instanceof StringMessage) {
+            return message.asString();
+        } else if (message instanceof BooleanMessage) {
+            return message.isTrue();
+        } else if (message instanceof IntegerMessage) {
+            return message.asInteger();
+        } else if (message instanceof BinaryMessage) {
+            return message.asBytes();
+        } else if (message instanceof CompositeMessage) {
+            HashMap<String, Object> map = new HashMap<String, Object>();
+            for (String key : message.keys()) {
+                map.put(key, deflateMessage(message.read(key)));
+            }
+            return map;
+        }
+
+        throw new RuntimeException("unsupported message type: " + message.getClass());
     }
 
     private Message inflateMessage(Object object) {
