@@ -1,0 +1,17 @@
+version '0.1'
+sourceCompatibility = 1.5
+
+dependencies {
+    compile project(':node')
+}
+
+task buildClient(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'zells command line client',
+                'Main-Class': 'org.zells.client.Client'
+    }
+    baseName = 'client'
+    destinationDir = file("$rootDir/build")
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}

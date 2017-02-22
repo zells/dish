@@ -1,2 +1,2 @@
 rootProject.name = 'dish'
-include "node"
+include "node", "client"
