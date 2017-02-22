@@ -30,4 +30,8 @@ public class Address {
     public String asString() {
         return value;
     }
+
+    public static Address fromBytes(byte[] bytes) {
+        return new Address(new String(bytes));
+    }
 }

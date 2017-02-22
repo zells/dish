@@ -12,7 +12,7 @@ public abstract class SignalListener {
         if (signal instanceof DeliverSignal) {
             return isOk(onDeliver(((DeliverSignal) signal).getDelivery()));
         } else if (signal instanceof JoinSignal) {
-            return isOk(onJoin(((JoinSignal) signal).getConnection()));
+            return isOk(onJoin(((JoinSignal) signal).getConnectionDescription()));
         }
 
         throw new RuntimeException("unknown signal: " + signal.getClass());
@@ -24,5 +24,5 @@ public abstract class SignalListener {
 
     protected abstract boolean onDeliver(Delivery delivery);
 
-    protected abstract boolean onJoin(Connection connections);
+    protected abstract boolean onJoin(String connectionDescription);
 }

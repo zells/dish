@@ -18,4 +18,14 @@ public class StringMessage extends Message {
     public byte[] asBinary() {
         return isNull() ? super.asBinary() : value.getBytes();
     }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof StringMessage && value.equals(((StringMessage) obj).value);
+    }
 }

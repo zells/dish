@@ -4,12 +4,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.ReceiverNotFoundException;
-import org.zells.dish.fakes.FakeEncoding;
-import org.zells.dish.fakes.FakeServer;
-import org.zells.dish.fakes.FakeUuidGenerator;
-import org.zells.dish.fakes.FakeZell;
+import org.zells.dish.fakes.*;
 import org.zells.dish.delivery.messages.StringMessage;
 import org.zells.dish.network.Connection;
+import org.zells.dish.network.ConnectionFactory;
+import org.zells.dish.network.ConnectionRepository;
 import org.zells.dish.network.encoding.EncodingRepository;
 
 import java.util.IdentityHashMap;
@@ -17,15 +16,38 @@ import java.util.Map;
 
 public class DeliverMessagesTest {
 
-    private FakeDish dish;
-    private FakeDish dishTwo;
-    private FakeDish dishThree;
+    private Dish dish;
+    private Dish dishTwo;
+    private Dish dishThree;
+    private FakeUuidGenerator uuidGenerator;
+    private EncodingRepository encodings;
+    private ConnectionRepository connections;
 
     @Before
     public void setUp() {
-        dish = new FakeDish();
-        dishTwo = new FakeDish();
-        dishThree = new FakeDish();
+        uuidGenerator = new FakeUuidGenerator();
+        connections = new ConnectionRepository();
+        encodings = new EncodingRepository()
+                .add(new FakeEncoding());
+
+        dish = newDish(1);
+        dishTwo = newDish(2);
+        dishThree = newDish(3);
+    }
+
+    private Dish newDish(final int id) {
+        final FakeServer server = new FakeServer(id);
+        connections.add(new ConnectionFactory() {
+            public boolean canBuild(String description) {
+                return description.equals("fake:" + id);
+            }
+
+            public Connection build(String description) {
+                return server.getConnection();
+            }
+        });
+
+        return new Dish(server, uuidGenerator, encodings, connections);
     }
 
     @Test(expected = ReceiverNotFoundException.class)
@@ -63,7 +85,7 @@ public class DeliverMessagesTest {
         FakeZell aZell = new FakeZell();
         Address anAddress = dishTwo.add(aZell);
 
-        dish.join(dishTwo.connection);
+        dish.join(connections.getConnectionOf("fake:2"));
         dish.send(anAddress, new StringMessage("a asString"));
 
         assert aZell.received.asString().equals("a asString");
@@ -74,8 +96,8 @@ public class DeliverMessagesTest {
         FakeZell aZell = new FakeZell();
         Address anAddress = dishThree.add(aZell);
 
-        dish.join(dishTwo.connection);
-        dishTwo.join(dishThree.connection);
+        dish.join(connections.getConnectionOf("fake:2"));
+        dishTwo.join(connections.getConnectionOf("fake:3"));
 
         dish.send(anAddress, new StringMessage("a asString"));
 
@@ -87,8 +109,8 @@ public class DeliverMessagesTest {
         FakeZell aZell = new FakeZell();
         Address anAddress = dishThree.add(aZell);
 
-        dish.join(dishTwo.connection);
-        dish.join(dishThree.connection);
+        dish.join(connections.getConnectionOf("fake:2"));
+        dish.join(connections.getConnectionOf("fake:3"));
 
         dish.send(anAddress, new StringMessage("a asString"));
 
@@ -97,9 +119,9 @@ public class DeliverMessagesTest {
 
     @Test(expected = ReceiverNotFoundException.class)
     public void avoidLoops() {
-        dish.join(dishTwo.connection);
-        dishTwo.join(dishThree.connection);
-        dishThree.join(dish.connection);
+        dish.join(connections.getConnectionOf("fake:2"));
+        dishTwo.join(connections.getConnectionOf("fake:3"));
+        dishThree.join(connections.getConnectionOf("fake:1"));
 
         dish.send(new Address("loop"), new StringMessage("asString"));
     }
@@ -109,35 +131,9 @@ public class DeliverMessagesTest {
         FakeZell aZell = new FakeZell();
         Address anAddress = dish.add(aZell);
 
-        dish.join(dishTwo.connection);
+        dish.join(connections.getConnectionOf("fake:2"));
         dishTwo.send(anAddress, new StringMessage("a asString"));
 
         assert aZell.received.asString().equals("a asString");
-    }
-
-    static class FakeDish extends Dish {
-
-        final Connection connection;
-
-        private static int lastId = 0;
-        private static Map<Integer, Connection> connections = new IdentityHashMap<Integer, Connection>();
-
-        FakeDish() {
-            super(server(), new FakeUuidGenerator(), encodings());
-            connection = connections.get(lastId);
-            lastId++;
-        }
-
-        private static FakeServer server() {
-            FakeServer server = new FakeServer();
-            connections.put(lastId, server.getConnection());
-            return server;
-        }
-
-        private static EncodingRepository encodings() {
-            EncodingRepository repository = new EncodingRepository();
-            repository.add(new FakeEncoding());
-            return repository;
-        }
     }
 }

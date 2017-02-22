@@ -14,4 +14,15 @@ public class DeliverSignal implements Signal {
     public Delivery getDelivery() {
         return delivery;
     }
+
+    @Override
+    public int hashCode() {
+        return delivery.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof DeliverSignal
+                && delivery.equals(((DeliverSignal) obj).delivery);
+    }
 }

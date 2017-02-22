@@ -1,17 +1,27 @@
 package org.zells.dish.network.signals;
 
-import org.zells.dish.network.Connection;
 import org.zells.dish.network.Signal;
 
 public class JoinSignal implements Signal {
 
-    private Connection connection;
+    private String connectionDescription;
 
-    public JoinSignal(Connection connection) {
-        this.connection = connection;
+    public JoinSignal(String connectionDescription) {
+        this.connectionDescription = connectionDescription;
     }
 
-    public Connection getConnection() {
-        return connection;
+    public String getConnectionDescription() {
+        return connectionDescription;
+    }
+
+    @Override
+    public int hashCode() {
+        return connectionDescription.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof JoinSignal
+                && connectionDescription.equals(((JoinSignal) obj).connectionDescription);
     }
 }

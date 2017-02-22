@@ -3,15 +3,16 @@ package org.zells.dish.fakes;
 import org.zells.dish.network.Packet;
 import org.zells.dish.network.Signal;
 
-public class FakePacket implements Packet {
+class FakePacket extends Packet {
 
     private Signal signal;
 
-    public FakePacket(Signal signal) {
+    FakePacket(Signal signal) {
+        super(new byte[0]);
         this.signal = signal;
     }
 
-    public Signal getSignal() {
+    Signal getSignal() {
         return signal;
     }
 }

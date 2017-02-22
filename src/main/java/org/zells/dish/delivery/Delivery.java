@@ -20,6 +20,10 @@ public class Delivery {
         return message;
     }
 
+    public String getUuid() {
+        return uuid;
+    }
+
     @Override
     public int hashCode() {
         return uuid.hashCode();
@@ -28,6 +32,8 @@ public class Delivery {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Delivery
-                && uuid.equals(((Delivery) obj).uuid);
+                && uuid.equals(((Delivery) obj).uuid)
+                && receiver.equals(((Delivery) obj).receiver)
+                && message.equals(((Delivery) obj).message);
     }
 }

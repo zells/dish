@@ -21,7 +21,7 @@ public class Peer {
     }
 
     public void join(Connection connection) {
-        signal(new JoinSignal(connection));
+        signal(new JoinSignal(connection.getDescription()));
     }
 
     private Signal signal(Signal signal) {

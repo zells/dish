@@ -4,10 +4,7 @@ import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Delivery;
 import org.zells.dish.delivery.Message;
 import org.zells.dish.delivery.ReceiverNotFoundException;
-import org.zells.dish.network.Connection;
-import org.zells.dish.network.Peer;
-import org.zells.dish.network.Server;
-import org.zells.dish.network.SignalListener;
+import org.zells.dish.network.*;
 import org.zells.dish.network.encoding.EncodingRepository;
 import org.zells.dish.util.UuidGenerator;
 
@@ -18,15 +15,17 @@ class Dish {
     private Server server;
     private UuidGenerator generator;
     private EncodingRepository encodings;
+    private ConnectionRepository connections;
 
     private Map<Address, Zell> culture = new HashMap<Address, Zell>();
     private List<Peer> peers = new ArrayList<Peer>();
     private Set<Delivery> delivered = new HashSet<Delivery>();
 
-    Dish(Server server, UuidGenerator generator, EncodingRepository encodings) {
+    Dish(Server server, UuidGenerator generator, EncodingRepository encodings, ConnectionRepository connections) {
         this.server = server;
         this.generator = generator;
         this.encodings = encodings;
+        this.connections = connections;
 
         server.start(new DishSignalListener());
     }
@@ -91,8 +90,8 @@ class Dish {
             return deliver(delivery);
         }
 
-        protected boolean onJoin(Connection connections) {
-            return connect(connections) != null;
+        protected boolean onJoin(String connectionDescription) {
+            return connect(connections.getConnectionOf(connectionDescription)) != null;
         }
     }
 }

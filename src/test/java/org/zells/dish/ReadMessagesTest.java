@@ -128,6 +128,7 @@ public class ReadMessagesTest {
         assert m.asInteger() == 1;
         assert Arrays.equals(m.asBinary(), Address.parse("foo").getBytes());
         assert m.keys().isEmpty();
+        assert m.asAddress().equals(Address.parse("foo"));
     }
 
     @Test
