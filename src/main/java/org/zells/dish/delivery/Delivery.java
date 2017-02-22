@@ -1,12 +1,14 @@
 package org.zells.dish.delivery;
 
+import org.zells.dish.util.Uuid;
+
 public class Delivery {
 
     private final Address receiver;
     private final Message message;
-    private String uuid;
+    private Uuid uuid;
 
-    public Delivery(Address receiver, Message message, String uuid) {
+    public Delivery(Uuid uuid, Address receiver, Message message) {
         this.receiver = receiver;
         this.message = message;
         this.uuid = uuid;
@@ -20,7 +22,7 @@ public class Delivery {
         return message;
     }
 
-    public String getUuid() {
+    public Uuid getUuid() {
         return uuid;
     }
 

@@ -16,12 +16,11 @@ import org.zells.dish.network.signals.DeliverSignal;
 import org.zells.dish.network.signals.FailedSignal;
 import org.zells.dish.network.signals.JoinSignal;
 import org.zells.dish.network.signals.OkSignal;
+import org.zells.dish.util.Uuid;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MsgpackEncoding implements Encoding {
 
@@ -52,7 +51,7 @@ public class MsgpackEncoding implements Encoding {
 
             payload.add("DELIVER");
             payload.add(delivery.getUuid().getBytes());
-            payload.add(delivery.getReceiver().getBytes());
+            payload.add(delivery.getReceiver().toBytes());
             payload.add(deflateMessage(delivery.getMessage()));
         } else if (signal instanceof JoinSignal) {
             payload.add("JOIN");
@@ -109,9 +108,9 @@ public class MsgpackEncoding implements Encoding {
             }
 
             return new DeliverSignal(new Delivery(
+                    new Uuid((byte[]) payload.get(1)),
                     Address.fromBytes((byte[]) payload.get(2)),
-                    inflateMessage(payload.get(3)),
-                    new String((byte[]) payload.get(1))
+                    inflateMessage(payload.get(3))
             ));
         } else if (payload.get(0).equals("JOIN")) {
             if (payload.size() != 2) {

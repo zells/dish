@@ -13,6 +13,7 @@ import org.zells.dish.network.signals.DeliverSignal;
 import org.zells.dish.network.signals.FailedSignal;
 import org.zells.dish.network.signals.JoinSignal;
 import org.zells.dish.network.signals.OkSignal;
+import org.zells.dish.util.Uuid;
 
 import java.util.List;
 
@@ -56,8 +57,8 @@ public class EncodeSignalsTest {
 
     @Test
     public void deliver() {
-        assertEncodeDecode(new DeliverSignal(new Delivery(Address.parse("foo"), new NullMessage(), "uuid")));
-        assertEncodeDecode(new DeliverSignal(new Delivery(Address.parse("foo"), new StringMessage("message"), "uuid")));
+        assertEncodeDecode(new DeliverSignal(new Delivery(Uuid.fromString("01"), Address.fromString("aa"), new NullMessage())));
+        assertEncodeDecode(new DeliverSignal(new Delivery(Uuid.fromString("02"), Address.fromString("ab"), new StringMessage("message"))));
     }
 
     @Test

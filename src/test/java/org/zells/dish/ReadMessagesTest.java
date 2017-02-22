@@ -1,6 +1,5 @@
 package org.zells.dish;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
@@ -120,15 +119,15 @@ public class ReadMessagesTest {
 
     @Test
     public void addressMessage() {
-        Message m = new AddressMessage(Address.parse("foo"));
+        Message m = new AddressMessage(Address.fromString("aa"));
 
         assert !m.isNull();
         assert m.isTrue();
-        assert m.asString().equals("foo");
+        assert m.asString().equals("aa");
         assert m.asInteger() == 1;
-        assert Arrays.equals(m.asBinary(), Address.parse("foo").getBytes());
+        assert Arrays.equals(m.asBinary(), Address.fromString("aa").toBytes());
         assert m.keys().isEmpty();
-        assert m.asAddress().equals(Address.parse("foo"));
+        assert m.asAddress().equals(Address.fromString("aa"));
     }
 
     @Test

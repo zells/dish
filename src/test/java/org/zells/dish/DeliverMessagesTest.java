@@ -52,7 +52,7 @@ public class DeliverMessagesTest {
 
     @Test(expected = ReceiverNotFoundException.class)
     public void failIfZellDoesNotExist() {
-        dish.send(new Address("not an address"), new StringMessage("a asString"));
+        dish.send(Address.fromString("not an address"), new StringMessage("a asString"));
     }
 
     @Test
@@ -123,7 +123,7 @@ public class DeliverMessagesTest {
         dishTwo.join(connections.getConnectionOf("fake:3"));
         dishThree.join(connections.getConnectionOf("fake:1"));
 
-        dish.send(new Address("loop"), new StringMessage("asString"));
+        dish.send(Address.fromString("loop"), new StringMessage("asString"));
     }
 
     @Test

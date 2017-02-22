@@ -31,7 +31,7 @@ class Dish {
     }
 
     void send(Address receiver, Message message) {
-        if (!deliver(new Delivery(receiver, message, generator.generate()))) {
+        if (!deliver(new Delivery(generator.generate(), receiver, message))) {
             throw new ReceiverNotFoundException();
         }
     }

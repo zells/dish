@@ -13,7 +13,7 @@ public class AddressMessage extends Message {
 
     @Override
     public String asString() {
-        return value.asString();
+        return value.toString();
     }
 
     @Override
@@ -23,6 +23,6 @@ public class AddressMessage extends Message {
 
     @Override
     public byte[] asBinary() {
-        return value.getBytes();
+        return value.toBytes();
     }
 }
