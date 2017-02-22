@@ -1,12 +1,44 @@
 package org.zells.dish.delivery;
 
+import java.util.HashSet;
 import java.util.Set;
 
-public interface Message {
+public abstract class Message {
 
-    String value();
+    public String asString() {
+        return null;
+    }
 
-    Set<String> keys();
+    public boolean isNull() {
+        return asString() == null;
+    }
 
-    Message read(String key);
+    public boolean isTrue() {
+        return !isNull() && !asString().equals("");
+    }
+
+    public int asInteger() {
+        return isTrue() ? 1 : 0;
+    }
+
+    public byte[] asBinary() {
+        return isNull() ? new byte[0] : (isTrue() ? new byte[]{1} : new byte[]{0});
+    }
+
+    public Address asAddress() {
+        throw new RuntimeException("not an address");
+    }
+
+    public Set<String> keys() {
+        return new HashSet<String>();
+    }
+
+    public Message read(String key) {
+        throw new RuntimeException("cannot read [" + key + "]");
+    }
+
+    @Override
+    public String toString() {
+        return asString();
+    }
 }

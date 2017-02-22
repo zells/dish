@@ -18,4 +18,16 @@ public class Address {
         return obj instanceof Address
                 && value.equals(((Address) obj).value);
     }
+
+    public static Address parse(String string) {
+        return new Address(string);
+    }
+
+    public byte[] getBytes() {
+        return value.getBytes();
+    }
+
+    public String asString() {
+        return value;
+    }
 }

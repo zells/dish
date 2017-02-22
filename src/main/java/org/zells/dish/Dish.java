@@ -27,7 +27,7 @@ public class Dish implements SignalListener {
     private List<Peer> peers = new ArrayList<Peer>();
     private Set<Delivery> delivered = new HashSet<Delivery>();
 
-    Dish(Server server, UuidGenerator generator, EncodingRepository encodings) {
+    public Dish(Server server, UuidGenerator generator, EncodingRepository encodings) {
         this.server = server;
         this.generator = generator;
         this.encodings = encodings;
@@ -35,7 +35,7 @@ public class Dish implements SignalListener {
         server.start(this);
     }
 
-    void send(Address receiver, Message message) {
+    public void send(Address receiver, Message message) {
         if (!deliver(new Delivery(receiver, message, generator.generate()))) {
             throw new ReceiverNotFoundException();
         }
@@ -72,13 +72,13 @@ public class Dish implements SignalListener {
         return false;
     }
 
-    Address add(Zell zell) {
+    public Address add(Zell zell) {
         Address address = new Address(generator.generate());
         culture.put(address, zell);
         return address;
     }
 
-    void join(Connection connection) {
+    public void join(Connection connection) {
         Peer peer = connect(connection);
         peer.join(server.getConnection());
     }

@@ -4,54 +4,36 @@ import org.junit.Before;
 import org.junit.Test;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.ReceiverNotFoundException;
-import org.zells.dish.network.encoding.EncodingRepository;
-import org.zells.dish.fakes.FakeServer;
-import org.zells.dish.fakes.FakeUuidGenerator;
+import org.zells.dish.fakes.FakeDish;
 import org.zells.dish.fakes.FakeZell;
-import org.zells.dish.delivery.messages.Structure;
-import org.zells.dish.delivery.messages.Value;
+import org.zells.dish.delivery.messages.StringMessage;
 
 public class DeliverMessagesTest {
 
-    private Dish dish;
+    private FakeDish dish;
+    private FakeDish dishTwo;
+    private FakeDish dishThree;
 
     @Before
     public void setUp() {
-        dish = new Dish(new FakeServer(), new FakeUuidGenerator(), new EncodingRepository());
+        dish = new FakeDish();
+        dishTwo = new FakeDish();
+        dishThree = new FakeDish();
     }
 
     @Test(expected = ReceiverNotFoundException.class)
     public void failIfZellDoesNotExist() {
-        dish.send(new Address("not an address"), new Value("a value"));
+        dish.send(new Address("not an address"), new StringMessage("a asString"));
     }
 
     @Test
-    public void deliverValue() {
+    public void deliverLocally() {
         FakeZell aZell = new FakeZell();
 
         Address anAddress = dish.add(aZell);
-        dish.send(anAddress, new Value("a value"));
+        dish.send(anAddress, new StringMessage("a asString"));
 
-        assert aZell.received.value().equals("a value");
-    }
-
-    @Test
-    public void deliverStructure() {
-        FakeZell aZell = new FakeZell();
-
-        Address anAddress = dish.add(aZell);
-        dish.send(anAddress, new Structure()
-                .put("one", new Value("uno"))
-                .put("and", new Structure()
-                        .put("two", new Value("dos"))));
-
-
-        assert aZell.received.keys().size() == 2;
-        assert aZell.received.keys().contains("one");
-        assert aZell.received.keys().contains("and");
-
-        assert aZell.received.read("one").value().equals("uno");
-        assert aZell.received.read("and").read("two").value().equals("dos");
+        assert aZell.received.asString().equals("a asString");
     }
 
     @Test
@@ -62,10 +44,67 @@ public class DeliverMessagesTest {
         Address addressOne = dish.add(zellOne);
         Address addressTwo = dish.add(zellTwo);
 
-        dish.send(addressOne, new Value("for one"));
-        dish.send(addressTwo, new Value("for two"));
+        dish.send(addressOne, new StringMessage("for one"));
+        dish.send(addressTwo, new StringMessage("for two"));
 
-        assert zellOne.received.value().equals("for one");
-        assert zellTwo.received.value().equals("for two");
+        assert zellOne.received.asString().equals("for one");
+        assert zellTwo.received.asString().equals("for two");
+    }
+
+    @Test
+    public void deliverToPeer() {
+        FakeZell aZell = new FakeZell();
+        Address anAddress = dishTwo.add(aZell);
+
+        dish.join(dishTwo.connection);
+        dish.send(anAddress, new StringMessage("a asString"));
+
+        assert aZell.received.asString().equals("a asString");
+    }
+
+    @Test
+    public void forwardDelivery() {
+        FakeZell aZell = new FakeZell();
+        Address anAddress = dishThree.add(aZell);
+
+        dish.join(dishTwo.connection);
+        dishTwo.join(dishThree.connection);
+
+        dish.send(anAddress, new StringMessage("a asString"));
+
+        assert aZell.received.asString().equals("a asString");
+    }
+
+    @Test
+    public void searchInAllPeers() {
+        FakeZell aZell = new FakeZell();
+        Address anAddress = dishThree.add(aZell);
+
+        dish.join(dishTwo.connection);
+        dish.join(dishThree.connection);
+
+        dish.send(anAddress, new StringMessage("a asString"));
+
+        assert aZell.received.asString().equals("a asString");
+    }
+
+    @Test(expected = ReceiverNotFoundException.class)
+    public void avoidLoops() {
+        dish.join(dishTwo.connection);
+        dishTwo.join(dishThree.connection);
+        dishThree.join(dish.connection);
+
+        dish.send(new Address("loop"), new StringMessage("asString"));
+    }
+
+    @Test
+    public void joinPeer() {
+        FakeZell aZell = new FakeZell();
+        Address anAddress = dish.add(aZell);
+
+        dish.join(dishTwo.connection);
+        dishTwo.send(anAddress, new StringMessage("a asString"));
+
+        assert aZell.received.asString().equals("a asString");
     }
 }
