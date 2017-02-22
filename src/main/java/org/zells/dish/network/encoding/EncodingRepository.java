@@ -18,21 +18,22 @@ public class EncodingRepository {
         return this;
     }
 
-    public Packet encode(Signal signal) {
-        if (signal instanceof DeliverSignal) {
-            return encodings.get(0).encode(signal);
-        } else if (signal instanceof JoinSignal) {
-            return encodings.get(0).encode(signal);
+    public EncodingRepository addAll(List<Encoding> encodings) {
+        for (Encoding encoding : encodings) {
+            add(encoding);
         }
+        return this;
+    }
 
-        throw new RuntimeException("Unknown signal");
+    public Packet encode(Signal signal) {
+        return encodings.get(0).encode(signal);
     }
 
     public Signal decode(Packet string) {
         return encodings.get(0).decode(string);
     }
 
-    public static List<Encoding> defaultEncodings() {
+    public static List<Encoding> supportedEncodings() {
         ArrayList<Encoding> encodings = new ArrayList<Encoding>();
         encodings.add(new MsgpackEncoding());
         return encodings;

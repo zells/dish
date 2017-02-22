@@ -73,13 +73,13 @@ class Dish {
         return address;
     }
 
-    void join(Connection connection) {
-        Peer peer = connect(connection);
-        peer.join(server.getConnection());
+    void join(String connectionDescription) {
+        Peer peer = connect(connectionDescription);
+        peer.join(server.getConnectionDescription());
     }
 
-    private Peer connect(Connection connection) {
-        Peer peer = new Peer(connection, encodings);
+    private Peer connect(String connectionDescription) {
+        Peer peer = new Peer(connections.getConnectionOf(connectionDescription), encodings);
         peers.add(peer);
         return peer;
     }
@@ -91,7 +91,7 @@ class Dish {
         }
 
         protected boolean onJoin(String connectionDescription) {
-            return connect(connections.getConnectionOf(connectionDescription)) != null;
+            return connect(connectionDescription) != null;
         }
     }
 }

@@ -19,8 +19,8 @@ public class FakeServer implements Server {
     public void stop() {
     }
 
-    public Connection getConnection() {
-        return new FakeConnection(this, this.id);
+    public String getConnectionDescription() {
+        return "fake:" + id;
     }
 
     Packet receive(Packet packet) {

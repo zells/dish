@@ -6,5 +6,5 @@ public interface Server {
 
     void stop();
 
-    Connection getConnection();
+    String getConnectionDescription();
 }

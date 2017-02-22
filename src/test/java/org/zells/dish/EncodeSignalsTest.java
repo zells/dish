@@ -23,7 +23,7 @@ public class EncodeSignalsTest {
 
     @Before
     public void SetUp() {
-        encodings = EncodingRepository.defaultEncodings();
+        encodings = EncodingRepository.supportedEncodings();
     }
 
     @Test

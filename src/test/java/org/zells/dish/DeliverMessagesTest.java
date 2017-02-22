@@ -11,9 +11,6 @@ import org.zells.dish.network.ConnectionFactory;
 import org.zells.dish.network.ConnectionRepository;
 import org.zells.dish.network.encoding.EncodingRepository;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
-
 public class DeliverMessagesTest {
 
     private Dish dish;
@@ -43,7 +40,7 @@ public class DeliverMessagesTest {
             }
 
             public Connection build(String description) {
-                return server.getConnection();
+                return new FakeConnection(server);
             }
         });
 
@@ -85,7 +82,7 @@ public class DeliverMessagesTest {
         FakeZell aZell = new FakeZell();
         Address anAddress = dishTwo.add(aZell);
 
-        dish.join(connections.getConnectionOf("fake:2"));
+        dish.join("fake:2");
         dish.send(anAddress, new StringMessage("a asString"));
 
         assert aZell.received.asString().equals("a asString");
@@ -96,8 +93,8 @@ public class DeliverMessagesTest {
         FakeZell aZell = new FakeZell();
         Address anAddress = dishThree.add(aZell);
 
-        dish.join(connections.getConnectionOf("fake:2"));
-        dishTwo.join(connections.getConnectionOf("fake:3"));
+        dish.join("fake:2");
+        dishTwo.join("fake:3");
 
         dish.send(anAddress, new StringMessage("a asString"));
 
@@ -109,8 +106,8 @@ public class DeliverMessagesTest {
         FakeZell aZell = new FakeZell();
         Address anAddress = dishThree.add(aZell);
 
-        dish.join(connections.getConnectionOf("fake:2"));
-        dish.join(connections.getConnectionOf("fake:3"));
+        dish.join("fake:2");
+        dish.join("fake:3");
 
         dish.send(anAddress, new StringMessage("a asString"));
 
@@ -119,9 +116,9 @@ public class DeliverMessagesTest {
 
     @Test(expected = ReceiverNotFoundException.class)
     public void avoidLoops() {
-        dish.join(connections.getConnectionOf("fake:2"));
-        dishTwo.join(connections.getConnectionOf("fake:3"));
-        dishThree.join(connections.getConnectionOf("fake:1"));
+        dish.join("fake:2");
+        dishTwo.join("fake:3");
+        dishThree.join("fake:1");
 
         dish.send(Address.fromString("loop"), new StringMessage("asString"));
     }
@@ -131,7 +128,7 @@ public class DeliverMessagesTest {
         FakeZell aZell = new FakeZell();
         Address anAddress = dish.add(aZell);
 
-        dish.join(connections.getConnectionOf("fake:2"));
+        dish.join("fake:2");
         dishTwo.send(anAddress, new StringMessage("a asString"));
 
         assert aZell.received.asString().equals("a asString");
