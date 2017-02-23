@@ -20,7 +20,7 @@ public class Dish {
     private ConnectionRepository connections;
 
     private Map<Address, Zell> culture = new HashMap<Address, Zell>();
-    private List<Peer> peers = new ArrayList<Peer>();
+    private Map<String, Peer> peers = new HashMap<String, Peer>();
     private Set<Delivery> delivered = new HashSet<Delivery>();
 
     public Dish(Server server, UuidGenerator generator, EncodingRepository encodings, ConnectionRepository connections) {
@@ -73,7 +73,7 @@ public class Dish {
     }
 
     private boolean deliverRemotely(Delivery delivery) {
-        for (Peer peer : peers) {
+        for (Peer peer : peers.values()) {
             if (peer.deliver(delivery)) {
                 return true;
             }
@@ -88,14 +88,17 @@ public class Dish {
     }
 
     public void join(String connectionDescription) {
-        Peer peer = connect(connectionDescription);
-        peer.join(server.getConnectionDescription());
+        connect(connectionDescription);
+        peers.get(connectionDescription).join(server.getConnectionDescription());
     }
 
-    private Peer connect(String connectionDescription) {
+    public void connect(String connectionDescription) {
+        if (peers.containsKey(connectionDescription)) {
+            return;
+        }
+
         Peer peer = new Peer(connections.getConnectionOf(connectionDescription), encodings);
-        peers.add(peer);
-        return peer;
+        peers.put(connectionDescription, peer);
     }
 
     private class DishSignalListener extends SignalListener {
@@ -105,7 +108,8 @@ public class Dish {
         }
 
         protected boolean onJoin(String connectionDescription) {
-            return connect(connectionDescription) != null;
+            connect(connectionDescription);
+            return true;
         }
     }
 }

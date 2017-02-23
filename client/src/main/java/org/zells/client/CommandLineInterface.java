@@ -36,7 +36,7 @@ class CommandLineInterface {
             try {
                 dish.send(parser.getAddress(), parser.getMessage());
             } catch (Exception e) {
-                user.tell("Failed to deliver message");
+                user.tell("Failed to deliver message: " + e);
             }
         }
     }
