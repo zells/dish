@@ -1,10 +1,11 @@
-package org.zells.dish;
+package org.zells.dish.tests;
 
 import org.junit.Test;
+import org.zells.dish.Dish;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.messages.StringMessage;
-import org.zells.dish.fakes.FakeUuidGenerator;
-import org.zells.dish.fakes.FakeZell;
+import org.zells.dish.tests.fakes.FakeUuidGenerator;
+import org.zells.dish.tests.fakes.FakeZell;
 import org.zells.dish.network.ConnectionRepository;
 import org.zells.dish.network.connections.TcpSocketServer;
 import org.zells.dish.network.encoding.EncodingRepository;

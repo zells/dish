@@ -84,7 +84,7 @@ public class Dish {
         return address;
     }
 
-    void join(String connectionDescription) {
+    public void join(String connectionDescription) {
         Peer peer = connect(connectionDescription);
         peer.join(server.getConnectionDescription());
     }

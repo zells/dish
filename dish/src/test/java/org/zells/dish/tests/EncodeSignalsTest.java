@@ -1,4 +1,4 @@
-package org.zells.dish;
+package org.zells.dish.tests;
 
 import org.junit.Before;
 import org.junit.Test;

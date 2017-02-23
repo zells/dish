@@ -1,4 +1,4 @@
-package org.zells.dish;
+package org.zells.dish.tests;
 
 import org.junit.Test;
 import org.zells.dish.delivery.Address;

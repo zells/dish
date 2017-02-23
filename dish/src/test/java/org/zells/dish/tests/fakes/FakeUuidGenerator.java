@@ -1,4 +1,4 @@
-package org.zells.dish.fakes;
+package org.zells.dish.tests.fakes;
 
 import org.zells.dish.util.Uuid;
 import org.zells.dish.util.UuidGenerator;

@@ -1,4 +1,4 @@
-package org.zells.dish.fakes;
+package org.zells.dish.tests.fakes;
 
 import org.zells.dish.network.Connection;
 import org.zells.dish.network.Packet;
