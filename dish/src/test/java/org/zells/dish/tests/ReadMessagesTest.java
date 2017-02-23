@@ -134,9 +134,9 @@ public class ReadMessagesTest {
 
         assert !m.isNull();
         assert m.isTrue();
-        assert m.asString().equals("{and={two=2}, one=uno}");
+        assert m.asString().equals("{and:{two:2}, one:uno}");
         assert m.asInteger() == 1;
-        assert Arrays.equals(m.asBytes(), "{and={two=2}, one=uno}".getBytes());
+        assert Arrays.equals(m.asBytes(), "{and:{two:2}, one:uno}".getBytes());
 
         assert m.keys().contains("one");
         assert m.keys().contains("and");

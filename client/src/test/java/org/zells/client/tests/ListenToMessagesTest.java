@@ -9,15 +9,13 @@ import org.zells.client.tests.fakes.FakeUser;
 public class ListenToMessagesTest {
 
     private FakeUser user;
-    private FakeDish dish;
 
     @Before
     public void SetUp() {
         user = new FakeUser();
-        dish = new FakeDish();
 
         FakeDish.nextAddress = "fade";
-        new Client(user, dish);
+        new Client(user, new FakeDish());
     }
 
     @Test
@@ -30,6 +28,6 @@ public class ListenToMessagesTest {
     public void tellReceivedMessages() {
         user.hear("fade listen");
         user.hear("0xa3 hello:world");
-        assert user.told.contains(">>> {hello=world}");
+        assert user.told.contains(">>> {hello:world}");
     }
 }

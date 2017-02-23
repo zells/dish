@@ -2,9 +2,7 @@ package org.zells.dish.delivery.messages;
 
 import org.zells.dish.delivery.Message;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class CompositeMessage extends Message {
 
@@ -21,7 +19,16 @@ public class CompositeMessage extends Message {
 
     @Override
     public String asString() {
-        return map.toString();
+        StringBuilder builder = new StringBuilder();
+        builder.append("{");
+        for (String key : keys()) {
+            builder.append(key).append(":").append(read(key).asString()).append(", ");
+        }
+        if (!keys().isEmpty()) {
+            builder.delete(builder.length() - 2, builder.length());
+        }
+        builder.append("}");
+        return builder.toString();
     }
 
     @Override
