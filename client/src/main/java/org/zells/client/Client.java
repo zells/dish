@@ -30,6 +30,7 @@ public class Client {
     }
 
     private class ClientZell implements Zell {
+        @Override
         public void receive(Message message) {
             if (message.read(0).asString().equals("connect")) {
                 String description = "tcp:localhost:" + message.read("port").asString();
@@ -39,9 +40,18 @@ public class Client {
                 String description = "tcp:localhost:" + message.read("port").asString();
                 dish.join(description);
                 user.tell("Joined " + description);
+            } else if (message.read(0).asString().equals("listen")) {
+                user.tell("Listening on " + dish.add(new ListenerZell()));
             } else {
                 user.tell("Did not understand: " + message);
             }
+        }
+    }
+
+    private class ListenerZell implements Zell {
+        @Override
+        public void receive(Message message) {
+            user.tell(">>> " + message.toString());
         }
     }
 }
