@@ -143,6 +143,7 @@ public class ReadMessagesTest {
         assert m.keys().contains("and");
         assert m.read("one").asString().equals("uno");
         assert m.read("and").read("two").asInteger() == 2;
+        assert m.read("not").isNull();
     }
 
     @Test

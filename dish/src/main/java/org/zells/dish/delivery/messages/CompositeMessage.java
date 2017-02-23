@@ -43,6 +43,9 @@ public class CompositeMessage extends Message {
 
     @Override
     public Message read(String key) {
+        if (!map.containsKey(key)) {
+            return new NullMessage();
+        }
         return map.get(key);
     }
 
