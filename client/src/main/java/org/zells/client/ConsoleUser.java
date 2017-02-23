@@ -17,6 +17,11 @@ public class ConsoleUser extends User implements Runnable {
         System.out.print("> ");
     }
 
+    @Override
+    public void stop() {
+        System.exit(0);
+    }
+
     public void run() {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String input;

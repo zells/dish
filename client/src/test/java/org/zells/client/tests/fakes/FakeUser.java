@@ -8,8 +8,14 @@ import java.util.List;
 public class FakeUser extends User {
 
     public List<String> told = new ArrayList<String>();
+    public boolean stopped = false;
 
     public void tell(String output) {
         told.add(output);
+    }
+
+    @Override
+    public void stop() {
+        stopped = true;
     }
 }

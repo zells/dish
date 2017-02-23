@@ -41,6 +41,11 @@ public class Dish {
         return new Dish(server, generator, encodings, connections);
     }
 
+    public void stop() {
+        server.stop();
+        leaveAll();
+    }
+
     public void send(Address receiver, Message message) {
         if (!deliver(new Delivery(generator.generate(), receiver, message))) {
             throw new ReceiverNotFoundException();
@@ -105,6 +110,14 @@ public class Dish {
 
     private void disconnect(String connectionDescription) {
         peers.remove(connectionDescription);
+    }
+
+    private void leaveAll() {
+        for (Iterator<Map.Entry<String, Peer>> iterator = peers.entrySet().iterator(); iterator.hasNext(); ) {
+            Map.Entry<String, Peer> entry = iterator.next();
+            entry.getValue().leave(server.getConnectionDescription());
+            iterator.remove();
+        }
     }
 
     private class DishSignalListener extends SignalListener {

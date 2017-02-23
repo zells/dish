@@ -19,6 +19,8 @@ public abstract class User {
         }
     }
 
+    public void stop() {}
+
     interface InputListener {
         void hears(String input);
     }

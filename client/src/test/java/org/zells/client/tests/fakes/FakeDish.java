@@ -17,9 +17,15 @@ public class FakeDish extends Dish {
     public List<Map.Entry<Address, Message>> sent = new ArrayList<Map.Entry<Address, Message>>();
     public List<String> joined = new ArrayList<String>();
     public List<String> left = new ArrayList<String>();
+    public boolean stopped = false;
 
     public FakeDish() {
         super(new FakeServer(), new FakeUuidGenerator(), null, null);
+    }
+
+    @Override
+    public void stop() {
+        stopped = true;
     }
 
     @Override

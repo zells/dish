@@ -36,4 +36,11 @@ public class JoinPeersTest {
         user.hear("fade leave port:12345");
         assert dish.left.contains("tcp:localhost:12345");
     }
+
+    @Test
+    public void exit() {
+        user.hear("fade exit");
+        assert dish.stopped;
+        assert user.stopped;
+    }
 }
