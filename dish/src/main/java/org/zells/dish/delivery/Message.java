@@ -34,7 +34,7 @@ public abstract class Message {
     }
 
     public Message read(String key) {
-        throw new RuntimeException("cannot read [" + key + "]");
+        throw new RuntimeException("no value for [" + key + "]");
     }
 
     public Message read(int key) {

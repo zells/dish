@@ -7,8 +7,7 @@ import org.zells.dish.delivery.Message;
 import org.zells.dish.delivery.messages.*;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 class InputParser {
 
@@ -28,7 +27,17 @@ class InputParser {
         String rawMessage = input.substring(firstSpace + 1).trim();
         if (rawMessage.startsWith("!")) {
             message = parseJsonMessage(rawMessage.substring(1));
+        } else {
+            message = parseShortSyntaxMessage(rawMessage);
         }
+    }
+
+    Address getAddress() {
+        return address;
+    }
+
+    Message getMessage() {
+        return message;
     }
 
     private Message parseJsonMessage(String jsonString) throws IOException {
@@ -64,11 +73,44 @@ class InputParser {
         throw new IOException("Could not parse: " + json);
     }
 
-    Address getAddress() {
-        return address;
+    private Message parseShortSyntaxMessage(String input) {
+        Map<String, CompositeMessage> collections = new HashMap<String, CompositeMessage>();
+        CompositeMessage message = new CompositeMessage();
+
+        int index = 0;
+        for (String part : input.split(" ")) {
+            if (part.contains(":")) {
+                String[] keyValue = part.split(":");
+                String key = keyValue[0];
+                Message value = parseShortSyntaxPart(keyValue[1]);
+
+                if (!collections.containsKey(key)) {
+                    message.put(key, value);
+                    collections.put(key, new CompositeMessage());
+                } else {
+                    message.put(key, collections.get(key));
+                }
+
+                collections.get(key).put(collections.get(key).keys().size(), value);
+            } else {
+                message.put(index, parseShortSyntaxPart(part));
+                index++;
+            }
+        }
+        return message;
     }
 
-    Message getMessage() {
-        return message;
+    private Message parseShortSyntaxPart(String part) {
+        if (part.matches("^\\d+$")) {
+            return new IntegerMessage(Integer.valueOf(part));
+        } else if (part.equals("yes")) {
+            return new BooleanMessage(true);
+        } else if (part.equals("no")) {
+            return new BooleanMessage(false);
+        } else if (part.startsWith("0x")) {
+            return BinaryMessage.fromString(part);
+        } else {
+            return new StringMessage(part);
+        }
     }
 }
