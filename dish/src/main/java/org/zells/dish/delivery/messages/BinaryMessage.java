@@ -2,6 +2,7 @@ package org.zells.dish.delivery.messages;
 
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
+import org.zells.dish.util.ByteArray;
 
 import java.util.Arrays;
 
@@ -15,7 +16,7 @@ public class BinaryMessage extends Message {
 
     @Override
     public String asString() {
-        return value.length == 0 ? null : new String(value);
+        return value.length == 0 ? null : ByteArray.toHexString(value);
     }
 
     @Override
@@ -37,5 +38,9 @@ public class BinaryMessage extends Message {
     public boolean equals(Object obj) {
         return obj instanceof BinaryMessage
                 && Arrays.equals(value, ((BinaryMessage) obj).value);
+    }
+
+    public static BinaryMessage fromString(String hexString) {
+        return new BinaryMessage(ByteArray.fromHexString(hexString));
     }
 }

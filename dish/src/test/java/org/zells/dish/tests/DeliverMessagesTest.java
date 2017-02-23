@@ -28,9 +28,9 @@ public class DeliverMessagesTest {
         encodings = new EncodingRepository()
                 .add(new FakeEncoding());
 
-        dish = newDish(1);
-        dishTwo = newDish(2);
-        dishThree = newDish(3);
+        dish = newDish(1).start();
+        dishTwo = newDish(2).start();
+        dishThree = newDish(3).start();
     }
 
     private Dish newDish(final int id) {

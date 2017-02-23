@@ -28,8 +28,6 @@ public class Dish {
         this.generator = generator;
         this.encodings = encodings;
         this.connections = connections;
-
-        server.start(new DishSignalListener());
     }
 
     public static Dish buildDefault(String host, int port) {
@@ -39,6 +37,11 @@ public class Dish {
         BasicUuidGenerator generator = new BasicUuidGenerator();
 
         return new Dish(server, generator, encodings, connections);
+    }
+
+    public Dish start() {
+        server.start(new DishSignalListener());
+        return this;
     }
 
     public void send(Address receiver, Message message) {

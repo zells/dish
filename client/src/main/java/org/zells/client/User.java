@@ -13,7 +13,7 @@ public abstract class User {
         listeners.add(listener);
     }
 
-    void hear(String input) {
+    public void hear(String input) {
         for (InputListener listener : listeners) {
             listener.hears(input);
         }

@@ -7,15 +7,18 @@ import org.zells.dish.delivery.Message;
 
 public class Client {
 
-    private final ConsoleUser user;
+    private final User user;
 
     public static void main(String[] args) {
         new Client("localhost", 42420);
     }
 
     private Client(String host, int port) {
-        Dish dish = Dish.buildDefault(host, port);
-        user = new ConsoleUser();
+        this(new ConsoleUser(), Dish.buildDefault(host, port));
+    }
+
+    public Client(User user, Dish dish) {
+        this.user = user;
 
         Address me = dish.add(new ClientZell());
         user.tell("Hi. I am " + me);

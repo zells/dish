@@ -1,8 +1,9 @@
 version '0.1'
-sourceCompatibility = 1.5
+sourceCompatibility = 1.6
 
 dependencies {
     compile project(':dish')
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.8.7'
 }
 
 task buildClient(type: Jar) {

@@ -100,7 +100,7 @@ public class ReadMessagesTest {
 
         assert !m.isNull();
         assert m.isTrue();
-        assert m.asString().equals("foo");
+        assert m.asString().equals("0x666f6f");
         assert m.asInteger() == 1;
         assert Arrays.equals(m.asBytes(), "foo".getBytes());
         assert m.keys().isEmpty();

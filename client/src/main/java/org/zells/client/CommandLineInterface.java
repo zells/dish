@@ -4,12 +4,17 @@ import org.zells.dish.Dish;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.messages.StringMessage;
 
+import java.io.IOException;
+
 class CommandLineInterface {
 
     private final Dish dish;
+    private final User user;
 
     CommandLineInterface(User user, Dish dish) {
+        this.user = user;
         this.dish = dish;
+
         user.listen(new InputListener());
     }
 
@@ -20,12 +25,18 @@ class CommandLineInterface {
                 return;
             }
 
-            String[] receiverMessage = input.split(" ");
+            InputParser parser;
+            try {
+                parser = new InputParser(input);
+            } catch (Exception e) {
+                user.tell("Parsing error: " + e.getMessage());
+                return;
+            }
 
             try {
-                dish.send(Address.fromString(receiverMessage[0]), new StringMessage(receiverMessage[1]));
+                dish.send(parser.getAddress(), parser.getMessage());
             } catch (Exception e) {
-                System.err.println("Failed");
+                user.tell("Failed to deliver message");
             }
         }
     }
