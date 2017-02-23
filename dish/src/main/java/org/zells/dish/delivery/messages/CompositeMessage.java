@@ -33,7 +33,7 @@ public class CompositeMessage extends Message {
 
     @Override
     public byte[] asBytes() {
-        return asString().getBytes();
+        return new byte[0];
     }
 
     @Override
