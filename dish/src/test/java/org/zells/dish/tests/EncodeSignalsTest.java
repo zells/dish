@@ -9,10 +9,7 @@ import org.zells.dish.delivery.messages.*;
 import org.zells.dish.network.Signal;
 import org.zells.dish.network.encoding.Encoding;
 import org.zells.dish.network.encoding.EncodingRepository;
-import org.zells.dish.network.signals.DeliverSignal;
-import org.zells.dish.network.signals.FailedSignal;
-import org.zells.dish.network.signals.JoinSignal;
-import org.zells.dish.network.signals.OkSignal;
+import org.zells.dish.network.signals.*;
 import org.zells.dish.util.Uuid;
 
 import java.util.List;
@@ -66,6 +63,11 @@ public class EncodeSignalsTest {
     @Test
     public void join() {
         assertEncodeDecode(new JoinSignal("foo:connection"));
+    }
+
+    @Test
+    public void leave() {
+        assertEncodeDecode(new LeaveSignal("foo:connection"));
     }
 
     private Exception tryToEncode(Encoding encoding) {

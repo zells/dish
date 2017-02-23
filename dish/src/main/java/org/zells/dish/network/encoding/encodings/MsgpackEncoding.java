@@ -11,10 +11,7 @@ import org.zells.dish.delivery.messages.*;
 import org.zells.dish.network.Packet;
 import org.zells.dish.network.Signal;
 import org.zells.dish.network.encoding.Encoding;
-import org.zells.dish.network.signals.DeliverSignal;
-import org.zells.dish.network.signals.FailedSignal;
-import org.zells.dish.network.signals.JoinSignal;
-import org.zells.dish.network.signals.OkSignal;
+import org.zells.dish.network.signals.*;
 import org.zells.dish.util.Uuid;
 
 import java.io.IOException;
@@ -70,6 +67,9 @@ public class MsgpackEncoding implements Encoding {
         } else if (signal instanceof JoinSignal) {
             payload.add("JOIN");
             payload.add(((JoinSignal) signal).getConnectionDescription());
+        } else if (signal instanceof LeaveSignal) {
+            payload.add("LEAVE");
+            payload.add(((LeaveSignal) signal).getConnectionDescription());
         } else {
             throw new RuntimeException("unsupported signal type: " + signal.getClass());
         }
@@ -106,6 +106,12 @@ public class MsgpackEncoding implements Encoding {
             }
 
             return new JoinSignal((String) payload.get(1));
+        } else if (payload.get(0).equals("LEAVE")) {
+            if (payload.size() != 2) {
+                throw new RuntimeException("invalid format");
+            }
+
+            return new LeaveSignal((String) payload.get(1));
         } else {
             throw new RuntimeException("unsupported signal: " + payload.get(0));
         }

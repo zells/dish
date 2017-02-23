@@ -16,7 +16,7 @@ public class FakeDish extends Dish {
     public static String nextAddress;
     public List<Map.Entry<Address, Message>> sent = new ArrayList<Map.Entry<Address, Message>>();
     public List<String> joined = new ArrayList<String>();
-    public List<String> connected = new ArrayList<String>();
+    public List<String> left = new ArrayList<String>();
 
     public FakeDish() {
         super(new FakeServer(), new FakeUuidGenerator(), null, null);
@@ -39,8 +39,8 @@ public class FakeDish extends Dish {
     }
 
     @Override
-    public void connect(String connectionDescription) {
-        connected.add(connectionDescription);
+    public void leave(String connectionDescription) {
+        left.add(connectionDescription);
     }
 
     private static class FakeUuidGenerator implements UuidGenerator {

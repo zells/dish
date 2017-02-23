@@ -32,14 +32,14 @@ public class Client {
     private class ClientZell implements Zell {
         @Override
         public void receive(Message message) {
-            if (message.read(0).asString().equals("connect")) {
-                String description = "tcp:localhost:" + message.read("port").asString();
-                dish.connect(description);
-                user.tell("Connected to " + description);
-            } else if (message.read(0).asString().equals("join")) {
+            if (message.read(0).asString().equals("join")) {
                 String description = "tcp:localhost:" + message.read("port").asString();
                 dish.join(description);
                 user.tell("Joined " + description);
+            } else if (message.read(0).asString().equals("leave")) {
+                String description = "tcp:localhost:" + message.read("port").asString();
+                dish.leave(description);
+                user.tell("Left " + description);
             } else if (message.read(0).asString().equals("listen")) {
                 user.tell("Listening on " + dish.add(new ListenerZell()));
             } else {

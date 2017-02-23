@@ -89,13 +89,22 @@ public class Dish {
         peers.get(connectionDescription).join(server.getConnectionDescription());
     }
 
-    public void connect(String connectionDescription) {
+    private void connect(String connectionDescription) {
         if (peers.containsKey(connectionDescription)) {
             return;
         }
 
         Peer peer = new Peer(connections.getConnectionOf(connectionDescription), encodings);
         peers.put(connectionDescription, peer);
+    }
+
+    public void leave(String connectionDescription) {
+        peers.get(connectionDescription).leave(server.getConnectionDescription());
+        disconnect(connectionDescription);
+    }
+
+    private void disconnect(String connectionDescription) {
+        peers.remove(connectionDescription);
     }
 
     private class DishSignalListener extends SignalListener {
@@ -106,6 +115,11 @@ public class Dish {
 
         protected boolean onJoin(String connectionDescription) {
             connect(connectionDescription);
+            return true;
+        }
+
+        protected boolean onLeave(String connectionDescription) {
+            disconnect(connectionDescription);
             return true;
         }
     }

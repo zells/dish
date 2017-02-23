@@ -26,14 +26,14 @@ public class JoinPeersTest {
     }
 
     @Test
-    public void connectPeerDefaultHost() {
-        user.hear("fade connect port:12345");
-        assert dish.connected.contains("tcp:localhost:12345");
-    }
-
-    @Test
     public void joinPeerDefaultHost() {
         user.hear("fade join port:12345");
         assert dish.joined.contains("tcp:localhost:12345");
+    }
+
+    @Test
+    public void leavePeerDefaultHost() {
+        user.hear("fade leave port:12345");
+        assert dish.left.contains("tcp:localhost:12345");
     }
 }

@@ -2,10 +2,7 @@ package org.zells.dish.network;
 
 import org.zells.dish.delivery.Delivery;
 import org.zells.dish.network.encoding.EncodingRepository;
-import org.zells.dish.network.signals.DeliverSignal;
-import org.zells.dish.network.signals.FailedSignal;
-import org.zells.dish.network.signals.JoinSignal;
-import org.zells.dish.network.signals.OkSignal;
+import org.zells.dish.network.signals.*;
 
 import java.io.IOException;
 
@@ -25,6 +22,10 @@ public class Peer {
 
     public void join(String connectionDescription) {
         signal(new JoinSignal(connectionDescription));
+    }
+
+    public void leave(String connectionDescription) {
+        signal(new LeaveSignal(connectionDescription));
     }
 
     private Signal signal(Signal signal) {

@@ -1,10 +1,7 @@
 package org.zells.dish.network;
 
 import org.zells.dish.delivery.Delivery;
-import org.zells.dish.network.signals.DeliverSignal;
-import org.zells.dish.network.signals.FailedSignal;
-import org.zells.dish.network.signals.JoinSignal;
-import org.zells.dish.network.signals.OkSignal;
+import org.zells.dish.network.signals.*;
 
 public abstract class SignalListener {
 
@@ -13,6 +10,8 @@ public abstract class SignalListener {
             return isOk(onDeliver(((DeliverSignal) signal).getDelivery()));
         } else if (signal instanceof JoinSignal) {
             return isOk(onJoin(((JoinSignal) signal).getConnectionDescription()));
+        } else if (signal instanceof LeaveSignal) {
+            return isOk(onLeave(((LeaveSignal) signal).getConnectionDescription()));
         }
 
         throw new RuntimeException("unknown signal: " + signal.getClass());
@@ -25,4 +24,6 @@ public abstract class SignalListener {
     protected abstract boolean onDeliver(Delivery delivery);
 
     protected abstract boolean onJoin(String connectionDescription);
+
+    protected abstract boolean onLeave(String connectionDescription);
 }

@@ -134,4 +134,14 @@ public class DeliverMessagesTest {
 
         assert aZell.received.asString().equals("a asString");
     }
+
+    @Test(expected = ReceiverNotFoundException.class)
+    public void leavePeer() {
+        FakeZell aZell = new FakeZell();
+        Address anAddress = dish.add(aZell);
+
+        dish.join("fake:2");
+        dish.leave("fake:2");
+        dishTwo.send(anAddress, new StringMessage("a asString"));
+    }
 }
