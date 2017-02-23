@@ -1,7 +1,6 @@
 package org.zells.client.tests;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.zells.client.Client;
 import org.zells.client.tests.fakes.FakeDish;
@@ -114,5 +113,21 @@ public class SendMessagesTest {
         user.hear("d7 foo:yes bar");
         assert dish.sent.get(9).getValue().read("foo").equals(new BooleanMessage(true));
         assert dish.sent.get(9).getValue().read(0).equals(new StringMessage("bar"));
+    }
+
+    @Test
+    public void parseQuotedSyntax() {
+        user.hear("d0 \"foo: bar\" foo:\"cat dog\"");
+        assert dish.sent.get(0).getValue().read(0).equals(new StringMessage("foo: bar"));
+        assert dish.sent.get(0).getValue().read("foo").equals(new StringMessage("cat dog"));
+
+        user.hear("d1 with\\:\\ space");
+        assert dish.sent.get(1).getValue().read(0).equals(new StringMessage("with: space"));
+
+        user.hear("d2 with\\\"quote");
+        assert dish.sent.get(2).getValue().read(0).equals(new StringMessage("with\"quote"));
+
+        user.hear("d3 \"a \\\"quoted\\\" message\"");
+        assert dish.sent.get(3).getValue().read(0).equals(new StringMessage("a \"quoted\" message"));
     }
 }

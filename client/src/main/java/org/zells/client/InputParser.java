@@ -74,30 +74,54 @@ class InputParser {
     }
 
     private Message parseShortSyntaxMessage(String input) {
-        Map<String, CompositeMessage> collections = new HashMap<String, CompositeMessage>();
         CompositeMessage message = new CompositeMessage();
 
+        Map<String, CompositeMessage> collections = new HashMap<String, CompositeMessage>();
+        boolean quoted = false;
+        boolean escaped = false;
+
         int index = 0;
-        for (String part : input.split(" ")) {
-            if (part.contains(":")) {
-                String[] keyValue = part.split(":");
-                String key = keyValue[0];
-                Message value = parseShortSyntaxPart(keyValue[1]);
+        String key = "0";
+        StringBuilder bag = new StringBuilder();
 
-                if (!collections.containsKey(key)) {
-                    message.put(key, value);
-                    collections.put(key, new CompositeMessage());
-                } else {
-                    message.put(key, collections.get(key));
-                }
-
-                collections.get(key).put(collections.get(key).keys().size(), value);
-            } else {
-                message.put(index, parseShortSyntaxPart(part));
+        for (char c : input.toCharArray()) {
+            if (!escaped && !quoted && c == ' ') {
+                message.put(key, combinedMessage(collections, bag, key));
+                bag = new StringBuilder();
                 index++;
+                key = Integer.toString(index);
+            } else if (!escaped && !quoted && c == ':') {
+                key = bag.toString();
+                bag = new StringBuilder();
+                index--;
+            } else if (!escaped && c == '"') {
+                quoted = !quoted;
+            } else if (c == '\\') {
+                escaped = !escaped;
+            } else {
+                escaped = false;
+                bag.append(c);
             }
         }
+        message.put(key, combinedMessage(collections, bag, key));
+
         return message;
+    }
+
+    private Message combinedMessage(Map<String, CompositeMessage> collections, StringBuilder bag, String key) {
+        if (!collections.containsKey(key)) {
+            collections.put(key, new CompositeMessage());
+        }
+        CompositeMessage composite = collections.get(key);
+        int lastKey = composite.keys().size();
+
+        composite.put(lastKey, parseShortSyntaxPart(bag.toString()));
+
+        if (lastKey == 0) {
+            return composite.read(0);
+        } else {
+            return composite;
+        }
     }
 
     private Message parseShortSyntaxPart(String part) {
