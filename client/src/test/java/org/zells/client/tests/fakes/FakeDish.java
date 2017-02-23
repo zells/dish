@@ -47,6 +47,7 @@ public class FakeDish extends Dish {
         int count = 0;
         @Override
         public Uuid generate() {
+            count++;
             String address = "a" + count;
             if (nextAddress != null) {
                 address = nextAddress;

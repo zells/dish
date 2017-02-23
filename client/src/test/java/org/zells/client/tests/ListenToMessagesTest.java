@@ -6,7 +6,7 @@ import org.zells.client.Client;
 import org.zells.client.tests.fakes.FakeDish;
 import org.zells.client.tests.fakes.FakeUser;
 
-public class JoinPeersTest {
+public class ListenToMessagesTest {
 
     private FakeUser user;
     private FakeDish dish;
@@ -21,19 +21,15 @@ public class JoinPeersTest {
     }
 
     @Test
-    public void introducesYourself() {
-        assert user.told.contains("Hi. I am 0xfade");
+    public void addListener() {
+        user.hear("fade listen");
+        assert user.told.contains("Listening on 0xa3");
     }
 
     @Test
-    public void connectPeerDefaultHost() {
-        user.hear("fade connect port:12345");
-        assert dish.connected.contains("tcp:localhost:12345");
-    }
-
-    @Test
-    public void joinPeerDefaultHost() {
-        user.hear("fade join port:12345");
-        assert dish.joined.contains("tcp:localhost:12345");
+    public void tellReceivedMessages() {
+        user.hear("fade listen");
+        user.hear("0xa3 hello:world");
+        assert user.told.contains(">>> {hello=world}");
     }
 }
