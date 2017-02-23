@@ -1,16 +1,18 @@
 package org.zells.dish.delivery;
 
+import org.zells.dish.delivery.messages.NullMessage;
+
 import java.util.HashSet;
 import java.util.Set;
 
 public abstract class Message {
 
-    public String asString() {
-        return null;
+    public boolean isNull() {
+        return false;
     }
 
-    public boolean isNull() {
-        return asString() == null;
+    public String asString() {
+        return "";
     }
 
     public boolean isTrue() {
@@ -34,7 +36,7 @@ public abstract class Message {
     }
 
     public Message read(String key) {
-        throw new RuntimeException("no value for [" + key + "]");
+        return new NullMessage();
     }
 
     public Message read(int key) {

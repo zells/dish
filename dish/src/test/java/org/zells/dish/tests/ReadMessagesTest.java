@@ -16,10 +16,11 @@ public class ReadMessagesTest {
 
         assert m.isNull();
         assert !m.isTrue();
-        assert m.asString() == null;
+        assert m.asString().equals("");
         assert m.asInteger() == 0;
         assert Arrays.equals(m.asBytes(), new byte[0]);
         assert m.keys().isEmpty();
+        assert m.read("foo").read("bar").isNull();
     }
 
     @Test
@@ -110,9 +111,9 @@ public class ReadMessagesTest {
     public void emptyBinaryMessage() {
         Message m = new BinaryMessage(new byte[0]);
 
-        assert m.isNull();
+        assert !m.isNull();
         assert !m.isTrue();
-        assert m.asString() == null;
+        assert m.asString().equals("0x");
         assert m.asInteger() == 0;
         assert Arrays.equals(m.asBytes(), new byte[0]);
         assert m.keys().isEmpty();

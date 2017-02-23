@@ -16,7 +16,12 @@ public class BinaryMessage extends Message {
 
     @Override
     public String asString() {
-        return value.length == 0 ? null : ByteArray.toHexString(value);
+        return ByteArray.toHexString(value);
+    }
+
+    @Override
+    public boolean isTrue() {
+        return value.length != 0;
     }
 
     @Override
