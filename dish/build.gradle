@@ -6,7 +6,7 @@ dependencies {
     compile 'org.msgpack:jackson-dataformat-msgpack:0.8.12'
 }
 
-task buildNode(type: Jar) {
+task buildDish(type: Jar) {
     manifest {
         attributes 'Implementation-Title': 'zells messaging protocol (zmp) client library'
     }

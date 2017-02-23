@@ -2,7 +2,7 @@ version '0.1'
 sourceCompatibility = 1.5
 
 dependencies {
-    compile project(':node')
+    compile project(':dish')
 }
 
 task buildClient(type: Jar) {
