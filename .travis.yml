@@ -3,6 +3,7 @@ jdk:
   - oraclejdk8
   - oraclejdk7
   - openjdk6
+install: gradle assemble
 script: gradle check
 
 before_cache:
