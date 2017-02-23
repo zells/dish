@@ -19,10 +19,10 @@ public class ConnectOverSocketsTest {
         ConnectionRepository connections = new ConnectionRepository().addAll(ConnectionRepository.supportedConnections());
 
         TcpSocketServer serverOne = new TcpSocketServer("localhost", 42421, encodings);
-        Dish one = new Dish(serverOne, generator, encodings, connections).start();
+        Dish one = new Dish(serverOne, generator, encodings, connections);
 
         TcpSocketServer serverTwo = new TcpSocketServer("localhost", 42422, encodings);
-        Dish two = new Dish(serverTwo, generator, encodings, connections).start();
+        Dish two = new Dish(serverTwo, generator, encodings, connections);
 
         FakeZell aZell = new FakeZell();
         Address anAddress = two.add(aZell);

@@ -4,6 +4,8 @@ import org.zells.dish.Dish;
 import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
+import org.zells.dish.network.Server;
+import org.zells.dish.network.SignalListener;
 import org.zells.dish.util.Uuid;
 import org.zells.dish.util.UuidGenerator;
 
@@ -17,7 +19,7 @@ public class FakeDish extends Dish {
     public List<String> connected = new ArrayList<String>();
 
     public FakeDish() {
-        super(null, new FakeUuidGenerator(), null, null);
+        super(new FakeServer(), new FakeUuidGenerator(), null, null);
     }
 
     @Override
@@ -51,6 +53,21 @@ public class FakeDish extends Dish {
                 nextAddress = null;
             }
             return Uuid.fromString(address);
+        }
+    }
+
+    private static class FakeServer implements Server {
+        @Override
+        public void start(SignalListener listener) {
+        }
+
+        @Override
+        public void stop() {
+        }
+
+        @Override
+        public String getConnectionDescription() {
+            return null;
         }
     }
 }

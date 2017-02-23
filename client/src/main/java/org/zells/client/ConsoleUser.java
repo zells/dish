@@ -23,10 +23,8 @@ public class ConsoleUser extends User implements Runnable {
 
         try {
             while ((input = reader.readLine()) != null) {
+                System.out.print("> ");
                 hear(input);
-                if (input.length() == 0) {
-                    System.out.print("> ");
-                }
             }
         } catch (IOException e) {
             e.printStackTrace();

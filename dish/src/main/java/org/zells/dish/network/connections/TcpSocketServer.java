@@ -37,6 +37,8 @@ public class TcpSocketServer implements Server {
         running = true;
 
         (new SocketListener(server, listener)).start();
+
+        System.out.println("Started listening on port " + port);
     }
 
     public void stop() {

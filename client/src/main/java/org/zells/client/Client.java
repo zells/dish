@@ -5,8 +5,6 @@ import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
 
-import java.util.Arrays;
-
 public class Client {
 
     private final User user;
@@ -14,7 +12,6 @@ public class Client {
 
     public static void main(String[] args) {
         int port = args.length == 1 ? Integer.parseInt(args[0]) : 42420;
-        System.out.println(port);
         new Client("localhost", port);
     }
 
@@ -35,9 +32,13 @@ public class Client {
     private class ClientZell implements Zell {
         public void receive(Message message) {
             if (message.read(0).asString().equals("connect")) {
-                dish.connect("tcp:localhost:" + message.read("port").asString());
+                String description = "tcp:localhost:" + message.read("port").asString();
+                dish.connect(description);
+                user.tell("Connected to " + description);
             } else if (message.read(0).asString().equals("join")) {
-                dish.join("tcp:localhost:" + message.read("port").asString());
+                String description = "tcp:localhost:" + message.read("port").asString();
+                dish.join(description);
+                user.tell("Joined " + description);
             } else {
                 user.tell("Did not understand: " + message);
             }
