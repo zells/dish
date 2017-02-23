@@ -37,6 +37,10 @@ public abstract class Message {
         throw new RuntimeException("cannot read [" + key + "]");
     }
 
+    public Message read(int key) {
+        return read(Integer.toString(key));
+    }
+
     @Override
     public String toString() {
         return asString();

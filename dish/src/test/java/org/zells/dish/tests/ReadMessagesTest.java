@@ -6,6 +6,7 @@ import org.zells.dish.delivery.Message;
 import org.zells.dish.delivery.messages.*;
 
 import java.util.Arrays;
+import java.util.HashSet;
 
 public class ReadMessagesTest {
 
@@ -125,9 +126,9 @@ public class ReadMessagesTest {
 
     @Test
     public void compositeMessage() {
-        Message m = (new CompositeMessage())
+        Message m = new CompositeMessage()
                 .put("one", new StringMessage("uno"))
-                .put("and", (new CompositeMessage())
+                .put("and", new CompositeMessage()
                         .put("two", new IntegerMessage(2)));
 
         assert !m.isNull();
@@ -140,5 +141,18 @@ public class ReadMessagesTest {
         assert m.keys().contains("and");
         assert m.read("one").asString().equals("uno");
         assert m.read("and").read("two").asInteger() == 2;
+    }
+
+    @Test
+    public void compositeMessageWithNumericalKeys() {
+        Message m = new CompositeMessage()
+                .put(1, new StringMessage("one"))
+                .put(42, new StringMessage("fourty-two"))
+                .put("21", new IntegerMessage(21));
+
+        assert m.keys().equals(new HashSet<String>(Arrays.asList("1", "42", "21")));
+        assert m.read(1).asString().equals("one");
+        assert m.read("1").asString().equals("one");
+        assert m.read(21).asString().equals("21");
     }
 }

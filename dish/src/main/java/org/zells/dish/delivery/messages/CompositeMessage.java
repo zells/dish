@@ -15,6 +15,10 @@ public class CompositeMessage extends Message {
         return this;
     }
 
+    public CompositeMessage put(int key, Message value) {
+        return put(Integer.toString(key), value);
+    }
+
     @Override
     public String asString() {
         return map.toString();
