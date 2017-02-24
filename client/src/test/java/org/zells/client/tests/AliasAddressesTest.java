@@ -6,6 +6,7 @@ import org.zells.client.Client;
 import org.zells.client.tests.fakes.FakeDish;
 import org.zells.client.tests.fakes.FakeUser;
 import org.zells.dish.delivery.Address;
+import org.zells.dish.delivery.messages.StringMessage;
 
 public class AliasAddressesTest {
 
@@ -78,5 +79,13 @@ public class AliasAddressesTest {
         assert user.told.get(2).contains("bar: 0xfade\n");
         assert user.told.get(2).contains("foo: 0xdada\n");
         assert user.told.get(2).contains("client: 0xfade\n");
+    }
+
+    @Test
+    public void useAliasInMessage() {
+        user.hear("client alias use:foo for:dada");
+        user.hear("fade from:@foo");
+
+        assert dish.lastMessage.read("from").equals(new StringMessage("0xdada"));
     }
 }

@@ -66,7 +66,7 @@ class CommandLineInterface {
 
             InputParser parser;
             try {
-                parser = new InputParser(input, received);
+                parser = new InputParser(input, received, aliases);
             } catch (Exception e) {
                 user.tell("Parsing error: " + e.getMessage());
                 return;

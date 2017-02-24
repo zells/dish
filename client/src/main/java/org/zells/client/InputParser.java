@@ -3,6 +3,7 @@ package org.zells.client;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.msgpack.value.IntegerValue;
+import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
 import org.zells.dish.delivery.messages.*;
 
@@ -14,9 +15,11 @@ class InputParser {
     private String receiver;
     private Message message;
     private List<Message> receivedMessages;
+    private Map<String, Address> aliases;
 
-    InputParser(String input, List<Message> receivedMessages) throws Exception {
+    InputParser(String input, List<Message> receivedMessages, Map<String, Address> aliases) throws Exception {
         this.receivedMessages = receivedMessages;
+        this.aliases = aliases;
 
         int firstSpace = input.indexOf(" ");
         if (firstSpace < 0) {
@@ -167,6 +170,8 @@ class InputParser {
             return new BooleanMessage(false);
         } else if (part.startsWith("0x")) {
             return BinaryMessage.fromString(part);
+        } else if (part.startsWith("@")) {
+            return new StringMessage(aliases.get(part.substring(1)).toString());
         } else {
             return new StringMessage(part);
         }
