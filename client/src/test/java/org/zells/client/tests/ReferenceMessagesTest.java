@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.zells.client.Client;
 import org.zells.client.tests.fakes.FakeDish;
 import org.zells.client.tests.fakes.FakeUser;
+import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.messages.IntegerMessage;
 import org.zells.dish.delivery.messages.StringMessage;
 
@@ -70,5 +71,13 @@ public class ReferenceMessagesTest {
         user.hear("a0 #0.foo.bar.1");
 
         assert dish.lastMessage.read(0).equals(new IntegerMessage(42));
+    }
+
+    @Test
+    public void useReferenceAsReceiver() {
+        user.hear("me 0xdada");
+        user.hear("#0.0 foo");
+
+        assert dish.sent.get(2).getKey().equals(Address.fromString("dada"));
     }
 }

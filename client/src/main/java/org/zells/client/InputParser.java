@@ -27,6 +27,10 @@ class InputParser {
 
         receiver = input.substring(0, firstSpace);
 
+        if (receiver.startsWith("#")) {
+            receiver = resolveReference(receiver.substring(1)).asString();
+        }
+
         String rawMessage = input.substring(firstSpace + 1).trim();
         if (rawMessage.startsWith("!")) {
             message = parseJsonMessage(rawMessage.substring(1));
