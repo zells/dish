@@ -50,8 +50,8 @@ public class ConnectOverSocketsTest {
         Dish one = Dish.buildDefault();
         Dish two = Dish.buildDefault();
 
-        TcpSocketServer server = new TcpSocketServer(new ServerSocket(42422)).start(two);
-        TcpSocketConnection connection = new TcpSocketConnection(new Socket("localhost", 42422)).open();
+        TcpSocketServer server = new TcpSocketServer(new ServerSocket(42423)).start(two);
+        TcpSocketConnection connection = new TcpSocketConnection(new Socket("localhost", 42423)).open();
 
         one.join(connection);
         try {
@@ -75,9 +75,9 @@ public class ConnectOverSocketsTest {
         FakeZell zell = new FakeZell();
         Address address = one.add(zell);
 
-        TcpSocketServer server = new TcpSocketServer(new ServerSocket(42423)).start(two);
-        TcpSocketConnection connectionOne = new TcpSocketConnection(new Socket("localhost", 42423)).open();
-        TcpSocketConnection connectionThree = new TcpSocketConnection(new Socket("localhost", 42423)).open();
+        TcpSocketServer server = new TcpSocketServer(new ServerSocket(42424)).start(two);
+        TcpSocketConnection connectionOne = new TcpSocketConnection(new Socket("localhost", 42424)).open();
+        TcpSocketConnection connectionThree = new TcpSocketConnection(new Socket("localhost", 42424)).open();
 
         one.join(connectionOne);
         three.join(connectionThree);
