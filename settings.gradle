@@ -1,2 +1,2 @@
-rootProject.name = 'zells-java'
+rootProject.name = 'interface'
 include "dish", "client"
