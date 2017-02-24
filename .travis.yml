@@ -4,7 +4,7 @@ jdk:
   - oraclejdk7
   - openjdk6
 install: gradle assemble
-script: gradle check
+script: gradle check --stacktrace
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
