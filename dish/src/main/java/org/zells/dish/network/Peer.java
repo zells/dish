@@ -11,21 +11,22 @@ public class Peer {
     private Connection connection;
     private EncodingRepository encodings;
 
-    public Peer(Connection connection, EncodingRepository encodings) {
+    public Peer(EncodingRepository encodings, Connection connection) {
         this.connection = connection;
         this.encodings = encodings;
     }
 
     public boolean deliver(Delivery delivery) {
-        return signal(new DeliverSignal(delivery)) instanceof OkSignal;
+        Signal response = signal(new DeliverSignal(delivery));
+        return response instanceof OkSignal;
     }
 
-    public void join(String connectionDescription) {
-        signal(new JoinSignal(connectionDescription));
+    public void join() {
+        signal(new JoinSignal());
     }
 
-    public void leave(String connectionDescription) {
-        signal(new LeaveSignal(connectionDescription));
+    public void leave() {
+        signal(new LeaveSignal());
     }
 
     private Signal signal(Signal signal) {

@@ -1,135 +1,50 @@
 package org.zells.dish.network.connections;
 
-import org.zells.dish.network.Packet;
+import org.zells.dish.Dish;
 import org.zells.dish.network.Server;
-import org.zells.dish.network.Signal;
-import org.zells.dish.network.SignalListener;
-import org.zells.dish.network.encoding.EncodingRepository;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TcpSocketServer implements Server {
 
-    private final String host;
-    private final int port;
-    private EncodingRepository encodings;
-
-    private boolean running;
     private ServerSocket server;
 
-    public TcpSocketServer(String host, int port, EncodingRepository encodings) {
-        this.host = host;
-        this.port = port;
-        this.encodings = encodings;
+    private boolean running = false;
+    private List<TcpSocketConnection> connections = new ArrayList<TcpSocketConnection>();
+
+    public TcpSocketServer(ServerSocket server) {
+        this.server = server;
     }
 
-    public void start(SignalListener listener) {
-        try {
-            server = new ServerSocket(port);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to open port " + port, e);
-        }
-
+    public TcpSocketServer start(final Dish dish) {
         running = true;
+        new Thread(new Runnable() {
+            public void run() {
+                while (running) {
+                    try {
+                        TcpSocketConnection connection = new TcpSocketConnection(server.accept()).open();
+                        connections.add(connection);
+                        dish.listen(connection);
+                    } catch (IOException ignored) {
+                    }
+                }
+            }
+        }).start();
 
-        (new SocketListener(server, listener)).start();
-
-        System.out.println("Started listening on port " + port);
+        return this;
     }
 
     public void stop() {
         running = false;
-
-        if (server == null) {
-            return;
-        }
-
         try {
             server.close();
+            for (TcpSocketConnection connection : connections) {
+                connection.close();
+            }
         } catch (IOException ignored) {
-        }
-    }
-
-    public String getConnectionDescription() {
-        return "tcp:" + host + ":" + port;
-    }
-
-    private class SocketListener extends Thread {
-
-        private ServerSocket server;
-        private SignalListener listener;
-
-        SocketListener(ServerSocket server, SignalListener listener) {
-            this.server = server;
-            this.listener = listener;
-        }
-
-        @Override
-        public void run() {
-            new Thread(new Runnable() {
-                public void run() {
-                    while (running) {
-                        try {
-                            Socket socket = server.accept();
-                            (new SignalWorker(socket, listener)).start();
-                        } catch (IOException e) {
-                            if (running) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-
-                }
-            }).start();
-        }
-    }
-
-    private class SignalWorker extends Thread {
-
-        private final Socket socket;
-        private final SignalListener listener;
-
-        SignalWorker(Socket socket, SignalListener listener) {
-            this.socket = socket;
-            this.listener = listener;
-        }
-
-        @Override
-        public void run() {
-            DataOutputStream out = null;
-            DataInputStream in = null;
-
-            try {
-                out = new DataOutputStream(socket.getOutputStream());
-                in = new DataInputStream(socket.getInputStream());
-
-
-                int length = in.readInt();
-                if (length > 0) {
-                    byte[] message = new byte[length];
-                    in.readFully(message, 0, message.length);
-                    Signal receivedSignal = encodings.decode(new Packet(message));
-                    Signal responseSignal = listener.respondTo(receivedSignal);
-                    Packet response = encodings.encode(responseSignal);
-
-                    byte[] bytes = response.getBytes();
-                    out.writeInt(bytes.length);
-                    out.write(bytes);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                if (in != null) in.close();
-                if (out != null) out.close();
-                socket.close();
-            } catch (IOException ignored) {
-            }
         }
     }
 }

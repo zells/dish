@@ -21,6 +21,7 @@ public class EncodeSignalsTest {
     @Before
     public void SetUp() {
         encodings = EncodingRepository.supportedEncodings();
+        assert encodings.size() > 0;
     }
 
     @Test
@@ -62,12 +63,12 @@ public class EncodeSignalsTest {
 
     @Test
     public void join() {
-        assertEncodeDecode(new JoinSignal("foo:connection"));
+        assertEncodeDecode(new JoinSignal());
     }
 
     @Test
     public void leave() {
-        assertEncodeDecode(new LeaveSignal("foo:connection"));
+        assertEncodeDecode(new LeaveSignal());
     }
 
     private Exception tryToEncode(Encoding encoding) {

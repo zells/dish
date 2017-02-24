@@ -66,10 +66,8 @@ public class MsgpackEncoding implements Encoding {
             payload.add(deflateMessage(delivery.getMessage()));
         } else if (signal instanceof JoinSignal) {
             payload.add("JOIN");
-            payload.add(((JoinSignal) signal).getConnectionDescription());
         } else if (signal instanceof LeaveSignal) {
             payload.add("LEAVE");
-            payload.add(((LeaveSignal) signal).getConnectionDescription());
         } else {
             throw new RuntimeException("unsupported signal type: " + signal.getClass());
         }
@@ -101,17 +99,9 @@ public class MsgpackEncoding implements Encoding {
                     inflateMessage(payload.get(3))
             ));
         } else if (payload.get(0).equals("JOIN")) {
-            if (payload.size() != 2) {
-                throw new RuntimeException("invalid format");
-            }
-
-            return new JoinSignal((String) payload.get(1));
+            return new JoinSignal();
         } else if (payload.get(0).equals("LEAVE")) {
-            if (payload.size() != 2) {
-                throw new RuntimeException("invalid format");
-            }
-
-            return new LeaveSignal((String) payload.get(1));
+            return new LeaveSignal();
         } else {
             throw new RuntimeException("unsupported signal: " + payload.get(0));
         }

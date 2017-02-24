@@ -4,8 +4,7 @@ import org.zells.dish.Dish;
 import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
-import org.zells.dish.network.Server;
-import org.zells.dish.network.SignalListener;
+import org.zells.dish.network.Connection;
 import org.zells.dish.util.Uuid;
 import org.zells.dish.util.UuidGenerator;
 
@@ -18,18 +17,18 @@ public class FakeDish extends Dish {
     public List<Map.Entry<Address, Message>> sent = new ArrayList<Map.Entry<Address, Message>>();
     public Message lastMessage;
 
-    public List<String> joined = new ArrayList<String>();
-    public List<String> left = new ArrayList<String>();
+    public List<Connection> joined = new ArrayList<Connection>();
+    public List<Connection> left = new ArrayList<Connection>();
 
-    public boolean stopped = false;
+    public boolean leftAll = false;
 
     public FakeDish() {
-        super(new FakeServer(), new FakeUuidGenerator(), null, null);
+        super(new FakeUuidGenerator(), null);
     }
 
     @Override
-    public void stop() {
-        stopped = true;
+    public void leaveAll() {
+        leftAll = true;
     }
 
     @Override
@@ -45,13 +44,13 @@ public class FakeDish extends Dish {
     }
 
     @Override
-    public void join(String connectionDescription) {
-        joined.add(connectionDescription);
+    public void join(Connection connection) {
+        joined.add(connection);
     }
 
     @Override
-    public void leave(String connectionDescription) {
-        left.add(connectionDescription);
+    public void leave(Connection connection) {
+        left.add(connection);
     }
 
     private static class FakeUuidGenerator implements UuidGenerator {
@@ -65,21 +64,6 @@ public class FakeDish extends Dish {
                 nextAddress = null;
             }
             return Uuid.fromString(address);
-        }
-    }
-
-    private static class FakeServer implements Server {
-        @Override
-        public void start(SignalListener listener) {
-        }
-
-        @Override
-        public void stop() {
-        }
-
-        @Override
-        public String getConnectionDescription() {
-            return null;
         }
     }
 }

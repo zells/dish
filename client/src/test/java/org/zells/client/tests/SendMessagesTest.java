@@ -3,10 +3,12 @@ package org.zells.client.tests;
 import org.junit.Before;
 import org.junit.Test;
 import org.zells.client.Client;
+import org.zells.client.tests.fakes.FakeConnectionRepository;
 import org.zells.client.tests.fakes.FakeDish;
 import org.zells.client.tests.fakes.FakeUser;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.messages.*;
+import org.zells.dish.network.connections.NullServer;
 
 public class SendMessagesTest {
 
@@ -18,7 +20,7 @@ public class SendMessagesTest {
         user = new FakeUser();
         dish = new FakeDish();
 
-        new Client(dish, user);
+        new Client(dish, new NullServer(), user, new FakeConnectionRepository());
     }
 
     @Test

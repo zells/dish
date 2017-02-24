@@ -6,13 +6,21 @@ import java.io.InputStreamReader;
 
 public class ConsoleUser extends User implements Runnable {
 
+    private boolean wasMe = false;
+
     ConsoleUser() {
         (new Thread(this)).start();
     }
 
     @Override
     public void tell(String output) {
+        if (!wasMe) {
+            System.out.println();
+        }
         System.out.println(output);
+        if (!wasMe) {
+            System.out.print("< ");
+        }
     }
 
     @Override
@@ -27,8 +35,10 @@ public class ConsoleUser extends User implements Runnable {
         try {
             System.out.print("< ");
             while ((input = reader.readLine()) != null) {
+                wasMe = true;
                 hear(input);
                 System.out.print("< ");
+                wasMe = false;
             }
         } catch (IOException e) {
             e.printStackTrace();

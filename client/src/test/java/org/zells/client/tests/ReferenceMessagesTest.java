@@ -3,11 +3,13 @@ package org.zells.client.tests;
 import org.junit.Before;
 import org.junit.Test;
 import org.zells.client.Client;
+import org.zells.client.tests.fakes.FakeConnectionRepository;
 import org.zells.client.tests.fakes.FakeDish;
 import org.zells.client.tests.fakes.FakeUser;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.messages.IntegerMessage;
 import org.zells.dish.delivery.messages.StringMessage;
+import org.zells.dish.network.connections.NullServer;
 
 public class ReferenceMessagesTest {
 
@@ -18,7 +20,7 @@ public class ReferenceMessagesTest {
     public void SetUp() {
         user = new FakeUser();
         dish = new FakeDish();
-        new Client(dish, user);
+        new Client(dish, new NullServer(), user, new FakeConnectionRepository());
 
         user.hear("client listen as:me");
     }

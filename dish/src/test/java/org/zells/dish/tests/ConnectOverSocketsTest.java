@@ -1,38 +1,92 @@
 package org.zells.dish.tests;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.zells.dish.Dish;
+import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
+import org.zells.dish.delivery.ReceiverNotFoundException;
 import org.zells.dish.delivery.messages.StringMessage;
-import org.zells.dish.tests.fakes.FakeUuidGenerator;
-import org.zells.dish.tests.fakes.FakeZell;
-import org.zells.dish.network.ConnectionRepository;
+import org.zells.dish.network.connections.TcpSocketConnection;
 import org.zells.dish.network.connections.TcpSocketServer;
-import org.zells.dish.network.encoding.EncodingRepository;
+import org.zells.dish.tests.fakes.FakeZell;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
 
 public class ConnectOverSocketsTest {
 
     @Test
-    public void singleConnection() {
-        FakeUuidGenerator generator = new FakeUuidGenerator();
-        EncodingRepository encodings = new EncodingRepository().addAll(EncodingRepository.supportedEncodings());
-        ConnectionRepository connections = new ConnectionRepository().addAll(ConnectionRepository.supportedConnections());
+    public void twoDishes() throws IOException {
+        Dish one = Dish.buildDefault();
+        Dish two = Dish.buildDefault();
 
-        TcpSocketServer serverOne = new TcpSocketServer("localhost", 42421, encodings);
-        Dish one = new Dish(serverOne, generator, encodings, connections);
+        FakeZell zellOne = new FakeZell();
+        FakeZell zellTwo = new FakeZell();
 
-        TcpSocketServer serverTwo = new TcpSocketServer("localhost", 42422, encodings);
-        Dish two = new Dish(serverTwo, generator, encodings, connections);
+        Address addressOne = one.add(zellOne);
+        Address addressTwo = two.add(zellTwo);
 
-        FakeZell aZell = new FakeZell();
-        Address anAddress = two.add(aZell);
+        TcpSocketServer server = new TcpSocketServer(new ServerSocket(42422)).start(two);
+        TcpSocketConnection connection = new TcpSocketConnection(new Socket("localhost", 42422)).open();
 
-        one.join(serverTwo.getConnectionDescription());
-        one.send(anAddress, new StringMessage("hello"));
+        one.join(connection);
+        one.send(addressTwo, new StringMessage("two"));
+        two.send(addressOne, new StringMessage("one"));
 
-        serverOne.stop();
-        serverTwo.stop();
+        assert zellTwo.received.toString().equals("two");
+        assert zellOne.received.toString().equals("one");
 
-        assert aZell.received.asString().equals("hello");
+        connection.close();
+        server.stop();
+    }
+
+    @Test
+    public void zellsDoesNotExist() throws IOException {
+        Exception caught = null;
+
+        Dish one = Dish.buildDefault();
+        Dish two = Dish.buildDefault();
+
+        TcpSocketServer server = new TcpSocketServer(new ServerSocket(42422)).start(two);
+        TcpSocketConnection connection = new TcpSocketConnection(new Socket("localhost", 42422)).open();
+
+        one.join(connection);
+        try {
+            one.send(Address.fromString("dada"), new StringMessage("two"));
+        } catch (ReceiverNotFoundException e) {
+            caught = e;
+        }
+
+        assert caught != null;
+
+        connection.close();
+        server.stop();
+    }
+
+    @Test
+    public void threeDishes() throws IOException {
+        Dish one = Dish.buildDefault();
+        Dish two = Dish.buildDefault();
+        Dish three = Dish.buildDefault();
+
+        FakeZell zell = new FakeZell();
+        Address address = one.add(zell);
+
+        TcpSocketServer server = new TcpSocketServer(new ServerSocket(42423)).start(two);
+        TcpSocketConnection connectionOne = new TcpSocketConnection(new Socket("localhost", 42423)).open();
+        TcpSocketConnection connectionThree = new TcpSocketConnection(new Socket("localhost", 42423)).open();
+
+        one.join(connectionOne);
+        three.join(connectionThree);
+        three.send(address, new StringMessage("one"));
+
+        assert zell.received.toString().equals("one");
+
+        connectionOne.close();
+        connectionThree.close();
+        server.stop();
     }
 }

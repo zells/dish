@@ -4,8 +4,10 @@ import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Delivery;
 import org.zells.dish.delivery.Message;
 import org.zells.dish.delivery.ReceiverNotFoundException;
-import org.zells.dish.network.*;
-import org.zells.dish.network.connections.TcpSocketServer;
+import org.zells.dish.network.Connection;
+import org.zells.dish.network.PacketHandler;
+import org.zells.dish.network.Peer;
+import org.zells.dish.network.SignalListener;
 import org.zells.dish.network.encoding.EncodingRepository;
 import org.zells.dish.util.BasicUuidGenerator;
 import org.zells.dish.util.UuidGenerator;
@@ -14,48 +16,37 @@ import java.util.*;
 
 public class Dish {
 
-    private Server server;
     private UuidGenerator generator;
     private EncodingRepository encodings;
-    private ConnectionRepository connections;
 
     private Map<Address, Zell> culture = new HashMap<Address, Zell>();
-    private Map<String, Peer> peers = new HashMap<String, Peer>();
+    private Map<Connection, Peer> peers = new IdentityHashMap<Connection, Peer>();
     private Set<Delivery> delivered = new HashSet<Delivery>();
 
-    public Dish(Server server, UuidGenerator generator, EncodingRepository encodings, ConnectionRepository connections) {
-        this.server = server;
+    public Dish(UuidGenerator generator, EncodingRepository encodings) {
         this.generator = generator;
         this.encodings = encodings;
-        this.connections = connections;
-
-        server.start(new DishSignalListener());
     }
 
-    public static Dish buildDefault(String host, int port) {
+    public static Dish buildDefault() {
         EncodingRepository encodings = new EncodingRepository().addAll(EncodingRepository.supportedEncodings());
-        ConnectionRepository connections = new ConnectionRepository().addAll(ConnectionRepository.supportedConnections());
-        TcpSocketServer server = new TcpSocketServer(host, port, encodings);
         BasicUuidGenerator generator = new BasicUuidGenerator();
 
-        return new Dish(server, generator, encodings, connections);
-    }
-
-    public void stop() {
-        server.stop();
-        leaveAll();
+        return new Dish(generator, encodings);
     }
 
     public void send(Address receiver, Message message) {
-        if (!deliver(new Delivery(generator.generate(), receiver, message))) {
-            throw new ReceiverNotFoundException();
-        }
+        deliver(new Delivery(generator.generate(), receiver, message));
     }
 
-    private boolean deliver(Delivery delivery) {
-        return !alreadyDelivered(delivery)
+    private void deliver(Delivery delivery) {
+        boolean delivered = !alreadyDelivered(delivery)
                 && (deliverLocally(delivery)
                 || deliverRemotely(delivery));
+
+        if (!delivered) {
+            throw new ReceiverNotFoundException();
+        }
     }
 
     private boolean alreadyDelivered(Delivery delivery) {
@@ -89,51 +80,48 @@ public class Dish {
         return address;
     }
 
-    public void join(String connectionDescription) {
-        connect(connectionDescription);
-        peers.get(connectionDescription).join(server.getConnectionDescription());
+    public void join(Connection connection) {
+        listen(connection);
+        connect(connection).join();
     }
 
-    private void connect(String connectionDescription) {
-        if (peers.containsKey(connectionDescription)) {
-            return;
+    public void leave(Connection connection) {
+        disconnect(connection).leave();
+    }
+
+    public void leaveAll() {
+        for (Peer peer : peers.values()) {
+            peer.leave();
+        }
+        peers.clear();
+    }
+
+    private Peer connect(Connection connection) {
+        Peer peer = new Peer(encodings, connection);
+        peers.put(connection, peer);
+        return peer;
+    }
+
+    private Peer disconnect(Connection connection) {
+        return peers.remove(connection);
+    }
+
+    public void listen(Connection connection) {
+        connection.setHandler(new PacketHandler(encodings, connection, new DishSignalListener()));
+    }
+
+    private class DishSignalListener implements SignalListener {
+
+        public void onDeliver(Delivery delivery) {
+            deliver(delivery);
         }
 
-        Peer peer = new Peer(connections.getConnectionOf(connectionDescription), encodings);
-        peers.put(connectionDescription, peer);
-    }
-
-    public void leave(String connectionDescription) {
-        peers.get(connectionDescription).leave(server.getConnectionDescription());
-        disconnect(connectionDescription);
-    }
-
-    private void disconnect(String connectionDescription) {
-        peers.remove(connectionDescription);
-    }
-
-    private void leaveAll() {
-        for (Iterator<Map.Entry<String, Peer>> iterator = peers.entrySet().iterator(); iterator.hasNext(); ) {
-            Map.Entry<String, Peer> entry = iterator.next();
-            entry.getValue().leave(server.getConnectionDescription());
-            iterator.remove();
-        }
-    }
-
-    private class DishSignalListener extends SignalListener {
-
-        protected boolean onDeliver(Delivery delivery) {
-            return deliver(delivery);
+        public void onJoin(Connection connection) {
+            connect(connection);
         }
 
-        protected boolean onJoin(String connectionDescription) {
-            connect(connectionDescription);
-            return true;
-        }
-
-        protected boolean onLeave(String connectionDescription) {
-            disconnect(connectionDescription);
-            return true;
+        public void onLeave(Connection connection) {
+            disconnect(connection);
         }
     }
 }

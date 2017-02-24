@@ -1,59 +1,120 @@
 package org.zells.dish.network.connections;
 
 import org.zells.dish.network.Connection;
-import org.zells.dish.network.ConnectionFactory;
 import org.zells.dish.network.Packet;
+import org.zells.dish.network.PacketHandler;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TcpSocketConnection implements Connection {
 
-    private final String host;
-    private final int port;
+    private static int packetId = 0;
 
-    TcpSocketConnection(String host, int port) {
-        this.host = host;
-        this.port = port;
+    private DataOutputStream out;
+    private DataInputStream in;
+
+    private PacketHandler handler;
+    private Socket socket;
+
+    private Map<Integer, Packet> buffer = new HashMap<Integer, Packet>();
+    private boolean open = false;
+
+    public TcpSocketConnection(final Socket socket) {
+        this.socket = socket;
+    }
+
+    public TcpSocketConnection open() {
+        try {
+            out = new DataOutputStream(socket.getOutputStream());
+            in = new DataInputStream(socket.getInputStream());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        open = true;
+        new Thread(new Runnable() {
+            public void run() {
+                while (open) {
+                    try {
+                        final int id = in.readInt();
+                        if (id == 0) {
+                            continue;
+                        }
+                        packetId = id + 1;
+                        int length = in.readInt();
+                        if (length == 0) {
+                            continue;
+                        }
+
+                        byte[] message = new byte[length];
+                        in.readFully(message, 0, message.length);
+
+                        final Packet packet = new Packet(message);
+                        buffer.put(id, packet);
+
+                        new Thread(new Runnable() {
+                            public void run() {
+                                try {
+                                    Packet response = handler.handle(packet);
+
+                                    byte[] bytes = response.getBytes();
+                                    out.writeInt(id);
+                                    out.writeInt(bytes.length);
+                                    out.write(bytes);
+                                } catch (IOException ignored) {
+                                }
+                            }
+                        }).start();
+                    } catch (IOException ignored) {
+                    }
+                }
+            }
+        }).
+
+                start();
+
+        return this;
+    }
+
+    public void close() {
+        open = false;
+        try {
+            in.close();
+            out.close();
+            socket.close();
+        } catch (IOException ignored) {
+        }
+    }
+
+    public void setHandler(PacketHandler handler) {
+        this.handler = handler;
     }
 
     public Packet transmit(Packet packet) throws IOException {
-            Socket socket = new Socket(host, port);
+        if (!open) {
+            throw new IOException("Connection not open");
+        }
 
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-            DataInputStream in = new DataInputStream(socket.getInputStream());
+        packetId++;
+        int id = packetId;
 
-            byte[] bytes = packet.getBytes();
-            out.writeInt(bytes.length);
-            out.write(bytes);
+        byte[] bytes = packet.getBytes();
+        out.writeInt(id);
+        out.writeInt(bytes.length);
+        out.write(bytes);
 
-            Packet response = new Packet(new byte[0]);
-
-            int length = in.readInt();
-            if (length > 0) {
-                byte[] message = new byte[length];
-                in.readFully(message, 0, message.length);
-                response = new Packet(message);
+        while (!buffer.containsKey(id)) {
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException ignored) {
             }
-
-            out.close();
-            in.close();
-            socket.close();
-
-            return response;
-    }
-
-    public static class Factory implements ConnectionFactory {
-
-        public boolean canBuild(String description) {
-            return description.startsWith("tcp:");
         }
 
-        public Connection build(String description) {
-            String[] hostPort = description.substring(4).split(":");
-            return new TcpSocketConnection(hostPort[0], Integer.parseInt(hostPort[1]));
-        }
+        return buffer.remove(id);
     }
 }

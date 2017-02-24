@@ -2,12 +2,11 @@ package org.zells.dish.network.encoding;
 
 import org.zells.dish.network.Packet;
 import org.zells.dish.network.Signal;
-import org.zells.dish.network.encoding.encodings.MsgpackEncoding;
-import org.zells.dish.network.signals.DeliverSignal;
-import org.zells.dish.network.signals.JoinSignal;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.zells.dish.network.encoding.encodings.MsgpackEncoding;
 
 public class EncodingRepository {
 
@@ -29,8 +28,8 @@ public class EncodingRepository {
         return encodings.get(0).encode(signal);
     }
 
-    public Signal decode(Packet string) {
-        return encodings.get(0).decode(string);
+    public Signal decode(Packet packet) {
+        return encodings.get(0).decode(packet);
     }
 
     public static List<Encoding> supportedEncodings() {

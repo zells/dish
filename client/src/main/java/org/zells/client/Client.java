@@ -4,28 +4,47 @@ import org.zells.dish.Dish;
 import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
+import org.zells.dish.network.connections.NullServer;
+import org.zells.dish.network.Server;
+import org.zells.dish.network.connections.TcpSocketServer;
+
+import java.io.IOException;
+import java.net.ServerSocket;
 
 public class Client {
 
     private final User user;
     private final Dish dish;
+    private final Server server;
+    private final ConnectionRepository connections;
+
     private final CommandLineInterface cli;
 
-    public static void main(String[] args) {
-        int port = args.length == 1 ? Integer.parseInt(args[0]) : 42420;
-        new Client("localhost", port);
+    public static void main(String[] args) throws IOException {
+        Server server = new NullServer();
+        if (args.length == 1) {
+            int port = Integer.parseInt(args[0]);
+            server = new TcpSocketServer(new ServerSocket(port));
+            System.out.println("Started server on port " + port);
+        }
+
+        new Client(
+                Dish.buildDefault(),
+                server,
+                new ConsoleUser(),
+                new ConnectionRepository().addAll(ConnectionRepository.supportedConnections()));
     }
 
-    private Client(String host, int port) {
-        this(Dish.buildDefault(host, port), new ConsoleUser());
-    }
-
-    public Client(Dish dish, User user) {
+    public Client(Dish dish, Server server, User user, ConnectionRepository connections) {
         this.user = user;
         this.dish = dish;
+        this.server = server.start(dish);
+        this.connections = connections;
 
         cli = new CommandLineInterface(user, dish);
         cli.setAlias("client", dish.add(new ClientZell()));
+
+        server.start(dish);
     }
 
     private class ClientZell implements Zell {
@@ -33,15 +52,19 @@ public class Client {
         public void receive(Message message) {
             if (message.read(0).asString().equals("exit")) {
                 user.tell("Good-bye");
-                dish.stop();
+
+                if (server != null) {
+                    server.stop();
+                }
+                dish.leaveAll();
                 user.stop();
             } else if (message.read(0).asString().equals("join")) {
                 String description = "tcp:localhost:" + message.read("port").asString();
-                dish.join(description);
+                dish.join(connections.getConnectionOf(description));
                 user.tell("Joined " + description);
             } else if (message.read(0).asString().equals("leave")) {
                 String description = "tcp:localhost:" + message.read("port").asString();
-                dish.leave(description);
+                dish.leave(connections.getConnectionOf(description));
                 user.tell("Left " + description);
             } else if (message.read(0).asString().equals("listen")) {
                 Address address = dish.add(new ListenerZell());

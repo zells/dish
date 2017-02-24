@@ -1,10 +1,10 @@
 package org.zells.dish.network;
 
+import org.zells.dish.Dish;
+
 public interface Server {
 
-    void start(SignalListener listener);
+    Server start(Dish dish);
 
     void stop();
-
-    String getConnectionDescription();
 }
