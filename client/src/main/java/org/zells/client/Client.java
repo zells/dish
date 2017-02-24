@@ -72,7 +72,7 @@ public class Client {
                                 .append(cli.getAliases().get(alias))
                                 .append('\n');
                     }
-                    user.tell(output.toString());
+                    user.tell(output.toString().trim());
                 }
             } else {
                 user.tell("Did not understand: " + message);
