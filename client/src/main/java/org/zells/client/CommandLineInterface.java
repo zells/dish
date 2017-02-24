@@ -2,14 +2,17 @@ package org.zells.client;
 
 import org.zells.dish.Dish;
 import org.zells.dish.delivery.Address;
-import org.zells.dish.delivery.messages.StringMessage;
+import org.zells.dish.delivery.Message;
 
-import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.Map;
 
 class CommandLineInterface {
 
     private final Dish dish;
     private final User user;
+    private Map<String, Address> aliases = new HashMap<String, Address>();
 
     CommandLineInterface(User user, Dish dish) {
         this.user = user;
@@ -18,8 +21,40 @@ class CommandLineInterface {
         user.listen(new InputListener());
     }
 
-    private class InputListener implements User.InputListener {
+    Map<String, Address> getAliases() {
+        return aliases;
+    }
 
+    void setAlias(String alias, Address address) {
+        aliases.put(alias, address);
+    }
+
+    void removeAlias(String alias) {
+        if (!aliases.containsKey(alias)) {
+            throw new RuntimeException("No such alias: " + alias);
+        }
+        aliases.remove(alias);
+    }
+
+    private void send(String receiver, Message message) {
+        try {
+            dish.send(resolveAddress(receiver), message);
+        } catch (Exception e) {
+            user.tell("Error: " + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()));
+        }
+    }
+
+    private Address resolveAddress(String receiver) {
+        if (receiver.startsWith("0x")) {
+            return Address.fromString(receiver);
+        } else if (aliases.containsKey(receiver)) {
+            return aliases.get(receiver);
+        } else {
+            return Address.fromString(receiver);
+        }
+    }
+
+    private class InputListener implements User.InputListener {
         public void hears(String input) {
             if (input.length() == 0) {
                 return;
@@ -33,11 +68,8 @@ class CommandLineInterface {
                 return;
             }
 
-            try {
-                dish.send(parser.getAddress(), parser.getMessage());
-            } catch (Exception e) {
-                user.tell("Failed to deliver message: " + e);
-            }
+            send(parser.getReceiver(), parser.getMessage());
         }
+
     }
 }

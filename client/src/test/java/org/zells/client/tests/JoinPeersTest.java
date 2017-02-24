@@ -17,12 +17,7 @@ public class JoinPeersTest {
         dish = new FakeDish();
 
         FakeDish.nextAddress = "fade";
-        new Client(user, dish);
-    }
-
-    @Test
-    public void introducesYourself() {
-        assert user.told.contains("Hi. I am 0xfade");
+        new Client(dish, user);
     }
 
     @Test

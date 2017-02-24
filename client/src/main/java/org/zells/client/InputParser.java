@@ -11,18 +11,18 @@ import java.util.*;
 
 class InputParser {
 
-    private Address address;
+    private String receiver;
     private Message message;
 
     InputParser(String input) throws Exception {
         int firstSpace = input.indexOf(" ");
         if (firstSpace < 0) {
-            address = Address.fromString(input);
+            receiver = input;
             message = new NullMessage();
             return;
         }
 
-        address = Address.fromString(input.substring(0, firstSpace));
+        receiver = input.substring(0, firstSpace);
 
         String rawMessage = input.substring(firstSpace + 1).trim();
         if (rawMessage.startsWith("!")) {
@@ -32,8 +32,8 @@ class InputParser {
         }
     }
 
-    Address getAddress() {
-        return address;
+    String getReceiver() {
+        return receiver;
     }
 
     Message getMessage() {

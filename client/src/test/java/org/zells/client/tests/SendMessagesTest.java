@@ -18,7 +18,7 @@ public class SendMessagesTest {
         user = new FakeUser();
         dish = new FakeDish();
 
-        new Client(user, dish);
+        new Client(dish, user);
     }
 
     @Test
@@ -26,7 +26,7 @@ public class SendMessagesTest {
         user.hear("not");
 
         assert dish.sent.isEmpty();
-        assert user.told.get(1).equals("Parsing error: Invalid hex string: not");
+        assert user.told.contains("Error: Invalid hex string: not");
     }
 
     @Test
@@ -44,7 +44,7 @@ public class SendMessagesTest {
         user.hear("fade !invalid");
 
         assert dish.sent.isEmpty();
-        assert user.told.get(1).startsWith("Parsing error: Unrecognized token 'invalid'");
+        assert user.told.get(0).startsWith("Parsing error: Unrecognized token 'invalid'");
     }
 
     @Test
