@@ -4,21 +4,25 @@ import org.zells.dish.Dish;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
 
-import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 class CommandLineInterface {
 
     private final Dish dish;
     private final User user;
     private Map<String, Address> aliases = new HashMap<String, Address>();
+    private List<Message> received = new ArrayList<Message>();
 
     CommandLineInterface(User user, Dish dish) {
         this.user = user;
         this.dish = dish;
 
         user.listen(new InputListener());
+    }
+
+    void receive(Message message) {
+        user.tell(received.size() + "> " + message.toString());
+        received.add(message);
     }
 
     Map<String, Address> getAliases() {
@@ -62,7 +66,7 @@ class CommandLineInterface {
 
             InputParser parser;
             try {
-                parser = new InputParser(input);
+                parser = new InputParser(input, received);
             } catch (Exception e) {
                 user.tell("Parsing error: " + e.getMessage());
                 return;

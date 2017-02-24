@@ -2,7 +2,7 @@ package org.zells.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.zells.dish.delivery.Address;
+import org.msgpack.value.IntegerValue;
 import org.zells.dish.delivery.Message;
 import org.zells.dish.delivery.messages.*;
 
@@ -13,8 +13,11 @@ class InputParser {
 
     private String receiver;
     private Message message;
+    private List<Message> receivedMessages;
 
-    InputParser(String input) throws Exception {
+    InputParser(String input, List<Message> receivedMessages) throws Exception {
+        this.receivedMessages = receivedMessages;
+
         int firstSpace = input.indexOf(" ");
         if (firstSpace < 0) {
             receiver = input;
@@ -79,6 +82,7 @@ class InputParser {
         Map<String, CompositeMessage> collections = new HashMap<String, CompositeMessage>();
         boolean quoted = false;
         boolean escaped = false;
+        boolean reference = false;
 
         int index = 0;
         String key = "0";
@@ -86,14 +90,17 @@ class InputParser {
 
         for (char c : input.toCharArray()) {
             if (!escaped && !quoted && c == ' ') {
-                message.put(key, combinedMessage(collections, bag, key));
+                message.put(key, combinedMessage(collections, bag, key, reference));
                 bag = new StringBuilder();
                 index++;
                 key = Integer.toString(index);
+                reference = false;
             } else if (!escaped && !quoted && c == ':') {
                 key = bag.toString();
                 bag = new StringBuilder();
                 index--;
+            } else if (!escaped && !quoted && c == '#') {
+                reference = true;
             } else if (!escaped && c == '"') {
                 quoted = !quoted;
             } else if (c == '\\') {
@@ -103,25 +110,48 @@ class InputParser {
                 bag.append(c);
             }
         }
-        message.put(key, combinedMessage(collections, bag, key));
+        message.put(key, combinedMessage(collections, bag, key, reference));
 
         return message;
     }
 
-    private Message combinedMessage(Map<String, CompositeMessage> collections, StringBuilder bag, String key) {
+    private Message combinedMessage(Map<String, CompositeMessage> collections, StringBuilder bag, String key, boolean reference) {
         if (!collections.containsKey(key)) {
             collections.put(key, new CompositeMessage());
         }
         CompositeMessage composite = collections.get(key);
         int lastKey = composite.keys().size();
 
-        composite.put(lastKey, parseShortSyntaxPart(bag.toString()));
+        Message value;
+        if (reference) {
+            value = resolveReference(bag.toString());
+        } else {
+            value = parseShortSyntaxPart(bag.toString());
+        }
+
+        composite.put(lastKey, value);
 
         if (lastKey == 0) {
             return composite.read(0);
         } else {
             return composite;
         }
+    }
+
+    private Message resolveReference(String reference) {
+        String[] parts = reference.split("\\.");
+        int id = Integer.valueOf(parts[0]);
+
+        if (receivedMessages.size() <= id) {
+            throw new RuntimeException("Invalid reference: " + reference);
+        }
+
+        Message message = new CompositeMessage().put(id, receivedMessages.get(id));
+        for (String part : parts) {
+            message = message.read(part);
+        }
+
+        return message;
     }
 
     private Message parseShortSyntaxPart(String part) {

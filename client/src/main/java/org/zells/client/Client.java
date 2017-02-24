@@ -83,7 +83,7 @@ public class Client {
     private class ListenerZell implements Zell {
         @Override
         public void receive(Message message) {
-            user.tell(">>> " + message.toString());
+            cli.receive(message);
         }
     }
 }

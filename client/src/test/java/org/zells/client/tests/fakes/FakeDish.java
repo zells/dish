@@ -14,9 +14,13 @@ import java.util.*;
 public class FakeDish extends Dish {
 
     public static String nextAddress;
+
     public List<Map.Entry<Address, Message>> sent = new ArrayList<Map.Entry<Address, Message>>();
+    public Message lastMessage;
+
     public List<String> joined = new ArrayList<String>();
     public List<String> left = new ArrayList<String>();
+
     public boolean stopped = false;
 
     public FakeDish() {
@@ -31,6 +35,7 @@ public class FakeDish extends Dish {
     @Override
     public void send(Address receiver, Message message) {
         sent.add(new AbstractMap.SimpleEntry<Address, Message>(receiver, message));
+        lastMessage = message;
         super.send(receiver, message);
     }
 

@@ -28,7 +28,7 @@ public class ListenToMessagesTest {
     public void tellReceivedMessages() {
         user.hear("fade listen");
         user.hear("0xa3 hello:world");
-        assert user.told.contains(">>> {hello:world}");
+        assert user.told.contains("0> {hello:world}");
     }
 
     @Test
