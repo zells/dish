@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 
 public class ConsoleUser extends User implements Runnable {
 
+    private boolean returned = false;
+
     ConsoleUser() {
         (new Thread(this)).start();
     }
@@ -13,6 +15,8 @@ public class ConsoleUser extends User implements Runnable {
     @Override
     public void tell(String output) {
         System.out.println(output);
+        System.out.print("> ");
+        returned = true;
     }
 
     @Override
@@ -28,7 +32,10 @@ public class ConsoleUser extends User implements Runnable {
             System.out.print("> ");
             while ((input = reader.readLine()) != null) {
                 hear(input);
-                System.out.print("> ");
+                if (!returned) {
+                    System.out.print("> ");
+                }
+                returned = false;
             }
         } catch (IOException e) {
             e.printStackTrace();
