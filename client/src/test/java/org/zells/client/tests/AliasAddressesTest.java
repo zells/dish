@@ -74,9 +74,9 @@ public class AliasAddressesTest {
         user.hear("client alias use:bar for:fade");
         user.hear("client alias");
 
-        assert user.told.contains("Aliases:\n" +
-                "bar: 0xfade\n" +
-                "foo: 0xdada\n" +
-                "client: 0xfade\n");
+        assert user.told.get(2).contains("Aliases:\n");
+        assert user.told.get(2).contains("bar: 0xfade\n");
+        assert user.told.get(2).contains("foo: 0xdada\n");
+        assert user.told.get(2).contains("client: 0xfade\n");
     }
 }
