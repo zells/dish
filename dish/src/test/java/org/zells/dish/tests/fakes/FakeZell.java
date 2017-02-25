@@ -1,7 +1,7 @@
 package org.zells.dish.tests.fakes;
 
-import org.zells.dish.delivery.Message;
 import org.zells.dish.Zell;
+import org.zells.dish.delivery.Message;
 
 public class FakeZell implements Zell {
 

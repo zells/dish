@@ -8,7 +8,10 @@ import org.zells.dish.network.Connection;
 import org.zells.dish.util.Uuid;
 import org.zells.dish.util.UuidGenerator;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class FakeDish extends Dish {
 

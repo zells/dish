@@ -8,7 +8,10 @@ import org.zells.dish.delivery.ReceiverNotFoundException;
 import org.zells.dish.delivery.messages.StringMessage;
 import org.zells.dish.network.Connection;
 import org.zells.dish.network.encoding.EncodingRepository;
-import org.zells.dish.tests.fakes.*;
+import org.zells.dish.tests.fakes.FakeConnection;
+import org.zells.dish.tests.fakes.FakeEncoding;
+import org.zells.dish.tests.fakes.FakeUuidGenerator;
+import org.zells.dish.tests.fakes.FakeZell;
 
 public class DeliverMessagesTest {
 

@@ -1,9 +1,7 @@
 package org.zells.dish.tests;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.zells.dish.Dish;
-import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.ReceiverNotFoundException;
 import org.zells.dish.delivery.messages.StringMessage;
@@ -14,7 +12,6 @@ import org.zells.dish.tests.fakes.FakeZell;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 
 public class ConnectOverSocketsTest {
 
