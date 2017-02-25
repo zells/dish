@@ -59,11 +59,13 @@ public class Client {
                 dish.leaveAll();
                 user.stop();
             } else if (message.read(0).asString().equals("join")) {
-                String description = "tcp:localhost:" + message.read("port").asString();
+                String host = message.read("host").isNull() ? "localhost" : message.read("host").asString();
+                String description = "tcp:" + host + ":" + message.read("port").asString();
                 dish.join(connections.getConnectionOf(description));
                 user.tell("Joined " + description);
             } else if (message.read(0).asString().equals("leave")) {
-                String description = "tcp:localhost:" + message.read("port").asString();
+                String host = message.read("host").isNull() ? "localhost" : message.read("host").asString();
+                String description = "tcp:" + host + ":" + message.read("port").asString();
                 dish.leave(connections.getConnectionOf(description));
                 user.tell("Left " + description);
             } else if (message.read(0).asString().equals("listen")) {
