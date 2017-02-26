@@ -48,6 +48,18 @@ public class JoinPeersTest {
     }
 
     @Test
+    public void voidJoinPeerDefaultPort() {
+        user.hear("fade join host:foo");
+        assert dish.joined.contains(new FakeConnection("tcp:foo:42420"));
+    }
+
+    @Test
+    public void leavePeerDefaultPort() {
+        user.hear("fade leave host:foo");
+        assert dish.left.contains(new FakeConnection("tcp:foo:42420"));
+    }
+
+    @Test
     public void exit() {
         user.hear("fade exit");
         assert dish.leftAll;

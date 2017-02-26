@@ -60,12 +60,14 @@ public class Client {
                 user.stop();
             } else if (message.read(0).asString().equals("join")) {
                 String host = message.read("host").isNull() ? "localhost" : message.read("host").asString();
-                String description = "tcp:" + host + ":" + message.read("port").asString();
+                String port = message.read("port").isNull() ? "42420" : message.read("port").asString();
+                String description = "tcp:" + host + ":" + port;
                 dish.join(connections.getConnectionOf(description));
                 user.tell("Joined " + description);
             } else if (message.read(0).asString().equals("leave")) {
                 String host = message.read("host").isNull() ? "localhost" : message.read("host").asString();
-                String description = "tcp:" + host + ":" + message.read("port").asString();
+                String port = message.read("port").isNull() ? "42420" : message.read("port").asString();
+                String description = "tcp:" + host + ":" + port;
                 dish.leave(connections.getConnectionOf(description));
                 user.tell("Left " + description);
             } else if (message.read(0).asString().equals("listen")) {
