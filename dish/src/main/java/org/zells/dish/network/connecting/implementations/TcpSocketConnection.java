@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class TcpSocketConnection implements Connection {
 
-    private static int packetId = 0;
+    private int packetId = 1;
 
     private DataOutputStream out;
     private DataInputStream in;
@@ -21,14 +21,18 @@ public class TcpSocketConnection implements Connection {
     private PacketHandler handler;
     private Socket socket;
 
-    private Map<Integer, Packet> buffer = new HashMap<Integer, Packet>();
+    private Map<Integer, Packet> responses = new HashMap<Integer, Packet>();
     private boolean open = false;
+
+    public static boolean loggingEnabled = false;
+    private int logCounter = 0;
 
     public TcpSocketConnection(final Socket socket) {
         this.socket = socket;
     }
 
     public TcpSocketConnection open() {
+        log("Open");
         try {
             out = new DataOutputStream(socket.getOutputStream());
             in = new DataInputStream(socket.getInputStream());
@@ -41,28 +45,32 @@ public class TcpSocketConnection implements Connection {
             public void run() {
                 while (open) {
                     try {
+                        final boolean isResponse = in.readBoolean();
                         final int id = in.readInt();
-                        if (id == 0) {
-                            continue;
-                        }
-                        packetId = id + 1;
                         int length = in.readInt();
                         if (length == 0) {
                             continue;
                         }
+                        log("Received " + length + " @" + id);
 
                         byte[] message = new byte[length];
                         in.readFully(message, 0, message.length);
 
                         final Packet packet = new Packet(message);
-                        buffer.put(id, packet);
+
+                        if (isResponse) {
+                            responses.put(id, packet);
+                            continue;
+                        }
 
                         new Thread(new Runnable() {
                             public void run() {
                                 try {
                                     Packet response = handler.handle(packet);
 
+                                    log("Reply " + response.getBytes().length + " @" + id);
                                     byte[] bytes = response.getBytes();
+                                    out.writeBoolean(true);
                                     out.writeInt(id);
                                     out.writeInt(bytes.length);
                                     out.write(bytes);
@@ -100,21 +108,34 @@ public class TcpSocketConnection implements Connection {
             throw new IOException("Connection not open");
         }
 
-        packetId++;
-        int id = packetId;
+        int id = packetId++;
 
+        log("Send " + packet.getBytes().length + " @" + id);
         byte[] bytes = packet.getBytes();
+        out.writeBoolean(false);
         out.writeInt(id);
         out.writeInt(bytes.length);
         out.write(bytes);
 
-        while (!buffer.containsKey(id)) {
+        return waitForResponse(id);
+    }
+
+    private Packet waitForResponse(int id) {
+        while (!responses.containsKey(id)) {
+            log("Hold for " + id);
             try {
                 Thread.sleep(20);
             } catch (InterruptedException ignored) {
             }
         }
 
-        return buffer.remove(id);
+        log("Got " + responses.get(id).getBytes().length + " @" + id);
+        return responses.remove(id);
+    }
+
+    private void log(String message) {
+        if (loggingEnabled) {
+            System.out.println(logCounter++ + " [" + socket.getLocalPort() + ">" + socket.getPort() + "] " + message);
+        }
     }
 }

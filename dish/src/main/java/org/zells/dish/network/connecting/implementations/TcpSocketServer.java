@@ -25,9 +25,10 @@ public class TcpSocketServer implements Server {
             public void run() {
                 while (running) {
                     try {
-                        TcpSocketConnection connection = new TcpSocketConnection(server.accept()).open();
+                        TcpSocketConnection connection = new TcpSocketConnection(server.accept());
                         connections.add(connection);
                         dish.listen(connection);
+                        connection.open();
                     } catch (IOException ignored) {
                     }
                 }

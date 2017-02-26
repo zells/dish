@@ -1,5 +1,6 @@
 package org.zells.dish.tests;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.zells.dish.Dish;
 import org.zells.dish.delivery.Address;
@@ -64,26 +65,55 @@ public class ConnectOverSocketsTest {
     }
 
     @Test
-    public void threeDishes() throws IOException {
+    public void proxyDish() throws IOException {
         Dish one = Dish.buildDefault();
+        Dish proxy = Dish.buildDefault();
         Dish two = Dish.buildDefault();
-        Dish three = Dish.buildDefault();
 
         FakeZell zell = new FakeZell();
         Address address = one.add(zell);
 
-        TcpSocketServer server = new TcpSocketServer(new ServerSocket(42424)).start(two);
+        TcpSocketServer proxyServer = new TcpSocketServer(new ServerSocket(42424)).start(proxy);
         TcpSocketConnection connectionOne = new TcpSocketConnection(new Socket("localhost", 42424)).open();
-        TcpSocketConnection connectionThree = new TcpSocketConnection(new Socket("localhost", 42424)).open();
+        TcpSocketConnection connectionTwo = new TcpSocketConnection(new Socket("localhost", 42424)).open();
 
         one.join(connectionOne);
-        three.join(connectionThree);
-        three.send(address, new StringMessage("one"));
+        two.join(connectionTwo);
+        two.send(address, new StringMessage("one"));
 
         assert zell.received.toString().equals("one");
 
         connectionOne.close();
-        connectionThree.close();
-        server.stop();
+        connectionTwo.close();
+        proxyServer.stop();
+    }
+
+    @Test
+    public void conversationByProxy() throws IOException {
+        Dish one = Dish.buildDefault();
+        Dish proxy = Dish.buildDefault();
+        Dish two = Dish.buildDefault();
+
+        FakeZell zellOne = new FakeZell();
+        Address addressOne = one.add(zellOne);
+        FakeZell zellTwo = new FakeZell();
+        Address addressTwo = two.add(zellTwo);
+
+        TcpSocketServer proxyServer = new TcpSocketServer(new ServerSocket(42425)).start(proxy);
+        TcpSocketConnection connectionOne = new TcpSocketConnection(new Socket("localhost", 42425)).open();
+        TcpSocketConnection connectionTwo = new TcpSocketConnection(new Socket("localhost", 42425)).open();
+
+        one.join(connectionOne);
+        two.join(connectionTwo);
+
+        one.send(addressTwo, new StringMessage("a"));
+        two.send(addressOne, new StringMessage("aa"));
+        one.send(addressTwo, new StringMessage("aaa"));
+        one.send(addressTwo, new StringMessage("aaaa"));
+        one.send(addressTwo, new StringMessage("aaaaa"));
+
+        connectionOne.close();
+        connectionTwo.close();
+        proxyServer.stop();
     }
 }
