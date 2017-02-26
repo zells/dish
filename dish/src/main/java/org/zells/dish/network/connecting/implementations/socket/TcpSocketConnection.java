@@ -1,4 +1,4 @@
-package org.zells.dish.network.connecting.implementations;
+package org.zells.dish.network.connecting.implementations.socket;
 
 import org.zells.dish.network.connecting.Connection;
 import org.zells.dish.network.connecting.Packet;
@@ -41,50 +41,7 @@ public class TcpSocketConnection implements Connection {
         }
 
         open = true;
-        new Thread(new Runnable() {
-            public void run() {
-                while (open) {
-                    try {
-                        final boolean isResponse = in.readBoolean();
-                        final int id = in.readInt();
-                        int length = in.readInt();
-                        if (length == 0) {
-                            continue;
-                        }
-                        log("Received " + length + " @" + id);
-
-                        byte[] message = new byte[length];
-                        in.readFully(message, 0, message.length);
-
-                        final Packet packet = new Packet(message);
-
-                        if (isResponse) {
-                            responses.put(id, packet);
-                            continue;
-                        }
-
-                        new Thread(new Runnable() {
-                            public void run() {
-                                try {
-                                    Packet response = handler.handle(packet);
-
-                                    log("Reply " + response.getBytes().length + " @" + id);
-                                    byte[] bytes = response.getBytes();
-                                    out.writeBoolean(true);
-                                    out.writeInt(id);
-                                    out.writeInt(bytes.length);
-                                    out.write(bytes);
-                                } catch (IOException ignored) {
-                                }
-                            }
-                        }).start();
-                    } catch (IOException ignored) {
-                    }
-                }
-            }
-        }).
-
-                start();
+        new Receiver().start();
 
         return this;
     }
@@ -109,15 +66,28 @@ public class TcpSocketConnection implements Connection {
         }
 
         int id = packetId++;
-
         log("Send " + packet.getBytes().length + " @" + id);
-        byte[] bytes = packet.getBytes();
-        out.writeBoolean(false);
-        out.writeInt(id);
-        out.writeInt(bytes.length);
-        out.write(bytes);
+        send(new Transmission(packet, id, false));
 
         return waitForResponse(id);
+    }
+
+    private void send(Transmission transmission) throws IOException {
+        byte[] bytes = transmission.packet.getBytes();
+        out.writeBoolean(transmission.isResponse);
+        out.writeInt(transmission.id);
+        out.writeInt(bytes.length);
+        out.write(bytes);
+    }
+
+    private Transmission receive() throws IOException {
+        final boolean isResponse = in.readBoolean();
+        final int id = in.readInt();
+        int length = in.readInt();
+        byte[] message = new byte[length];
+        in.readFully(message, 0, message.length);
+
+        return new Transmission(new Packet(message), id, isResponse);
     }
 
     private Packet waitForResponse(int id) {
@@ -136,6 +106,43 @@ public class TcpSocketConnection implements Connection {
     private void log(String message) {
         if (loggingEnabled) {
             System.out.println(logCounter++ + " [" + socket.getLocalPort() + ">" + socket.getPort() + "] " + message);
+        }
+    }
+
+    private class Receiver extends Thread {
+        public void run() {
+            while (open) {
+                try {
+                    final Transmission transmission = receive();
+                    log("Received " + transmission.packet.getBytes().length + " @" + transmission.id);
+
+                    if (transmission.isResponse) {
+                        responses.put(transmission.id, transmission.packet);
+                    } else if (transmission.packet.getBytes().length > 0) {
+                        new Responder(transmission).start();
+                    }
+                } catch (IOException ignored) {
+                }
+            }
+        }
+    }
+
+    private class Responder extends Thread {
+
+        private Transmission transmission;
+
+        Responder(Transmission transmission) {
+            this.transmission = transmission;
+        }
+
+        public void run() {
+            try {
+                Packet response = handler.handle(transmission.packet);
+
+                log("Reply " + response.getBytes().length + " @" + transmission.id);
+                send(transmission.response(response));
+            } catch (IOException ignored) {
+            }
         }
     }
 }

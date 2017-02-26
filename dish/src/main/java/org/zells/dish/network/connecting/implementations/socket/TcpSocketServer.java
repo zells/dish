@@ -1,4 +1,4 @@
-package org.zells.dish.network.connecting.implementations;
+package org.zells.dish.network.connecting.implementations.socket;
 
 import org.zells.dish.Dish;
 import org.zells.dish.network.connecting.Server;

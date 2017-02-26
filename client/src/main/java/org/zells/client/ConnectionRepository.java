@@ -1,7 +1,7 @@
 package org.zells.client;
 
 import org.zells.dish.network.connecting.Connection;
-import org.zells.dish.network.connecting.implementations.TcpSocketConnection;
+import org.zells.dish.network.connecting.implementations.socket.TcpSocketConnection;
 
 import java.io.IOException;
 import java.net.Socket;

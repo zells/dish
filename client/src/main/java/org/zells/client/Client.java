@@ -6,7 +6,7 @@ import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
 import org.zells.dish.network.connecting.Server;
 import org.zells.dish.network.connecting.implementations.NullServer;
-import org.zells.dish.network.connecting.implementations.TcpSocketServer;
+import org.zells.dish.network.connecting.implementations.socket.TcpSocketServer;
 
 import java.io.IOException;
 import java.net.ServerSocket;
