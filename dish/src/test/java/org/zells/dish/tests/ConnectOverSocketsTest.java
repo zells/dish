@@ -5,8 +5,8 @@ import org.zells.dish.Dish;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.ReceiverNotFoundException;
 import org.zells.dish.delivery.messages.StringMessage;
-import org.zells.dish.network.connections.TcpSocketConnection;
-import org.zells.dish.network.connections.TcpSocketServer;
+import org.zells.dish.network.connecting.implementations.TcpSocketConnection;
+import org.zells.dish.network.connecting.implementations.TcpSocketServer;
 import org.zells.dish.tests.fakes.FakeZell;
 
 import java.io.IOException;

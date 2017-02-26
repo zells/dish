@@ -1,4 +1,4 @@
-package org.zells.dish.network;
+package org.zells.dish.network.connecting;
 
 import java.io.IOException;
 

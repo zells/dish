@@ -1,4 +1,4 @@
-package org.zells.dish.network.encoding.encodings;
+package org.zells.dish.network.encoding.implementations;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -8,7 +8,7 @@ import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Delivery;
 import org.zells.dish.delivery.Message;
 import org.zells.dish.delivery.messages.*;
-import org.zells.dish.network.Packet;
+import org.zells.dish.network.connecting.Packet;
 import org.zells.dish.network.Signal;
 import org.zells.dish.network.encoding.Encoding;
 import org.zells.dish.network.signals.*;

@@ -6,7 +6,7 @@ import org.zells.client.Client;
 import org.zells.client.tests.fakes.FakeConnectionRepository;
 import org.zells.client.tests.fakes.FakeDish;
 import org.zells.client.tests.fakes.FakeUser;
-import org.zells.dish.network.connections.NullServer;
+import org.zells.dish.network.connecting.implementations.NullServer;
 
 public class ListenToMessagesTest {
 

@@ -1,5 +1,7 @@
-package org.zells.dish.network;
+package org.zells.dish.network.connecting;
 
+import org.zells.dish.network.Signal;
+import org.zells.dish.network.SignalListener;
 import org.zells.dish.network.encoding.EncodingRepository;
 import org.zells.dish.network.signals.*;
 

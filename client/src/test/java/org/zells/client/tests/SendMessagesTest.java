@@ -8,7 +8,7 @@ import org.zells.client.tests.fakes.FakeDish;
 import org.zells.client.tests.fakes.FakeUser;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.messages.*;
-import org.zells.dish.network.connections.NullServer;
+import org.zells.dish.network.connecting.implementations.NullServer;
 
 public class SendMessagesTest {
 

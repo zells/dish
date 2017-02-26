@@ -1,8 +1,8 @@
-package org.zells.dish.network.connections;
+package org.zells.dish.network.connecting.implementations;
 
-import org.zells.dish.network.Connection;
-import org.zells.dish.network.Packet;
-import org.zells.dish.network.PacketHandler;
+import org.zells.dish.network.connecting.Connection;
+import org.zells.dish.network.connecting.Packet;
+import org.zells.dish.network.connecting.PacketHandler;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

@@ -4,7 +4,7 @@ import org.zells.dish.Dish;
 import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
-import org.zells.dish.network.Connection;
+import org.zells.dish.network.connecting.Connection;
 import org.zells.dish.util.Uuid;
 import org.zells.dish.util.UuidGenerator;
 

@@ -1,6 +1,6 @@
 package org.zells.dish.tests.fakes;
 
-import org.zells.dish.network.Packet;
+import org.zells.dish.network.connecting.Packet;
 import org.zells.dish.network.Signal;
 
 class FakePacket extends Packet {

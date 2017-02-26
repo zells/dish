@@ -1,7 +1,7 @@
-package org.zells.dish.network.connections;
+package org.zells.dish.network.connecting.implementations;
 
 import org.zells.dish.Dish;
-import org.zells.dish.network.Server;
+import org.zells.dish.network.connecting.Server;
 
 public class NullServer implements Server {
 

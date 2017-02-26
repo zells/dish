@@ -1,6 +1,7 @@
 package org.zells.dish.network;
 
 import org.zells.dish.delivery.Delivery;
+import org.zells.dish.network.connecting.Connection;
 
 public interface SignalListener {
 

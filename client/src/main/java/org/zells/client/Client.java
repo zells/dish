@@ -4,9 +4,9 @@ import org.zells.dish.Dish;
 import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
-import org.zells.dish.network.Server;
-import org.zells.dish.network.connections.NullServer;
-import org.zells.dish.network.connections.TcpSocketServer;
+import org.zells.dish.network.connecting.Server;
+import org.zells.dish.network.connecting.implementations.NullServer;
+import org.zells.dish.network.connecting.implementations.TcpSocketServer;
 
 import java.io.IOException;
 import java.net.ServerSocket;

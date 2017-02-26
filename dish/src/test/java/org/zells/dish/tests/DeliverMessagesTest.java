@@ -6,7 +6,7 @@ import org.zells.dish.Dish;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.ReceiverNotFoundException;
 import org.zells.dish.delivery.messages.StringMessage;
-import org.zells.dish.network.Connection;
+import org.zells.dish.network.connecting.Connection;
 import org.zells.dish.network.encoding.EncodingRepository;
 import org.zells.dish.tests.fakes.FakeConnection;
 import org.zells.dish.tests.fakes.FakeEncoding;

@@ -1,6 +1,8 @@
 package org.zells.dish.network;
 
 import org.zells.dish.delivery.Delivery;
+import org.zells.dish.network.connecting.Connection;
+import org.zells.dish.network.connecting.Packet;
 import org.zells.dish.network.encoding.EncodingRepository;
 import org.zells.dish.network.signals.*;
 

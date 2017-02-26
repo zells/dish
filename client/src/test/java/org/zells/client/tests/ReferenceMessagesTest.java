@@ -9,7 +9,7 @@ import org.zells.client.tests.fakes.FakeUser;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.messages.IntegerMessage;
 import org.zells.dish.delivery.messages.StringMessage;
-import org.zells.dish.network.connections.NullServer;
+import org.zells.dish.network.connecting.implementations.NullServer;
 
 public class ReferenceMessagesTest {
 

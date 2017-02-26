@@ -1,8 +1,8 @@
 package org.zells.dish.tests.fakes;
 
-import org.zells.dish.network.Connection;
-import org.zells.dish.network.Packet;
-import org.zells.dish.network.PacketHandler;
+import org.zells.dish.network.connecting.Connection;
+import org.zells.dish.network.connecting.Packet;
+import org.zells.dish.network.connecting.PacketHandler;
 
 public class FakeConnection implements Connection {
 
