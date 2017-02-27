@@ -1,10 +1,13 @@
-# zells interface [![Build Status](https://travis-ci.org/zells/interface.svg?branch=master)](https://travis-ci.org/zells/interface)
+# zells (prototype three) [![Build Status](https://travis-ci.org/zells/three.svg?branch=master)](https://travis-ci.org/zells/three)
 
-[description tba]
+This is a prototype of the *zells* system used to explore the design of the *zells messaging protocol* and the implementation of a distributed peer-to-peer network based on it.
+
 
 ## Concepts
 
-[tba]
+A *Zell* encapsulates behaviour. Each zell has a unique *Address* which can be used to send it asynchronous *Messages* of arbitrary but structured content. Each Message is delivered exactly once if the receiver can be found.
+
+Zells live on a *Dish*. A Dish can be connected to another Dish, forming a Network of Zells. Messages can be sent to any Zell on a Network using its Address, regardless of the physical location of the Zell.
 
 
 ## Installation
@@ -34,7 +37,7 @@ There is also a [client] for sending and receiving messages.
 
 ## Documentation ##
 
-This project is a work-in-progress and there isn't much documentation yet. If you have any question or comment, please don't hesitate to [contact me].
+This project is a work-in-progress prototype with minimal documentation. If you have any question or comment, please don't hesitate to [contact me].
 
 [contact me]: https://github.com/rtens
 
