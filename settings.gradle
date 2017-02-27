@@ -1,2 +1,2 @@
-rootProject.name = 'interface'
+rootProject.name = 'zells'
 include "dish", "client"
