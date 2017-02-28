@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class CommandLineInterface {
+public class CommandLineInterface {
 
     private final Dish dish;
     private final User user;
@@ -23,20 +23,20 @@ class CommandLineInterface {
         user.listen(new InputListener());
     }
 
-    void receive(Message message) {
+    public void receive(Message message) {
         user.tell(received.size() + "> " + message.toString());
         received.add(message);
     }
 
-    Map<String, Address> getAliases() {
+    public Map<String, Address> getAliases() {
         return aliases;
     }
 
-    void setAlias(String alias, Address address) {
+    public void setAlias(String alias, Address address) {
         aliases.put(alias, address);
     }
 
-    void removeAlias(String alias) {
+    public void removeAlias(String alias) {
         if (!aliases.containsKey(alias)) {
             throw new RuntimeException("No such alias: " + alias);
         }
