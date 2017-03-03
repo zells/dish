@@ -1,0 +1,17 @@
+version '0.1'
+sourceCompatibility = 1.6
+
+dependencies {
+    compile project(':dish')
+}
+
+task buildLobby(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'simple chat room zell',
+                'Main-Class': 'org.zells.samples.Lobby'
+    }
+    baseName = 'zells-lobby'
+    destinationDir = file("$rootDir/build")
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}

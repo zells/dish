@@ -1,2 +1,4 @@
 rootProject.name = 'zells'
-include "dish", "client"
+include 'dish'
+include 'client'
+include 'samples'
