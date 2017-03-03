@@ -37,4 +37,5 @@ You can find an example in the [`Client`].
 
 [`Dish`]: https://github.com/zells/three/blob/master/dish/src/main/java/org/zells/dish/Dish.java
 [`Zell`]: https://github.com/zells/three/blob/master/dish/src/main/java/org/zells/dish/Zell.java
+[`Connection`]: https://github.com/zells/three/blob/master/dish/src/main/java/org/zells/dish/network/connecting/Connection.java
 [`Client`]: https://github.com/zells/three/blob/master/client/src/main/java/org/zells/client/Client.java
