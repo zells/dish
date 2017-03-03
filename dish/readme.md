@@ -1,6 +1,6 @@
 # zells dish
 
-A library for connecting to Peer, sending messages, and creating zells that react to received messages.
+A library for connecting to Peers, sending messages, and creating zells that react to received messages.
 
 ## Build
 
