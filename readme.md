@@ -37,7 +37,7 @@ The usage of each module is described in the module. They are
 
 This project is a work-in-progress prototype with minimal documentation. If you have any question or comment, please don't hesitate to [contact me].
 
-[contact me]: https://github.com/rtens
+[contact me]: http://rtens.org/#contact
 
 
 ## Contribution ##
