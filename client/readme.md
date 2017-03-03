@@ -60,7 +60,7 @@ Connects the Dish of the client to another Dish. The example uses the default va
 
 ### Use Aliases
 
-The Address of the receiver Zell can either be entered as a hexadecimal number or using an alias. The example lists the currently registered aliases, adds "foo" as a new alias for `0xfaba`, and the lists all aliases again.
+The Address of the receiver Zell can either be entered as a hexadecimal number or using an alias. The example lists the currently registered aliases, adds "foo" as a new alias for `0xfaba`, and then lists all aliases again.
 
     < client alias
     Aliases:
@@ -72,9 +72,9 @@ The Address of the receiver Zell can either be entered as a hexadecimal number o
     foo: 0xfaba
     client: 0xda4d3947c0d249929230c77ffa9cbb71
 
-An alias can be used in the message by prefixing it with an `@`.
+An alias can be used in a message by prefixing it with an `@`.
 
-    client say:@foo
+    < client say:@foo
     0xfaba
 
 ### Receive Message
