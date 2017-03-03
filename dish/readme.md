@@ -20,7 +20,16 @@ Messages can be received by adding a new [`Zell`] to the Dish.
 
     myDish.add(new MyZell());
 
-The `receive(Message message)` method is called every time the Zell receives a `Message`. The content of a Message is dynamic and can therefore be accessed as different types with the methods `isNull()`,`asString()`, `isTrue()`, `asInteger()`, `asBytes()`, as `asAddress()`. Fields of a Message can be read with `read(String key)` or `read(int key)` and return a `NullMessage` if the key does not exist. All keys are returned by `keys()`.
+The `receive(Message message)` method is called every time the Zell receives a `Message`.
+
+    class MyZell implements Zell {
+        public void receive(Message message) {
+            // Message is {"foo":{42:"Hello World"}}
+            System.log(message.read("foo").read(42).asString());
+        }
+    }
+
+The content of a Message is dynamic and can therefore be accessed as different types with the methods `isNull()`,`asString()`, `isTrue()`, `asInteger()`, `asBytes()`, as `asAddress()`. Fields of a Message can be read with `read(String key)` or `read(int key)` and return a `NullMessage` if the key does not exist. All keys are returned by `keys()`.
 
 ### Join Peer
 
