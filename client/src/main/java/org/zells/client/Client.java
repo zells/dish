@@ -58,6 +58,8 @@ public class Client {
                 }
                 dish.leaveAll();
                 user.stop();
+            } else if (!message.read("say").isNull()) {
+                user.tell(message.read("say").asString());
             } else if (message.read(0).asString().equals("join")) {
                 String host = message.read("host").isNull() ? "localhost" : message.read("host").asString();
                 String port = message.read("port").isNull() ? "42420" : message.read("port").asString();
