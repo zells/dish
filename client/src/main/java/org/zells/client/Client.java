@@ -4,6 +4,7 @@ import org.zells.dish.Dish;
 import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
+import org.zells.dish.network.connecting.ConnectionRepository;
 import org.zells.dish.network.connecting.Server;
 import org.zells.dish.network.connecting.implementations.NullServer;
 import org.zells.dish.network.connecting.implementations.socket.TcpSocketServer;

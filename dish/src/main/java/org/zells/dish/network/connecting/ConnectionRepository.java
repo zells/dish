@@ -1,6 +1,5 @@
-package org.zells.client;
+package org.zells.dish.network.connecting;
 
-import org.zells.dish.network.connecting.Connection;
 import org.zells.dish.network.connecting.implementations.socket.TcpSocketConnection;
 
 import java.io.IOException;
@@ -19,14 +18,14 @@ public class ConnectionRepository {
         factories.add(factory);
     }
 
-    ConnectionRepository addAll(List<ConnectionFactory> factories) {
+    public ConnectionRepository addAll(List<ConnectionFactory> factories) {
         for (ConnectionFactory factory : factories) {
             add(factory);
         }
         return this;
     }
 
-    Connection getConnectionOf(String description) {
+    public Connection getConnectionOf(String description) {
         if (connections.containsKey(description)) {
             return connections.get(description);
         }
@@ -46,7 +45,7 @@ public class ConnectionRepository {
         throw new RuntimeException("cannot build connection from: " + description);
     }
 
-    static List<ConnectionFactory> supportedConnections() {
+    public static List<ConnectionFactory> supportedConnections() {
         ArrayList<ConnectionFactory> factories = new ArrayList<ConnectionFactory>();
         factories.add(new ConnectionFactory() {
 
