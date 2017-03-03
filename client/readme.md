@@ -106,7 +106,7 @@ The client is exited with
 
 ## Example
 
-The following example starts two clients, connects one to the other and then creates listener zells on each to have a conversation. The `---------` lines indicate a switch between two terminal.
+The following example starts two clients, connects one to the other and then creates listener zells on each to have a conversation. The `---------` lines indicate a switch between two terminals.
 
     $ java -jar build/zells-client-0.1.jar 42420
     Started server on port 42420
