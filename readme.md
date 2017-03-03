@@ -7,31 +7,29 @@ This is a prototype of the *zells* system used to explore the design of the *zel
 
 A *Zell* encapsulates behaviour. Each zell has a unique *Address* which can be used to send it asynchronous *Messages* of arbitrary but structured content. Each Message is delivered exactly once if the receiver can be found.
 
-Zells live on a *Dish*. A Dish can be connected to another Dish, forming a Network of Zells. Messages can be sent to any Zell on a Network using its Address, regardless of the physical location of the Zell.
+Zells live on a *Dish*. A Dish can be connected to another Dish, called *Peer*, forming a Network of Zells. Messages can be sent to any Zell on a Network using its Address, regardless of the physical location of the Zell.
 
 
 ## Installation
 
-The project is built with [gradle].
+The project can be downloaded with [git] and built with [gradle].
 
-    git clone https://github.com/zells/interface.git
-    cd interface
+    git clone https://github.com/zells/three.git zells
+    cd zells
     ./gradlew check
 
+[git]: https://git-scm.com
 [gradle]: https://gradle.org/
 
 
 ## Usage
 
-This project is a library for building distributed applications. The following command will pack all dependencies of the `Dish` module into `build/zells-dish-0.1.jar`.
+The usage of each module is described in the module. They are
 
-    ./gradlew buildDish
+- **[dish]** - Library for managing Peers, sending and receiving Messages
+- **[client]** - Minimal user interface to Dish
 
-Check out the [samples] to see how the library is used.
-
-There is also a [client] for sending and receiving messages.
-
-[samples]: https://github.com/zells/interface/tree/master/samples
+[dish]: https://github.com/zells/interface/tree/master/dish
 [client]: https://github.com/zells/interface/tree/master/client
 
 
