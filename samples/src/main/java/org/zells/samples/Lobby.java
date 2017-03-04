@@ -26,5 +26,7 @@ public class Lobby {
                 System.out.println("Joined " + description);
             }
         }
+
+        System.out.println("Lobby is at " + dish.add(new LobbyZell(dish)));
     }
 }
