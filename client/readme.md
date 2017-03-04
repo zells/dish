@@ -1,17 +1,17 @@
 # zells client
 
-Simple command line application for sending and receiving Messages, as well as connecting to the zells network.
+Simple command line application for sending and receiving Messages, as well as connecting to other Dishes.
 
 ## Client Mode
 
-The following command builds and runs the client (version 0.1).
+The following command builds and runs the current version of the client.
 
     ./gradlew buildClient
     java -jar build/zells-client-0.1.jar
 
 ## Server Mode
 
-If the port is as command line argument, the application starts listening for Peer connections on that port
+If a port is provided as a command line argument, the application starts listening for connections from other Dishes on that port.
 
     java -jar build/zells-client-0.1.jar 42420
 
@@ -19,7 +19,11 @@ If the port is as command line argument, the application starts listening for Pe
 
 Every line entered sends a message. The syntax is
 
-    receiver [message]
+    receiver ["<" message]
+    
+The `receiver` Address can be entered as a hexadecimal number. The following input sends the message "Hello Zell" to the Zell at the Address `0x1234`
+
+    1234 < "Hello World"
 
 If the `message` is omitted, `null` is sent.
 
