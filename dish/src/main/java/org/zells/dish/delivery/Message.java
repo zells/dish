@@ -28,7 +28,7 @@ public abstract class Message {
     }
 
     public Address asAddress() {
-        throw new RuntimeException("not an address");
+        return Address.fromBytes(new byte[0]);
     }
 
     public Set<String> keys() {

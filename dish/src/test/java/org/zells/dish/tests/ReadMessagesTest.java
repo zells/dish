@@ -123,6 +123,12 @@ public class ReadMessagesTest {
     public void addressBinaryMessage() {
         Message m = new BinaryMessage(Address.fromString("dada").toBytes());
         assert m.asAddress().equals(Address.fromString("dada"));
+
+        Message m2 = new BooleanMessage(true);
+        assert m2.asAddress().equals(Address.fromBytes(new byte[0]));
+
+        Message m3 = new StringMessage("fade");
+        assert m3.asAddress().equals(Address.fromBytes(new byte[0]));
     }
 
     @Test
