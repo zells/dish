@@ -25,7 +25,7 @@ The Address is a hexadecimal number (`0001001000110100` in binary), marked by th
 
 ## Usage
 
-Everything is done by sending messages to Zells. A message can be sent to the client itself using the alias `client`. The following message just echoes what it receives.
+Everything is done by sending messages to Zells. A message can be sent to the client itself using the alias `client`. The following message echoes what it receives.
 
     client < say:"Hello World"
 
@@ -131,27 +131,28 @@ The following shows examples in short syntax and their equivalents in JSON.
 The following example starts two clients, connects one to the other and then creates listener zells on each to have a conversation. The `---------` lines indicate a switch between two terminals.
 
 ```diff
-    $ java -jar build/zells-client-0.1.jar 42420
-    + Started server on port 42420
-    << client < listen as:me
-    + Listening on 0xfa0624a8d4b24331bf691684338d1b3f
-    + Set alias [me] for [0xfa0624a8d4b24331bf691684338d1b3f]
-    <<
-    ---------
-    $ java -jar build/zells-client-0.1.jar
-    << client < join
-    + Joined tcp:localhost:42420
-    << client < alias use:other for:0xfa0624a8d4b24331bf691684338d1b3f
-    + Set alias [other] for [0xfa0624a8d4b24331bf691684338d1b3f]
-    << client < listen as:me
-    + Listening on 0x902de2010eeb4b2d8c6968cb0643a3ea
-    + Set alias [me] for [0x902de2010eeb4b2d8c6968cb0643a3ea]
-    << other < "Hello World" from:@me
-    <<
-    ---------
-    + 0> {0:Hello World, from:0x902de2010eeb4b2d8c6968cb0643a3ea}
-    << #0.from < "Hello Back" from:@me
-    <<
-    ---------
-    + 0> {0:Hello Back, from:0xfa0624a8d4b24331bf691684338d1b3f}
-    <<
+$ java -jar build/zells-client-0.1.jar 42420
++ Started server on port 42420
+<< client < listen as:me
++ Listening on 0xfa0624a8d4b24331bf691684338d1b3f
++ Set alias [me] for [0xfa0624a8d4b24331bf691684338d1b3f]
+<<
+---------
+$ java -jar build/zells-client-0.1.jar
+<< client < join
++ Joined tcp:localhost:42420
+<< client < alias use:other for:0xfa0624a8d4b24331bf691684338d1b3f
++ Set alias [other] for [0xfa0624a8d4b24331bf691684338d1b3f]
+<< client < listen as:me
++ Listening on 0x902de2010eeb4b2d8c6968cb0643a3ea
++ Set alias [me] for [0x902de2010eeb4b2d8c6968cb0643a3ea]
+<< other < "Hello World" from:@me
+<<
+---------
++ 0> {0:Hello World, from:0x902de2010eeb4b2d8c6968cb0643a3ea}
+<< #0.from < "Hello Back" from:@me
+<<
+---------
++ 0> {0:Hello Back, from:0xfa0624a8d4b24331bf691684338d1b3f}
+<<
+```

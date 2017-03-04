@@ -75,7 +75,7 @@ public class AliasAddressesTest {
     public void listAliases() {
         user.hear("client alias use:foo for:dada");
         user.hear("client alias use:bar for:fade");
-        user.hear("client alias");
+        user.hear("client alias list");
 
         assert user.told.get(2).contains("Aliases:");
         assert user.told.get(2).contains("bar: 0xfade");
