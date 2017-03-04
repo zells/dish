@@ -71,6 +71,12 @@ public class SendMessagesTest {
     }
 
     @Test
+    public void sendWithArrow() {
+        user.hear("fade < !\"hello\"");
+        assert dish.lastMessage.equals(new StringMessage("hello"));
+    }
+
+    @Test
     public void parseCompositeJson() {
         user.hear("da !{\"one\": \"uno\", \"and\": {\"two\": 2}, \"2\": [4, 2]}");
 

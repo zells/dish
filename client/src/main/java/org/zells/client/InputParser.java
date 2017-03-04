@@ -23,20 +23,24 @@ class InputParser {
         this.receivedMessages = receivedMessages;
         this.aliases = aliases;
 
-        int firstSpace = input.indexOf(" ");
-        if (firstSpace < 0) {
+        int separation = input.indexOf("<");
+        if (separation < 0) {
+            separation = input.indexOf(" ");
+        }
+
+        if (separation < 0) {
             receiver = input;
             message = new NullMessage();
             return;
         }
 
-        receiver = input.substring(0, firstSpace);
+        receiver = input.substring(0, separation).trim();
 
         if (receiver.startsWith("#")) {
             receiver = resolveReference(receiver.substring(1)).asString();
         }
 
-        String rawMessage = input.substring(firstSpace + 1).trim();
+        String rawMessage = input.substring(separation + 1).trim();
         if (rawMessage.startsWith("!")) {
             message = parseJsonMessage(rawMessage.substring(1));
         } else {
