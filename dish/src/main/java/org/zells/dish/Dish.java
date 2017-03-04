@@ -45,7 +45,7 @@ public class Dish {
                 || deliverRemotely(delivery));
 
         if (!delivered) {
-            throw new ReceiverNotFoundException();
+            throw new ReceiverNotFoundException(delivery);
         }
     }
 
