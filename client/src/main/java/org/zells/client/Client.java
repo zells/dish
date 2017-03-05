@@ -50,7 +50,9 @@ public class Client {
     }
 
     public void exit() {
-        server.stop();
+        if (server != null) {
+            server.stop();
+        }
         dish.leaveAll();
         user.stop();
     }

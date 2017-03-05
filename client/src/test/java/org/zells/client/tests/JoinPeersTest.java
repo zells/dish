@@ -7,7 +7,6 @@ import org.zells.client.tests.fakes.FakeConnection;
 import org.zells.client.tests.fakes.FakeConnectionRepository;
 import org.zells.client.tests.fakes.FakeDish;
 import org.zells.client.tests.fakes.FakeUser;
-import org.zells.dish.network.connecting.implementations.NullServer;
 
 public class JoinPeersTest {
 
@@ -20,7 +19,7 @@ public class JoinPeersTest {
         dish = new FakeDish();
 
         FakeDish.nextAddress = "fade";
-        new Client(dish, new NullServer(), user, new FakeConnectionRepository());
+        new Client(dish, user, new FakeConnectionRepository());
     }
 
     @Test

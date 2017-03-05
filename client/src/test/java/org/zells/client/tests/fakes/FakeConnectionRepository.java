@@ -1,7 +1,7 @@
 package org.zells.client.tests.fakes;
 
-import org.zells.dish.network.connecting.ConnectionRepository;
 import org.zells.dish.network.connecting.Connection;
+import org.zells.dish.network.connecting.ConnectionRepository;
 
 import java.io.IOException;
 

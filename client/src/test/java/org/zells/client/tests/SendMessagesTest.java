@@ -8,7 +8,6 @@ import org.zells.client.tests.fakes.FakeDish;
 import org.zells.client.tests.fakes.FakeUser;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.messages.*;
-import org.zells.dish.network.connecting.implementations.NullServer;
 
 public class SendMessagesTest {
 
@@ -20,7 +19,7 @@ public class SendMessagesTest {
         user = new FakeUser();
         dish = new FakeDish();
 
-        new Client(dish, new NullServer(), user, new FakeConnectionRepository());
+        new Client(dish, user, new FakeConnectionRepository());
     }
 
     @Test

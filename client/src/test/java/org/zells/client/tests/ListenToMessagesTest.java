@@ -6,7 +6,6 @@ import org.zells.client.Client;
 import org.zells.client.tests.fakes.FakeConnectionRepository;
 import org.zells.client.tests.fakes.FakeDish;
 import org.zells.client.tests.fakes.FakeUser;
-import org.zells.dish.network.connecting.implementations.NullServer;
 
 public class ListenToMessagesTest {
 
@@ -17,7 +16,7 @@ public class ListenToMessagesTest {
         user = new FakeUser();
 
         FakeDish.nextAddress = "fade";
-        new Client(new FakeDish(), new NullServer(), user, new FakeConnectionRepository());
+        new Client(new FakeDish(), user, new FakeConnectionRepository());
     }
 
     @Test
