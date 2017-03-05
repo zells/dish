@@ -1,6 +1,8 @@
 package org.zells.samples;
 
 import org.zells.dish.Dish;
+import org.zells.dish.delivery.Address;
+import org.zells.dish.network.connecting.Connection;
 import org.zells.dish.network.connecting.ConnectionRepository;
 import org.zells.dish.network.connecting.implementations.socket.TcpSocketServer;
 
@@ -9,24 +11,48 @@ import java.net.ServerSocket;
 
 public class Lobby {
 
-    public static void main(String[] args) throws IOException {
-        Dish dish = Dish.buildDefault();
+    private final Dish dish;
+    private Address address;
 
+    public static void main(String[] args) throws IOException {
+        Lobby lobby = new Lobby();
+        parseArguments(args, lobby);
+        System.out.println("Lobby is at " + lobby.getAddress());
+    }
+
+    private static void parseArguments(String[] args, Lobby lobby) throws IOException {
         ConnectionRepository connections = new ConnectionRepository()
                 .addAll(ConnectionRepository.supportedConnections());
 
         for (String arg : args) {
             if (arg.startsWith("-s")) {
                 int port = Integer.parseInt(arg.substring(2));
-                new TcpSocketServer(new ServerSocket(port)).start(dish);
+
+                lobby.startServer(port);
                 System.out.println("Started server on port " + port);
-            } else if (arg.startsWith("-p")) {
+            } else if (arg.startsWith("-j")) {
                 String description = arg.substring(2);
-                dish.join(connections.getConnectionOf(description));
+
+                lobby.join(connections.getConnectionOf(description));
                 System.out.println("Joined " + description);
             }
         }
+    }
 
-        System.out.println("Lobby is at " + dish.add(new LobbyZell(dish)));
+    private Lobby() {
+        dish = Dish.buildDefault();
+        address = dish.add(new LobbyZell(dish));
+    }
+
+    private void join(Connection connection) {
+        dish.join(connection);
+    }
+
+    private void startServer(int port) throws IOException {
+        new TcpSocketServer(new ServerSocket(port)).start(dish);
+    }
+
+    private Address getAddress() {
+        return address;
     }
 }
