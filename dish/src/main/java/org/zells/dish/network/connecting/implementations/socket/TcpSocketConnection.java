@@ -8,6 +8,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,13 +67,13 @@ public class TcpSocketConnection implements Connection {
         }
 
         int id = packetId++;
-        log("Send " + packet.getBytes().length + " @" + id);
+        log("Send " + packet.getBytes().length + " @" + id + " >> " + new String(packet.getBytes()));
         send(new Transmission(packet, id, false));
 
         return waitForResponse(id);
     }
 
-    private void send(Transmission transmission) throws IOException {
+    synchronized private void send(Transmission transmission) throws IOException {
         byte[] bytes = transmission.packet.getBytes();
         out.writeBoolean(transmission.isResponse);
         out.writeInt(transmission.id);
@@ -92,7 +93,6 @@ public class TcpSocketConnection implements Connection {
 
     private Packet waitForResponse(int id) {
         while (!responses.containsKey(id)) {
-            log("Hold for " + id);
             try {
                 Thread.sleep(20);
             } catch (InterruptedException ignored) {
@@ -103,7 +103,7 @@ public class TcpSocketConnection implements Connection {
         return responses.remove(id);
     }
 
-    private void log(String message) {
+    synchronized private void log(String message) {
         if (loggingEnabled) {
             System.out.println(logCounter++ + " [" + socket.getLocalPort() + ">" + socket.getPort() + "] " + message);
         }
@@ -114,7 +114,7 @@ public class TcpSocketConnection implements Connection {
             while (open) {
                 try {
                     final Transmission transmission = receive();
-                    log("Received " + transmission.packet.getBytes().length + " @" + transmission.id);
+                    log("Received " + transmission.packet.getBytes().length + " @" + transmission.id + " >> " + new String(transmission.packet.getBytes()));
 
                     if (transmission.isResponse) {
                         responses.put(transmission.id, transmission.packet);
@@ -139,7 +139,7 @@ public class TcpSocketConnection implements Connection {
             try {
                 Packet response = handler.handle(transmission.packet);
 
-                log("Reply " + response.getBytes().length + " @" + transmission.id);
+                log("Reply " + response.getBytes().length + " @" + transmission.id + " >> " + new String(transmission.packet.getBytes()));
                 send(transmission.response(response));
             } catch (IOException ignored) {
             }

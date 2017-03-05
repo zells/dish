@@ -4,6 +4,7 @@ import org.zells.dish.Dish;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.network.connecting.Connection;
 import org.zells.dish.network.connecting.ConnectionRepository;
+import org.zells.dish.network.connecting.implementations.socket.TcpSocketConnection;
 import org.zells.dish.network.connecting.implementations.socket.TcpSocketServer;
 
 import java.io.IOException;
@@ -35,6 +36,9 @@ public class Lobby {
 
                 lobby.join(connections.getConnectionOf(description));
                 System.out.println("Joined " + description);
+            } else if (arg.startsWith("-d")) {
+                TcpSocketConnection.loggingEnabled = true;
+                System.out.println("Debug mode");
             }
         }
     }
