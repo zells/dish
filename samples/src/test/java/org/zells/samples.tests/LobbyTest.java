@@ -34,7 +34,9 @@ public class LobbyTest {
         send(new CompositeMessage()
                 .put("hello", BinaryMessage.fromString("fade")));
 
-        assertSent("fade", "Currently here: [bar, foo]");
+        assert dish.sent.get(0).getValue().asString().startsWith("Currently here:");
+        assert dish.sent.get(0).getValue().asString().contains("bar");
+        assert dish.sent.get(0).getValue().asString().contains("foo");
     }
 
     @Test
