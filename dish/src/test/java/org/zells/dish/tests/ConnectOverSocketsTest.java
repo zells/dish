@@ -69,38 +69,14 @@ public class ConnectOverSocketsTest {
         Dish proxy = Dish.buildDefault();
         Dish two = Dish.buildDefault();
 
-        FakeZell zell = new FakeZell();
-        Address address = one.add(zell);
-
-        TcpSocketServer proxyServer = new TcpSocketServer(new ServerSocket(42424)).start(proxy);
-        TcpSocketConnection connectionOne = new TcpSocketConnection(new Socket("localhost", 42424)).open();
-        TcpSocketConnection connectionTwo = new TcpSocketConnection(new Socket("localhost", 42424)).open();
-
-        one.join(connectionOne);
-        two.join(connectionTwo);
-        two.send(address, new StringMessage("one"));
-
-        assert zell.received.toString().equals("one");
-
-        connectionOne.close();
-        connectionTwo.close();
-        proxyServer.stop();
-    }
-
-    @Test
-    public void conversationByProxy() throws IOException {
-        Dish one = Dish.buildDefault();
-        Dish proxy = Dish.buildDefault();
-        Dish two = Dish.buildDefault();
-
         FakeZell zellOne = new FakeZell();
         Address addressOne = one.add(zellOne);
         FakeZell zellTwo = new FakeZell();
         Address addressTwo = two.add(zellTwo);
 
-        TcpSocketServer proxyServer = new TcpSocketServer(new ServerSocket(42425)).start(proxy);
-        TcpSocketConnection connectionOne = new TcpSocketConnection(new Socket("localhost", 42425)).open();
-        TcpSocketConnection connectionTwo = new TcpSocketConnection(new Socket("localhost", 42425)).open();
+        TcpSocketServer proxyServer = new TcpSocketServer(new ServerSocket(42424)).start(proxy);
+        TcpSocketConnection connectionOne = new TcpSocketConnection(new Socket("localhost", 42424)).open();
+        TcpSocketConnection connectionTwo = new TcpSocketConnection(new Socket("localhost", 42424)).open();
 
         one.join(connectionOne);
         two.join(connectionTwo);
