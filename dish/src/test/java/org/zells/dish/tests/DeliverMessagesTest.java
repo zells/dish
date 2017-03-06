@@ -4,10 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.zells.dish.Dish;
 import org.zells.dish.Zell;
-import org.zells.dish.delivery.Address;
-import org.zells.dish.delivery.Message;
-import org.zells.dish.delivery.Messenger;
-import org.zells.dish.delivery.ReceiverNotFoundException;
+import org.zells.dish.delivery.*;
 import org.zells.dish.delivery.messages.StringMessage;
 import org.zells.dish.network.connecting.Connection;
 import org.zells.dish.network.encoding.EncodingRepository;
@@ -61,11 +58,11 @@ public class DeliverMessagesTest {
 
     @Test
     public void exceptionWhileReceiving() {
-        final String[] logged = new String[1];
+        final Exception[] logged = new Exception[1];
         Dish dish = new Dish(generator, encodings) {
             @Override
-            protected void logError(String message) {
-                logged[0] = message;
+            protected void logError(Exception e, Delivery delivery) {
+                logged[0] = e;
             }
         };
 
@@ -76,10 +73,7 @@ public class DeliverMessagesTest {
         });
 
         waitFor(dish.send(anAddress, new StringMessage("a string")));
-        assert logged[0].equals("Caught\n" +
-                "java.lang.RuntimeException: Nope\n" +
-                "  while delivering\n" +
-                "[0xabc1] 0xabc0 < a string");
+        assert logged[0].getMessage().equals("Nope");
     }
 
     @Test

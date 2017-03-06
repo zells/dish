@@ -3,6 +3,7 @@ package org.zells.client.tests.fakes;
 import org.zells.dish.Dish;
 import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
+import org.zells.dish.delivery.Delivery;
 import org.zells.dish.delivery.Message;
 import org.zells.dish.delivery.Messenger;
 import org.zells.dish.network.connecting.Connection;
@@ -25,7 +26,7 @@ public class FakeDish extends Dish {
     public List<Connection> left = new ArrayList<Connection>();
 
     public boolean leftAll = false;
-    public List<String> logged = new ArrayList<String>();
+    public List<Exception> logged = new ArrayList<Exception>();
 
     public FakeDish() {
         super(new FakeUuidGenerator(), null);
@@ -44,8 +45,8 @@ public class FakeDish extends Dish {
     }
 
     @Override
-    protected void logError(String message) {
-        logged.add(message);
+    protected void logError(Exception e, Delivery delivery) {
+        logged.add(e);
     }
 
     @Override

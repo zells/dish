@@ -2,6 +2,8 @@ package org.zells.dish.delivery;
 
 public class Messenger {
 
+    private static final int DEFAULT_TIME_OUT_SEC = 5;
+
     private boolean running;
     private Failed failureHandler;
     private Delivered successHandler;
@@ -52,6 +54,21 @@ public class Messenger {
             delivered.then();
         }
         return this;
+    }
+
+    public Messenger sync(int timeOutSec) {
+        long start = System.currentTimeMillis();
+        while (running) {
+            Thread.yield();
+            if (System.currentTimeMillis() - start > timeOutSec * 1000) {
+                throw new RuntimeException("Message delivery timed out");
+            }
+        }
+        return this;
+    }
+
+    public Messenger sync() {
+        return sync(DEFAULT_TIME_OUT_SEC);
     }
 
     public interface Failed {

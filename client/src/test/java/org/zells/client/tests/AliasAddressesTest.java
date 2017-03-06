@@ -67,7 +67,7 @@ public class AliasAddressesTest {
     @Test
     public void removeNonExistingAlias() {
         user.hear("client alias remove:da");
-        assert dish.logged.get(0).contains("No such alias: da");
+        assert dish.logged.get(0).getMessage().equals("No such alias: da");
     }
 
     @Test

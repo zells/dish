@@ -2,201 +2,323 @@ package org.zells.samples.tests;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.zells.dish.Dish;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
+import org.zells.dish.delivery.Messenger;
 import org.zells.dish.delivery.messages.BinaryMessage;
 import org.zells.dish.delivery.messages.CompositeMessage;
 import org.zells.dish.delivery.messages.StringMessage;
+import org.zells.dish.network.encoding.EncodingRepository;
+import org.zells.dish.util.BasicUuidGenerator;
 import org.zells.samples.LobbyZell;
-import org.zells.samples.tests.fakes.FakeDish;
-
-import java.util.AbstractMap;
+import org.zells.samples.tests.fakes.FakeZell;
 
 public class LobbyTest {
 
-    private FakeDish dish;
-    private LobbyZell lobby;
+    private Dish dish;
+    private Address lobby;
+    private FakeZell foo;
+    private FakeZell bar;
+    private FakeZell baz;
 
     @Before
     public void setUp() {
-        dish = new FakeDish();
-        lobby = new LobbyZell(dish);
+        dish = new Dish(new BasicUuidGenerator(), new EncodingRepository()) {
+            @Override
+            public Messenger send(Address receiver, Message message) {
+                return super.send(receiver, message).sync();
+            }
+        };
+        lobby = dish.add(new LobbyZell(dish));
+        foo = addZell(dish);
+        bar = addZell(dish);
+        baz = addZell(dish);
+    }
+
+    private FakeZell addZell(Dish dish) {
+        FakeZell zell = new FakeZell();
+        zell.address = dish.add(zell);
+        return zell;
     }
 
     @Test
-    public void introduce() {
-        send(new CompositeMessage()
-                .put("enter", BinaryMessage.fromString("abcd"))
+    public void enter() {
+        lobby(new CompositeMessage()
+                .put("enter", foo.addressMessage())
                 .put("as", new StringMessage("foo")));
-        send(new CompositeMessage()
-                .put("enter", BinaryMessage.fromString("1234"))
-                .put("as", new StringMessage("bar")));
-        send(new CompositeMessage()
-                .put("hello", BinaryMessage.fromString("fade")));
 
-        assert dish.sent.get(0).getValue().asString().startsWith("Currently here:");
-        assert dish.sent.get(0).getValue().asString().contains("bar");
-        assert dish.sent.get(0).getValue().asString().contains("foo");
+        assert foo.received.get(0).read(0).equals(new StringMessage("Hello, foo"));
+        assert foo.received.get(0).read("avatar") instanceof BinaryMessage;
     }
 
     @Test
-    public void alreadyThere() {
-        send(new CompositeMessage()
-                .put("enter", BinaryMessage.fromString("dada"))
+    public void introducePeople() {
+        lobby(new CompositeMessage()
+                .put("enter", foo.addressMessage())
                 .put("as", new StringMessage("foo")));
-        send(new CompositeMessage()
-                .put("enter", BinaryMessage.fromString("dada"))
+        lobby(new CompositeMessage()
+                .put("enter", bar.addressMessage())
                 .put("as", new StringMessage("bar")));
+        lobby(new CompositeMessage()
+                .put(0, new StringMessage("hello"))
+                .put("from", baz.addressMessage()));
 
-        assertSent("dada", "You are already there as [foo]");
+        assert baz.received(new CompositeMessage()
+                .put("people", new CompositeMessage()
+                        .put(0, new StringMessage("bar"))
+                        .put(1, new StringMessage("foo"))));
+    }
+
+    @Test
+    public void alterEgo() {
+        lobby(new CompositeMessage()
+                .put("enter", foo.addressMessage())
+                .put("as", new StringMessage("foo")));
+        lobby(new CompositeMessage()
+                .put("enter", foo.addressMessage())
+                .put("as", new StringMessage("bar")));
+        lobby(new CompositeMessage()
+                .put(0, new StringMessage("hello"))
+                .put("from", baz.addressMessage()));
+
+        assert baz.received(new CompositeMessage()
+                .put("people", new CompositeMessage()
+                        .put(0, new StringMessage("bar"))
+                        .put(1, new StringMessage("foo"))));
     }
 
     @Test
     public void nameTaken() {
-        send(new CompositeMessage()
-                .put("enter", BinaryMessage.fromString("dada"))
+        lobby(new CompositeMessage()
+                .put("enter", foo.addressMessage())
                 .put("as", new StringMessage("foo")));
-        send(new CompositeMessage()
-                .put("enter", BinaryMessage.fromString("cece"))
+        lobby(new CompositeMessage()
+                .put("enter", bar.addressMessage())
                 .put("as", new StringMessage("foo")));
 
-        assertSent("cece", "There is already somebody here with that name.");
+        assert bar.received(new CompositeMessage()
+                .put("error", new StringMessage("There is already somebody here with that name.")));
     }
 
     @Test
     public void leave() {
-        send(new CompositeMessage()
-                .put("enter", BinaryMessage.fromString("dada"))
+        lobby(new CompositeMessage()
+                .put("enter", foo.addressMessage())
                 .put("as", new StringMessage("foo")));
-        send(new CompositeMessage()
-                .put("leave", BinaryMessage.fromString("dada")));
+        avatar(foo, new CompositeMessage()
+                .put(0, new StringMessage("leave")));
 
-        assertSent("dada", "Good-bye");
+        assert foo.received(new StringMessage("Good-bye"));
 
-        send(new CompositeMessage()
-                .put("hello", BinaryMessage.fromString("fade")));
+        lobby(new CompositeMessage()
+                .put(0, new StringMessage("hello"))
+                .put("from", bar.addressMessage()));
 
-        assertSent("fade", "Currently here: []");
+        assert bar.received(new CompositeMessage()
+                .put("people", new CompositeMessage()));
     }
 
     @Test
     public void talkToAll() {
-        send(new CompositeMessage()
-                .put("enter", BinaryMessage.fromString("11"))
+        lobby(new CompositeMessage()
+                .put("enter", foo.addressMessage())
                 .put("as", new StringMessage("foo")));
-        send(new CompositeMessage()
-                .put("enter", BinaryMessage.fromString("22"))
+        lobby(new CompositeMessage()
+                .put("enter", bar.addressMessage())
                 .put("as", new StringMessage("bar")));
-        send(new CompositeMessage()
-                .put("enter", BinaryMessage.fromString("33"))
+        lobby(new CompositeMessage()
+                .put("enter", baz.addressMessage())
                 .put("as", new StringMessage("baz")));
-        send(new CompositeMessage()
-                .put("say", new StringMessage("Hello World"))
-                .put("as", BinaryMessage.fromString("11")));
+        avatar(foo, new CompositeMessage()
+                .put("say", new StringMessage("Hello World")));
 
-        assert dish.sent.size() == 2;
-        assertSent("22", new CompositeMessage()
+        CompositeMessage message = new CompositeMessage()
                 .put("message", new StringMessage("Hello World"))
-                .put("from", new StringMessage("foo")));
-        assertSent("33", new CompositeMessage()
-                .put("message", new StringMessage("Hello World"))
-                .put("from", new StringMessage("foo")));
+                .put("from", new StringMessage("foo"));
+
+        assert bar.received(message);
+        assert baz.received(message);
+        assert !foo.received(message);
+    }
+
+    @Test
+    public void leftLobby() {
+        lobby(new CompositeMessage()
+                .put("enter", foo.addressMessage())
+                .put("as", new StringMessage("foo")));
+        lobby(new CompositeMessage()
+                .put("enter", bar.addressMessage())
+                .put("as", new StringMessage("bar")));
+        avatar(bar, new CompositeMessage()
+                .put(0, new StringMessage("leave")));
+        avatar(foo, new CompositeMessage()
+                .put("say", new StringMessage("Hello World")));
+
+        assert bar.received.size() == 2;
     }
 
     @Test
     public void talkToSomebody() {
-        send(new CompositeMessage()
-                .put("enter", BinaryMessage.fromString("11"))
+        lobby(new CompositeMessage()
+                .put("enter", foo.addressMessage())
                 .put("as", new StringMessage("foo")));
-        send(new CompositeMessage()
-                .put("enter", BinaryMessage.fromString("22"))
+        lobby(new CompositeMessage()
+                .put("enter", bar.addressMessage())
                 .put("as", new StringMessage("bar")));
-        send(new CompositeMessage()
-                .put("enter", BinaryMessage.fromString("33"))
+        lobby(new CompositeMessage()
+                .put("enter", baz.addressMessage())
                 .put("as", new StringMessage("baz")));
-        send(new CompositeMessage()
+        avatar(foo, new CompositeMessage()
                 .put("say", new StringMessage("Hello You"))
-                .put("to", new StringMessage("bar"))
-                .put("as", BinaryMessage.fromString("11")));
+                .put("to", new StringMessage("bar")));
 
-        assert dish.sent.size() == 1;
-        assertSent("22", new CompositeMessage()
+        CompositeMessage message = new CompositeMessage()
                 .put("message", new StringMessage("Hello You"))
-                .put("from", new StringMessage("foo")));
+                .put("from", new StringMessage("foo"));
+
+        assert bar.received(message);
+        assert !baz.received(message);
+        assert !foo.received(message);
     }
 
     @Test
     public void listenToTopic() {
-        send(new CompositeMessage()
-                .put("enter", BinaryMessage.fromString("11"))
+        lobby(new CompositeMessage()
+                .put("enter", foo.addressMessage())
                 .put("as", new StringMessage("foo")));
-        send(new CompositeMessage()
-                .put("inform", BinaryMessage.fromString("dada"))
-                .put("about", new StringMessage("a topic")));
-        send(new CompositeMessage()
-                .put("say", new StringMessage("Hello World"))
-                .put("as", BinaryMessage.fromString("11"))
-                .put("regarding", new StringMessage("a topic")));
+        lobby(new CompositeMessage()
+                .put("enter", bar.addressMessage())
+                .put("as", new StringMessage("bar")));
+        lobby(new CompositeMessage()
+                .put("enter", baz.addressMessage())
+                .put("as", new StringMessage("baz")));
+        avatar(foo, new CompositeMessage()
+                .put("join", new StringMessage("a topic")));
+        avatar(bar, new CompositeMessage()
+                .put("say", new StringMessage("About that"))
+                .put("on", new StringMessage("a topic")));
 
-        assert dish.sent.size() == 1;
-        assertSent("dada", new CompositeMessage()
-                .put("message", new StringMessage("Hello World"))
-                .put("regarding", new StringMessage("a topic"))
-                .put("from", new StringMessage("foo")));
+        CompositeMessage message = new CompositeMessage()
+                .put("message", new StringMessage("About that"))
+                .put("on", new StringMessage("a topic"))
+                .put("from", new StringMessage("bar"));
+
+        assert foo.received(message);
+        assert !bar.received(message);
+        assert !baz.received(message);
+    }
+
+    @Test
+    public void leftTopic() {
+        lobby(new CompositeMessage()
+                .put("enter", foo.addressMessage())
+                .put("as", new StringMessage("foo")));
+        lobby(new CompositeMessage()
+                .put("enter", bar.addressMessage())
+                .put("as", new StringMessage("bar")));
+        avatar(foo, new CompositeMessage()
+                .put("join", new StringMessage("a topic")));
+        avatar(foo, new CompositeMessage()
+                .put(0, new StringMessage("leave")));
+        avatar(bar, new CompositeMessage()
+                .put("say", new StringMessage("About that"))
+                .put("on", new StringMessage("a topic")));
+
+        assert foo.received.size() == 2;
     }
 
     @Test
     public void nobodyCares() {
-        send(new CompositeMessage()
-                .put("enter", BinaryMessage.fromString("11"))
+        lobby(new CompositeMessage()
+                .put("enter", foo.addressMessage())
                 .put("as", new StringMessage("foo")));
-        send(new CompositeMessage()
-                .put("enter", BinaryMessage.fromString("22"))
+        lobby(new CompositeMessage()
+                .put("enter", bar.addressMessage())
                 .put("as", new StringMessage("bar")));
-        send(new CompositeMessage()
-                .put("say", new StringMessage("Hello World"))
-                .put("as", BinaryMessage.fromString("11"))
-                .put("regarding", new StringMessage("a topic")));
+        avatar(bar, new CompositeMessage()
+                .put("say", new StringMessage("About that"))
+                .put("on", new StringMessage("a topic")));
 
-        assert dish.sent.size() == 0;
+        assert foo.received.size() == 1;
+        assert bar.received.size() == 1;
     }
 
     @Test
     public void ignoreTopic() {
-        send(new CompositeMessage()
-                .put("enter", BinaryMessage.fromString("11"))
+        lobby(new CompositeMessage()
+                .put("enter", foo.addressMessage())
                 .put("as", new StringMessage("foo")));
-        send(new CompositeMessage()
-                .put("inform", BinaryMessage.fromString("dada"))
-                .put("about", new StringMessage("a topic")));
-        send(new CompositeMessage()
-                .put("inform", BinaryMessage.fromString("fade"))
-                .put("about", new StringMessage("a topic")));
-        send(new CompositeMessage()
-                .put("spare", BinaryMessage.fromString("dada"))
-                .put("about", new StringMessage("a topic")));
-        send(new CompositeMessage()
-                .put("say", new StringMessage("Hello World"))
-                .put("as", BinaryMessage.fromString("11"))
-                .put("regarding", new StringMessage("a topic")));
+        lobby(new CompositeMessage()
+                .put("enter", bar.addressMessage())
+                .put("as", new StringMessage("bar")));
+        avatar(foo, new CompositeMessage()
+                .put("join", new StringMessage("a topic")));
+        avatar(foo, new CompositeMessage()
+                .put("ignore", new StringMessage("a topic")));
+        avatar(bar, new CompositeMessage()
+                .put("say", new StringMessage("About that"))
+                .put("on", new StringMessage("a topic")));
 
-        assert dish.sent.size() == 1;
-        assertSent("fade", new CompositeMessage()
-                .put("message", new StringMessage("Hello World"))
-                .put("regarding", new StringMessage("a topic"))
-                .put("from", new StringMessage("foo")));
+        assert foo.received.size() == 1;
     }
 
-    private void assertSent(String to, String message) {
-        assertSent(to, new StringMessage(message));
+    @Test
+    public void catchUp() {
+        lobby(new CompositeMessage()
+                .put("enter", foo.addressMessage())
+                .put("as", new StringMessage("foo")));
+        lobby(new CompositeMessage()
+                .put("enter", bar.addressMessage())
+                .put("as", new StringMessage("bar")));
+        avatar(foo, new CompositeMessage()
+                .put("join", new StringMessage("bla")));
+        dish.remove(foo.address);
+
+        avatar(bar, new CompositeMessage()
+                .put("say", new StringMessage("one")));
+        avatar(bar, new CompositeMessage()
+                .put("say", new StringMessage("two")));
+        avatar(bar, new CompositeMessage()
+                .put("say", new StringMessage("topic"))
+                .put("on", new StringMessage("bla")));
+
+        assert foo.received.size() == 1;
+
+        foo.address = dish.add(foo);
+
+        avatar(bar, new CompositeMessage()
+                .put("say", new StringMessage("three")));
+        assert foo.received.size() == 1;
+
+        avatar(foo, new CompositeMessage()
+                .put("connect", foo.addressMessage()));
+
+        assert foo.received.size() == 5;
+        assert foo.received.get(1).equals(new CompositeMessage()
+                .put("message", new StringMessage("one"))
+                .put("from", new StringMessage("bar")));
+        assert foo.received.get(2).equals(new CompositeMessage()
+                .put("message", new StringMessage("two"))
+                .put("from", new StringMessage("bar")));
+        assert foo.received.get(3).equals(new CompositeMessage()
+                .put("message", new StringMessage("topic"))
+                .put("on", new StringMessage("bla"))
+                .put("from", new StringMessage("bar")));
+        assert foo.received.get(4).equals(new CompositeMessage()
+                .put("message", new StringMessage("three"))
+                .put("from", new StringMessage("bar")));
     }
 
-    private void assertSent(String to, Message message) {
-        assert dish.sent.contains(new
-                AbstractMap.SimpleEntry<Address, Message>(Address.fromString(to), message));
+    private void lobby(Message message) {
+        send(lobby, message);
     }
 
-    private void send(Message message) {
-        lobby.receive(message);
+    private void avatar(FakeZell zell, Message message) {
+        send(zell.received.get(0).read("avatar").asAddress(), message);
+    }
+
+    private void send(Address receiver, Message message) {
+        dish.send(receiver, message);
     }
 }

@@ -64,7 +64,7 @@ public class Dish {
         try {
             culture.get(delivery.getReceiver()).receive(delivery.getMessage());
         } catch (Exception e) {
-            logError("Caught\n" + e + "\n  while delivering\n" + delivery);
+            logError(e, delivery);
         }
         return true;
     }
@@ -82,6 +82,10 @@ public class Dish {
         Address address = new Address(generator.generate());
         culture.put(address, zell);
         return address;
+    }
+
+    public Zell remove(Address address) {
+        return culture.remove(address);
     }
 
     public void join(Connection connection) {
@@ -114,8 +118,9 @@ public class Dish {
         connection.setHandler(new PacketHandler(encodings, connection, new DishSignalListener()));
     }
 
-    protected void logError(String message) {
-        System.err.println(message);
+    protected void logError(Exception e, Delivery delivery) {
+        System.err.println("Caught\n  " + e + "\n  while delivering\n  " + delivery);
+        e.printStackTrace();
     }
 
     private class DishSignalListener implements SignalListener {
