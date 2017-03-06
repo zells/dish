@@ -5,12 +5,12 @@ dependencies {
     compile project(':dish')
 }
 
-task buildLobby(type: Jar) {
+task buildSamples(type: Jar) {
     manifest {
-        attributes 'Implementation-Title': 'simple chat room zell',
-                'Main-Class': 'org.zells.samples.Lobby'
+        attributes 'Implementation-Title': 'Dish with sample Zells',
+                'Main-Class': 'org.zells.samples.Main'
     }
-    baseName = 'zells-lobby'
+    baseName = 'zells-samples'
     destinationDir = file("$rootDir/build")
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar

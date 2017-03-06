@@ -12,5 +12,5 @@ subprojects {
     }
 }
 
-task buildAll(dependsOn: [':client:buildClient',':samples:buildLobby']) {
+task buildAll(dependsOn: [':client:buildClient',':samples:buildSamples']) {
 }

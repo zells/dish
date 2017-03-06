@@ -28,9 +28,11 @@ The usage of each module is described in the module. They are
 
 - **[dish]** - Library for sending and receiving Messages on a Zells Network
 - **[client]** - Minimal user interface to the Dish
+- **[samples]** - Samples demonstrating how zells can be used
 
 [dish]: https://github.com/zells/interface/tree/master/dish
 [client]: https://github.com/zells/interface/tree/master/client
+[samples]: https://github.com/zells/interface/tree/master/samples
 
 
 ## Documentation ##

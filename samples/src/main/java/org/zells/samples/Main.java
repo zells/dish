@@ -10,18 +10,18 @@ import org.zells.dish.network.connecting.implementations.socket.TcpSocketServer;
 import java.io.IOException;
 import java.net.ServerSocket;
 
-public class Lobby {
+public class Main {
 
     private final Dish dish;
-    private Address address;
+    private Address lobby;
 
     public static void main(String[] args) throws IOException {
-        Lobby lobby = new Lobby();
-        parseArguments(args, lobby);
-        System.out.println("Lobby is at " + lobby.getAddress());
+        Main main = new Main();
+        parseArguments(args, main);
+        System.out.println("Lobby is at " + main.getLobby());
     }
 
-    private static void parseArguments(String[] args, Lobby lobby) throws IOException {
+    private static void parseArguments(String[] args, Main app) throws IOException {
         ConnectionRepository connections = new ConnectionRepository()
                 .addAll(ConnectionRepository.supportedConnections());
 
@@ -29,12 +29,12 @@ public class Lobby {
             if (arg.startsWith("-s")) {
                 int port = Integer.parseInt(arg.substring(2));
 
-                lobby.startServer(port);
+                app.startServer(port);
                 System.out.println("Started server on port " + port);
             } else if (arg.startsWith("-j")) {
                 String description = arg.substring(2);
 
-                lobby.join(connections.getConnectionOf(description));
+                app.join(connections.getConnectionOf(description));
                 System.out.println("Joined " + description);
             } else if (arg.startsWith("-d")) {
                 TcpSocketConnection.loggingEnabled = true;
@@ -43,9 +43,9 @@ public class Lobby {
         }
     }
 
-    private Lobby() {
+    private Main() {
         dish = Dish.buildDefault();
-        address = dish.add(new LobbyZell(dish));
+        lobby = dish.add(new LobbyZell(dish));
     }
 
     private void join(Connection connection) {
@@ -56,7 +56,7 @@ public class Lobby {
         new TcpSocketServer(new ServerSocket(port)).start(dish);
     }
 
-    private Address getAddress() {
-        return address;
+    private Address getLobby() {
+        return lobby;
     }
 }
