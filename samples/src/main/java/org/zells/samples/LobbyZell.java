@@ -112,8 +112,10 @@ public class LobbyZell implements Zell {
                     String topic = message.read("on").asString();
                     relay.put("on", new StringMessage(topic));
                     if (subscribers.containsKey(topic)) {
-                        for (AvatarZell subscriber : subscribers.get(topic)) {
-                            subscriber.send(relay);
+                        for (AvatarZell avatar : subscribers.get(topic)) {
+                            if (!avatar.name.equals(name)) {
+                                avatar.send(relay);
+                            }
                         }
                     }
                 }

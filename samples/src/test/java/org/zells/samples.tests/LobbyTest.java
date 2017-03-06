@@ -196,6 +196,8 @@ public class LobbyTest {
         avatar(foo, new CompositeMessage()
                 .put("join", new StringMessage("a topic")));
         avatar(bar, new CompositeMessage()
+                .put("join", new StringMessage("a topic")));
+        avatar(bar, new CompositeMessage()
                 .put("say", new StringMessage("About that"))
                 .put("on", new StringMessage("a topic")));
 
