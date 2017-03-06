@@ -19,7 +19,7 @@ public class ConsoleUser extends User implements Runnable {
         }
         System.out.println(output);
         if (!wasMe) {
-            System.out.print("< ");
+            System.out.print("<< ");
         }
     }
 
@@ -33,11 +33,11 @@ public class ConsoleUser extends User implements Runnable {
         String input;
 
         try {
-            System.out.print("< ");
+            System.out.print("<< ");
             while ((input = reader.readLine()) != null) {
                 wasMe = true;
                 hear(input);
-                System.out.print("< ");
+                System.out.print("<< ");
                 wasMe = false;
             }
         } catch (IOException e) {
