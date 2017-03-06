@@ -177,7 +177,7 @@ class InputParser {
         } else if (part.startsWith("0x")) {
             return BinaryMessage.fromString(part);
         } else if (part.startsWith("@")) {
-            return new StringMessage(aliases.get(part.substring(1)).toString());
+            return new BinaryMessage(aliases.get(part.substring(1)).toBytes());
         } else {
             return new StringMessage(part);
         }
