@@ -25,20 +25,25 @@ public class PacketHandler {
 
     private Signal respond(Signal signal) {
         try {
-            onSignal(signal);
-            return new OkSignal();
+            if (onSignal(signal)) {
+                return new OkSignal();
+            } else {
+                return new FailedSignal();
+            }
         } catch (Exception e) {
             return new FailedSignal(e.getMessage());
         }
     }
 
-    private void onSignal(Signal signal) {
+    private boolean onSignal(Signal signal) {
         if (signal instanceof JoinSignal) {
-            listener.onJoin(connection);
+            return listener.onJoin(connection);
         } else if (signal instanceof LeaveSignal) {
-            listener.onLeave(connection);
+            return listener.onLeave(connection);
         } else if (signal instanceof DeliverSignal) {
-            listener.onDeliver(((DeliverSignal) signal).getDelivery());
+            return listener.onDeliver(((DeliverSignal) signal).getDelivery());
         }
+
+        throw new RuntimeException("Unexpected signal: " + signal.getClass());
     }
 }

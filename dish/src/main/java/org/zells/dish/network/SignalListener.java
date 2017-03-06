@@ -5,9 +5,9 @@ import org.zells.dish.network.connecting.Connection;
 
 public interface SignalListener {
 
-    void onDeliver(Delivery delivery);
+    boolean onDeliver(Delivery delivery);
 
-    void onJoin(Connection connection);
+    boolean onJoin(Connection connection);
 
-    void onLeave(Connection connection);
+    boolean onLeave(Connection connection);
 }

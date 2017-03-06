@@ -5,7 +5,7 @@ This is a prototype of the *zells* system used to explore the design of the *zel
 
 ## Concepts
 
-A *Zell* encapsulates behaviour. Each zell has a unique *Address* which can be used to send it asynchronous *Messages* with arbitrary but structured content. Each Message is delivered exactly once if the receiver can be found.
+A *Zell* encapsulates behaviour. Each zell has a unique *Address* which can be used to send it asynchronous *Messages* with arbitrary but structured content. Each Message is then exactly once if the receiver can be found.
 
 Zells live on a *Dish*. A Dish can be connected to other Dish, forming a *Network* of Zells. Messages can be sent to any Zell on the Network using its Address, regardless of the physical location of the Zell's Dish.
 

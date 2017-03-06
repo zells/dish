@@ -4,6 +4,7 @@ import org.zells.dish.Dish;
 import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
+import org.zells.dish.delivery.Messenger;
 import org.zells.dish.network.connecting.Connection;
 import org.zells.dish.util.Uuid;
 import org.zells.dish.util.UuidGenerator;
@@ -24,6 +25,7 @@ public class FakeDish extends Dish {
     public List<Connection> left = new ArrayList<Connection>();
 
     public boolean leftAll = false;
+    public List<String> logged = new ArrayList<String>();
 
     public FakeDish() {
         super(new FakeUuidGenerator(), null);
@@ -35,10 +37,15 @@ public class FakeDish extends Dish {
     }
 
     @Override
-    public void send(Address receiver, Message message) {
+    public Messenger send(Address receiver, Message message) {
         sent.add(new AbstractMap.SimpleEntry<Address, Message>(receiver, message));
         lastMessage = message;
-        super.send(receiver, message);
+        return super.send(receiver, message);
+    }
+
+    @Override
+    protected void logError(String message) {
+        logged.add(message);
     }
 
     @Override

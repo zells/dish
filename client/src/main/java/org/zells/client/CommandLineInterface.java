@@ -3,6 +3,7 @@ package org.zells.client;
 import org.zells.dish.Dish;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
+import org.zells.dish.delivery.Messenger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,11 +44,26 @@ public class CommandLineInterface {
         aliases.remove(alias);
     }
 
-    private void send(String receiver, Message message) {
-        try {
-            dish.send(resolveAddress(receiver), message);
-        } catch (Exception e) {
-            user.tell("Error: " + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()));
+    private void send(Address receiver, Message message) {
+        final boolean[] done = new boolean[1];
+
+        dish.send(receiver, message)
+            .when(new Messenger.Delivered() {
+                @Override
+                public void then() {
+                    done[0] = true;
+                }
+            })
+            .when(new Messenger.Failed() {
+                @Override
+                public void then(Exception e) {
+                    user.tell("Error: " + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()));
+                    done[0] = true;
+                }
+            });
+
+        while (!done[0]) {
+            Thread.yield();
         }
     }
 
@@ -70,12 +86,11 @@ public class CommandLineInterface {
             InputParser parser;
             try {
                 parser = new InputParser(input, received, aliases);
+                Address receiver = resolveAddress(parser.getReceiver());
+                send(receiver, parser.getMessage());
             } catch (Exception e) {
                 user.tell("Parsing error: " + e.getMessage());
-                return;
             }
-
-            send(parser.getReceiver(), parser.getMessage());
         }
 
     }

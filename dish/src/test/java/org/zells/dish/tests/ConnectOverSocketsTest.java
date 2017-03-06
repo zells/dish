@@ -3,6 +3,7 @@ package org.zells.dish.tests;
 import org.junit.Test;
 import org.zells.dish.Dish;
 import org.zells.dish.delivery.Address;
+import org.zells.dish.delivery.Messenger;
 import org.zells.dish.delivery.ReceiverNotFoundException;
 import org.zells.dish.delivery.messages.StringMessage;
 import org.zells.dish.network.connecting.implementations.socket.TcpSocketConnection;
@@ -15,8 +16,10 @@ import java.net.Socket;
 
 public class ConnectOverSocketsTest {
 
+    private int executed = 0;
+
     @Test
-    public void twoDishes() throws IOException {
+    public void twoDishes() throws Exception {
         Dish one = Dish.buildDefault();
         Dish two = Dish.buildDefault();
 
@@ -30,9 +33,10 @@ public class ConnectOverSocketsTest {
         TcpSocketConnection connection = new TcpSocketConnection(new Socket("localhost", 42422)).open();
 
         one.join(connection);
-        one.send(addressTwo, new StringMessage("two"));
-        two.send(addressOne, new StringMessage("one"));
+        increase(one.send(addressTwo, new StringMessage("two")));
+        increase(two.send(addressOne, new StringMessage("one")));
 
+        waitFor(2);
         assert zellTwo.received.toString().equals("two");
         assert zellOne.received.toString().equals("one");
 
@@ -41,8 +45,8 @@ public class ConnectOverSocketsTest {
     }
 
     @Test
-    public void zellsDoesNotExist() throws IOException {
-        Exception caught = null;
+    public void receiverDoesNotExist() throws IOException {
+        final Exception[] caught = {null};
 
         Dish one = Dish.buildDefault();
         Dish two = Dish.buildDefault();
@@ -51,13 +55,16 @@ public class ConnectOverSocketsTest {
         TcpSocketConnection connection = new TcpSocketConnection(new Socket("localhost", 42423)).open();
 
         one.join(connection);
-        try {
-            one.send(Address.fromString("dada"), new StringMessage("two"));
-        } catch (ReceiverNotFoundException e) {
-            caught = e;
-        }
+        one.send(Address.fromString("dada"), new StringMessage("two"))
+                .when(new Messenger.Failed() {
+                    public void then(Exception e) {
+                        caught[0] = e;
+                        executed++;
+                    }
+                });
 
-        assert caught != null;
+        waitFor(1);
+        assert caught[0] instanceof ReceiverNotFoundException;
 
         connection.close();
         server.stop();
@@ -81,14 +88,31 @@ public class ConnectOverSocketsTest {
         one.join(connectionOne);
         two.join(connectionTwo);
 
-        one.send(addressTwo, new StringMessage("a"));
-        two.send(addressOne, new StringMessage("aa"));
-        one.send(addressTwo, new StringMessage("aaa"));
-        one.send(addressTwo, new StringMessage("aaaa"));
-        one.send(addressTwo, new StringMessage("aaaaa"));
+        increase(one.send(addressTwo, new StringMessage("a")));
+        increase(two.send(addressOne, new StringMessage("aa")));
+        increase(one.send(addressTwo, new StringMessage("aaa")));
+        increase(one.send(addressTwo, new StringMessage("aaaa")));
+        increase(one.send(addressTwo, new StringMessage("aaaaa")));
 
+        waitFor(5);
         connectionOne.close();
         connectionTwo.close();
         proxyServer.stop();
+    }
+
+    private Messenger increase(Messenger messenger) {
+        return messenger.when(new Messenger.Delivered() {
+            public void then() {
+                executed++;
+            }
+        });
+    }
+
+    private void waitFor(int i) {
+        long start = System.currentTimeMillis();
+        while (executed < i) {
+            Thread.yield();
+            assert System.currentTimeMillis() - start < 4000;
+        }
     }
 }

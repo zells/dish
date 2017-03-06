@@ -1,13 +1,10 @@
 package org.zells.dish;
 
-import org.zells.dish.delivery.Address;
-import org.zells.dish.delivery.Delivery;
-import org.zells.dish.delivery.Message;
-import org.zells.dish.delivery.ReceiverNotFoundException;
-import org.zells.dish.network.connecting.Connection;
-import org.zells.dish.network.connecting.PacketHandler;
+import org.zells.dish.delivery.*;
 import org.zells.dish.network.Peer;
 import org.zells.dish.network.SignalListener;
+import org.zells.dish.network.connecting.Connection;
+import org.zells.dish.network.connecting.PacketHandler;
 import org.zells.dish.network.encoding.EncodingRepository;
 import org.zells.dish.util.BasicUuidGenerator;
 import org.zells.dish.util.UuidGenerator;
@@ -35,18 +32,21 @@ public class Dish {
         return new Dish(generator, encodings);
     }
 
-    public void send(Address receiver, Message message) {
-        deliver(new Delivery(generator.generate(), receiver, message));
+    public Messenger send(final Address receiver, final Message message) {
+        return new Messenger(new Runnable() {
+            public void run() {
+                Delivery delivery = new Delivery(generator.generate(), receiver, message);
+                if (!deliver(delivery)) {
+                    throw new ReceiverNotFoundException(delivery);
+                }
+            }
+        });
     }
 
-    private void deliver(Delivery delivery) {
-        boolean delivered = !alreadyDelivered(delivery)
+    private boolean deliver(Delivery delivery) {
+         return !alreadyDelivered(delivery)
                 && (deliverLocally(delivery)
                 || deliverRemotely(delivery));
-
-        if (!delivered) {
-            throw new ReceiverNotFoundException(delivery);
-        }
     }
 
     private boolean alreadyDelivered(Delivery delivery) {
@@ -61,7 +61,11 @@ public class Dish {
         if (!culture.containsKey(delivery.getReceiver())) {
             return false;
         }
-        culture.get(delivery.getReceiver()).receive(delivery.getMessage());
+        try {
+            culture.get(delivery.getReceiver()).receive(delivery.getMessage());
+        } catch (Exception e) {
+            logError("Caught\n" + e + "\n  while delivering\n" + delivery);
+        }
         return true;
     }
 
@@ -110,18 +114,23 @@ public class Dish {
         connection.setHandler(new PacketHandler(encodings, connection, new DishSignalListener()));
     }
 
+    protected void logError(String message) {
+        System.err.println(message);
+    }
+
     private class DishSignalListener implements SignalListener {
 
-        public void onDeliver(Delivery delivery) {
-            deliver(delivery);
+        public boolean onDeliver(Delivery delivery) {
+            return deliver(delivery);
         }
 
-        public void onJoin(Connection connection) {
-            connect(connection);
+        public boolean onJoin(Connection connection) {
+            return connect(connection) != null;
         }
 
-        public void onLeave(Connection connection) {
+        public boolean onLeave(Connection connection) {
             disconnect(connection);
+            return true;
         }
     }
 }

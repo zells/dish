@@ -27,7 +27,7 @@ public class SendMessagesTest {
         user.hear("not");
 
         assert dish.sent.isEmpty();
-        assert user.told.contains("Error: Invalid hex string: not");
+        assert user.told.contains("Parsing error: Invalid hex string: not");
     }
 
     @Test

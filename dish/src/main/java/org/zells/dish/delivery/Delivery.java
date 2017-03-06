@@ -38,4 +38,9 @@ public class Delivery {
                 && receiver.equals(((Delivery) obj).receiver)
                 && message.equals(((Delivery) obj).message);
     }
+
+    @Override
+    public String toString() {
+        return "[" + uuid + "] " + receiver + " < " + message;
+    }
 }

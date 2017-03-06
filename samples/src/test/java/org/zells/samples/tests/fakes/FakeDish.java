@@ -3,6 +3,7 @@ package org.zells.samples.tests.fakes;
 import org.zells.dish.Dish;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
+import org.zells.dish.delivery.Messenger;
 import org.zells.dish.network.encoding.EncodingRepository;
 import org.zells.dish.util.BasicUuidGenerator;
 
@@ -20,7 +21,12 @@ public class FakeDish extends Dish {
     }
 
     @Override
-    public void send(Address receiver, Message message) {
+    public Messenger send(Address receiver, Message message) {
         sent.add(new AbstractMap.SimpleEntry<Address, Message>(receiver, message));
+        return new Messenger(new Runnable() {
+            @Override
+            public void run() {
+            }
+        });
     }
 }

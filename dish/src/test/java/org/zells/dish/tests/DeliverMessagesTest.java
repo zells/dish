@@ -3,7 +3,10 @@ package org.zells.dish.tests;
 import org.junit.Before;
 import org.junit.Test;
 import org.zells.dish.Dish;
+import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
+import org.zells.dish.delivery.Message;
+import org.zells.dish.delivery.Messenger;
 import org.zells.dish.delivery.ReceiverNotFoundException;
 import org.zells.dish.delivery.messages.StringMessage;
 import org.zells.dish.network.connecting.Connection;
@@ -18,30 +21,65 @@ public class DeliverMessagesTest {
     private Dish dishOne;
     private Dish dishTwo;
     private Dish dishThree;
+    private int executed = 0;
+    private FakeUuidGenerator generator;
+    private EncodingRepository encodings;
 
     @Before
     public void setUp() {
-        FakeUuidGenerator generator = new FakeUuidGenerator();
-        EncodingRepository encodings = new EncodingRepository().add(new FakeEncoding());
+        executed = 0;
+
+        generator = new FakeUuidGenerator();
+        encodings = new EncodingRepository().add(new FakeEncoding());
 
         dishOne = new Dish(generator, encodings);
         dishTwo = new Dish(generator, encodings);
         dishThree = new Dish(generator, encodings);
     }
 
-    @Test(expected = ReceiverNotFoundException.class)
-    public void failIfZellDoesNotExist() {
-        dishOne.send(Address.fromString("not an address"), new StringMessage("a string"));
+    @Test
+    public void receiverDoesNotExist() {
+        dishOne.send(Address.fromString("not an address"), new StringMessage("a string"))
+                .when(new Messenger.Failed() {
+                    public void then(Exception e) {
+                        assert e instanceof ReceiverNotFoundException;
+                        executed++;
+                    }
+                });
+        waitFor(1);
     }
 
     @Test
     public void deliverLocally() {
         FakeZell aZell = new FakeZell();
-
         Address anAddress = dishOne.add(aZell);
-        dishOne.send(anAddress, new StringMessage("a string"));
+
+        waitFor(dishOne.send(anAddress, new StringMessage("a string")));
 
         assert aZell.received.asString().equals("a string");
+    }
+
+    @Test
+    public void exceptionWhileReceiving() {
+        final String[] logged = new String[1];
+        Dish dish = new Dish(generator, encodings) {
+            @Override
+            protected void logError(String message) {
+                logged[0] = message;
+            }
+        };
+
+        Address anAddress = dish.add(new Zell() {
+            public void receive(Message message) {
+                throw new RuntimeException("Nope");
+            }
+        });
+
+        waitFor(dish.send(anAddress, new StringMessage("a string")));
+        assert logged[0].equals("Caught\n" +
+                "java.lang.RuntimeException: Nope\n" +
+                "  while delivering\n" +
+                "[0xabc1] 0xabc0 < a string");
     }
 
     @Test
@@ -52,8 +90,8 @@ public class DeliverMessagesTest {
         Address addressOne = dishOne.add(zellOne);
         Address addressTwo = dishOne.add(zellTwo);
 
-        dishOne.send(addressOne, new StringMessage("for one"));
-        dishOne.send(addressTwo, new StringMessage("for two"));
+        waitFor(dishOne.send(addressOne, new StringMessage("for one")));
+        waitFor(dishOne.send(addressTwo, new StringMessage("for two")));
 
         assert zellOne.received.asString().equals("for one");
         assert zellTwo.received.asString().equals("for two");
@@ -65,7 +103,7 @@ public class DeliverMessagesTest {
         Address anAddress = dishTwo.add(aZell);
 
         dishOne.join(connect(dishOne, dishTwo));
-        dishOne.send(anAddress, new StringMessage("a string"));
+        waitFor(dishOne.send(anAddress, new StringMessage("a string")));
 
         assert aZell.received.asString().equals("a string");
     }
@@ -78,7 +116,7 @@ public class DeliverMessagesTest {
         dishOne.join(connect(dishOne, dishTwo));
         dishTwo.join(connect(dishTwo, dishThree));
 
-        dishOne.send(anAddress, new StringMessage("a string"));
+        waitFor(dishOne.send(anAddress, new StringMessage("a string")));
 
         assert aZell.received.asString().equals("a string");
     }
@@ -93,20 +131,20 @@ public class DeliverMessagesTest {
         dishOne.join(connect(dishOne, dishTwo));
         dishOne.join(connect(dishOne, dishThree));
 
-        dishOne.send(addressTwo, new StringMessage("two"));
-        dishOne.send(addressThree, new StringMessage("three"));
+        waitFor(dishOne.send(addressTwo, new StringMessage("two")));
+        waitFor(dishOne.send(addressThree, new StringMessage("three")));
 
         assert zellTwo.received.asString().equals("two");
         assert zellThree.received.asString().equals("three");
     }
 
-    @Test(expected = ReceiverNotFoundException.class)
+    @Test
     public void avoidLoops() {
         dishOne.join(connect(dishOne, dishTwo));
         dishTwo.join(connect(dishTwo, dishThree));
         dishThree.join(connect(dishThree, dishOne));
 
-        dishOne.send(Address.fromString("loop"), new StringMessage("a string"));
+        waitForFailure(dishOne.send(Address.fromString("loop"), new StringMessage("a string")));
     }
 
     @Test
@@ -118,8 +156,8 @@ public class DeliverMessagesTest {
 
         dishOne.join(connect(dishOne, dishTwo));
 
-        dishOne.send(addressTwo, new StringMessage("two"));
-        dishTwo.send(addressOne, new StringMessage("one"));
+        waitFor(dishOne.send(addressTwo, new StringMessage("two")));
+        waitFor(dishTwo.send(addressOne, new StringMessage("one")));
 
         assert zellOne.received.asString().equals("one");
         assert zellTwo.received.asString().equals("two");
@@ -134,16 +172,8 @@ public class DeliverMessagesTest {
         dishOne.join(connection);
         dishOne.leave(connection);
 
-        assertFails(new Runnable() {
-            public void run() {
-                dishTwo.send(addressOne, new StringMessage("a string"));
-            }
-        });
-        assertFails(new Runnable() {
-            public void run() {
-                dishOne.send(addressTwo, new StringMessage("a string"));
-            }
-        });
+        waitForFailure(dishTwo.send(addressOne, new StringMessage("a string")));
+        waitForFailure(dishOne.send(addressTwo, new StringMessage("a string")));
     }
 
     @Test
@@ -156,21 +186,53 @@ public class DeliverMessagesTest {
         dishOne.join(connect(dishOne, dishThree));
         dishOne.leaveAll();
 
-        assertFails(new Runnable() {
-            public void run() {
-                dishOne.send(addressTwo, new StringMessage("a string"));
+        waitForFailure(dishOne.send(addressTwo, new StringMessage("a string")));
+        waitForFailure(dishOne.send(addressThree, new StringMessage("a string")));
+        waitForFailure(dishTwo.send(addressOne, new StringMessage("a string")));
+    }
+
+    @Test
+    public void slowReaction() throws InterruptedException {
+        Address anAddress = dishOne.add(new FakeZell());
+
+        Messenger messenger = dishOne.send(anAddress, new StringMessage("a string"));
+        Thread.sleep(20);
+        waitFor(messenger);
+    }
+
+    @Test
+    public void slowCatcher() throws InterruptedException {
+        Messenger messenger = dishOne.send(Address.fromString("aa"), new StringMessage("a string"));
+        Thread.sleep(20);
+        waitForFailure(messenger);
+    }
+
+    private void waitFor(Messenger messenger) {
+        int current = executed;
+        messenger.when(new Messenger.Delivered() {
+            public void then() {
+                executed++;
             }
         });
-        assertFails(new Runnable() {
-            public void run() {
-                dishOne.send(addressThree, new StringMessage("a string"));
+        waitFor(current + 1);
+    }
+
+    private void waitForFailure(Messenger messenger) {
+        int current = executed;
+        messenger.when(new Messenger.Failed() {
+            public void then(Exception e) {
+                executed++;
             }
         });
-        assertFails(new Runnable() {
-            public void run() {
-                dishTwo.send(addressOne, new StringMessage("a string"));
-            }
-        });
+        waitFor(current + 1);
+    }
+
+    private void waitFor(int executions) {
+        long start = System.currentTimeMillis();
+        while (executed < executions) {
+            Thread.yield();
+            assert System.currentTimeMillis() - start < 2000;
+        }
     }
 
     private Connection connect(Dish a, Dish b) {
@@ -183,14 +245,5 @@ public class DeliverMessagesTest {
         a.listen(ba);
 
         return ba;
-    }
-
-    private void assertFails(Runnable doomed) {
-        try {
-            doomed.run();
-        } catch (Exception e) {
-            return;
-        }
-        throw new RuntimeException("Did not catch anything");
     }
 }

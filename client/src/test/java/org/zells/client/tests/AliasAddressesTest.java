@@ -8,7 +8,6 @@ import org.zells.client.tests.fakes.FakeDish;
 import org.zells.client.tests.fakes.FakeUser;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.messages.BinaryMessage;
-import org.zells.dish.delivery.messages.StringMessage;
 
 public class AliasAddressesTest {
 
@@ -68,7 +67,7 @@ public class AliasAddressesTest {
     @Test
     public void removeNonExistingAlias() {
         user.hear("client alias remove:da");
-        assert user.told.contains("Error: No such alias: da");
+        assert dish.logged.get(0).contains("No such alias: da");
     }
 
     @Test
