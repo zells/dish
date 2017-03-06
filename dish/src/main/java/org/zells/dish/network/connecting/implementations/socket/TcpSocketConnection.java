@@ -8,7 +8,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -139,7 +138,7 @@ public class TcpSocketConnection implements Connection {
             try {
                 Packet response = handler.handle(transmission.packet);
 
-                log("Reply " + response.getBytes().length + " @" + transmission.id + " >> " + new String(transmission.packet.getBytes()));
+                log("Reply " + response.getBytes().length + " @" + transmission.id + " >> " + new String(response.getBytes()));
                 send(transmission.response(response));
             } catch (IOException ignored) {
             }
