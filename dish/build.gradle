@@ -1,5 +1,5 @@
 version '0.1'
-sourceCompatibility = 1.5
+sourceCompatibility = 1.6
 
 dependencies {
     compile 'org.msgpack:msgpack-core:0.8.12'
