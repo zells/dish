@@ -66,3 +66,13 @@ You can also talk only to the people who are interested in a certain topic. To r
     <<
     6> {from:Peter, message:I agree, on:dinos}
     <<
+
+### Mailbox
+
+If the Zell connected to your avatar becomes unavailable, the avatar saves all messages and sends them to you when you re-connect.
+
+    << avatar < connect:@me
+    <<
+    0> {from:Peter, message:Which is your favourite, on:dinos}
+    1> {from:Peter, message:Mine is the stegosaurus, on:dinos}
+    2> {from:Peter, message:Join us on dinos}
