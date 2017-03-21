@@ -1,6 +1,7 @@
-package org.zells.client.tests;
+package org.zells.client.tests.communicator;
 
 import org.junit.Test;
+import org.zells.client.tests.BaseTest;
 import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;

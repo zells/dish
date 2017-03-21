@@ -1,4 +1,4 @@
-package org.zells.client.tests;
+package org.zells.client.tests.communicator;
 
 import org.junit.Ignore;
 import org.junit.Test;

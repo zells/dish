@@ -16,11 +16,11 @@ import java.util.List;
 
 abstract public class BaseTest {
 
-    List<Message> received = new ArrayList<Message>();
-    List<String> log = new ArrayList<String>();
+    public List<Message> received = new ArrayList<Message>();
+    protected List<String> log = new ArrayList<String>();
 
-    Dish dish;
-    Address target;
+    public Dish dish;
+    protected Address target;
 
     private Communicator communicator;
 
@@ -37,11 +37,11 @@ abstract public class BaseTest {
         communicator = new Communicator(target, dish, book);
     }
 
-    void send(String input) {
+    protected void send(String input) {
         send(input, new Listener());
     }
 
-    void send(String input, Listener listener) {
+    protected void send(String input, Listener listener) {
         try {
             communicator.send(input, listener);
         } catch (Exception e) {
