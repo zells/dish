@@ -1,139 +1,199 @@
 package org.zells.client.tests;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.zells.client.Cortex;
-import org.zells.client.tests.fakes.FakeConnectionRepository;
-import org.zells.client.tests.fakes.FakeDish;
+import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
+import org.zells.dish.delivery.Message;
 import org.zells.dish.delivery.messages.*;
 
-public class SendMessagesTest {
+import java.util.Arrays;
+import java.util.Collections;
 
-//    private FakeUser user;
-//    private FakeDish dish;
-//
-//    @Before
-//    public void SetUp() {
-//        user = new FakeUser();
-//        dish = new FakeDish();
-//
-//        new Cortex(dish, user, new FakeConnectionRepository());
-//    }
-//
-//    @Test
-//    public void invalidAddress() {
-//        user.hear("not");
-//
-//        assert dish.sent.isEmpty();
-//        assert user.told.contains("Parsing error: Invalid hex string: not");
-//    }
-//
-//    @Test
-//    public void sendNothing() {
-//        user.hear("0xfade");
-//        user.hear("fade");
-//
-//        assert dish.sent.get(0).getKey().equals(Address.fromString("fade"));
-//        assert dish.sent.get(1).getKey().equals(Address.fromString("fade"));
-//        assert dish.sent.get(0).getValue().equals(new NullMessage());
-//    }
-//
-//    @Test
-//    public void invalidMessage() {
-//        user.hear("fade !invalid");
-//
-//        assert dish.sent.isEmpty();
-//        assert user.told.get(0).startsWith("Parsing error: Unrecognized token 'invalid'");
-//    }
-//
-//    @Test
-//    public void parseScalarJson() {
-//        user.hear("d0 !null");
-//        assert dish.sent.get(0).getValue().equals(new NullMessage());
-//
-//        user.hear("d1   !\"foo\"");
-//        assert dish.sent.get(1).getValue().equals(new StringMessage("foo"));
-//
-//        user.hear("d2 !42  ");
-//        assert dish.sent.get(2).getValue().equals(new IntegerMessage(42));
-//
-//        user.hear("d3 !true");
-//        assert dish.sent.get(3).getValue().equals(new BooleanMessage(true));
-//
-//        user.hear("d4 !false");
-//        assert dish.sent.get(4).getValue().equals(new BooleanMessage(false));
-//
-//        user.hear("d5 !\"0xbaba\"");
-//        assert dish.sent.get(5).getValue().equals(BinaryMessage.fromString("baba"));
-//    }
-//
-//    @Test
-//    public void sendWithArrow() {
-//        user.hear("fade < !\"hello\"");
-//        assert dish.lastMessage.equals(new StringMessage("hello"));
-//    }
-//
-//    @Test
-//    public void parseCompositeJson() {
-//        user.hear("da !{\"one\": \"uno\", \"and\": {\"two\": 2}, \"2\": [4, 2]}");
-//
-//        assert dish.sent.get(0).getValue().read("one").equals(new StringMessage("uno"));
-//        assert dish.sent.get(0).getValue().read("and").read("two").equals(new IntegerMessage(2));
-//        assert dish.sent.get(0).getValue().read(2).read(0).equals(new IntegerMessage(4));
-//        assert dish.sent.get(0).getValue().read(2).read(1).equals(new IntegerMessage(2));
-//    }
-//
-//    @Test
-//    public void parseShortSyntax() {
-//        user.hear("d0 foo");
-//        assert dish.sent.get(0).getValue().read(0).equals(new StringMessage("foo"));
-//
-//        user.hear("d1 42");
-//        assert dish.sent.get(1).getValue().read(0).equals(new IntegerMessage(42));
-//
-//        user.hear("d2 yes");
-//        assert dish.sent.get(2).getValue().read(0).equals(new BooleanMessage(true));
-//
-//        user.hear("d3 no");
-//        assert dish.sent.get(3).getValue().read(0).equals(new BooleanMessage(false));
-//
-//        user.hear("d4 0xbaba");
-//        assert dish.sent.get(4).getValue().read(0).equals(BinaryMessage.fromString("baba"));
-//
-//        user.hear("d5 foo bar");
-//        assert dish.sent.get(5).getValue().read(0).equals(new StringMessage("foo"));
-//        assert dish.sent.get(5).getValue().read(1).equals(new StringMessage("bar"));
-//
-//        user.hear("d6 foo:bar");
-//        assert dish.sent.get(6).getValue().read("foo").equals(new StringMessage("bar"));
-//
-//        user.hear("d7 foo bar:yes");
-//        assert dish.sent.get(7).getValue().read(0).equals(new StringMessage("foo"));
-//        assert dish.sent.get(7).getValue().read("bar").equals(new BooleanMessage(true));
-//
-//        user.hear("d8 foo:bar foo:baz");
-//        assert dish.sent.get(8).getValue().read("foo").read(0).equals(new StringMessage("bar"));
-//        assert dish.sent.get(8).getValue().read("foo").read(1).equals(new StringMessage("baz"));
-//
-//        user.hear("d7 foo:yes bar");
-//        assert dish.sent.get(9).getValue().read("foo").equals(new BooleanMessage(true));
-//        assert dish.sent.get(9).getValue().read(0).equals(new StringMessage("bar"));
-//    }
-//
-//    @Test
-//    public void parseQuotedSyntax() {
-//        user.hear("d0 \"foo: bar\" foo:\"cat dog\"");
-//        assert dish.sent.get(0).getValue().read(0).equals(new StringMessage("foo: bar"));
-//        assert dish.sent.get(0).getValue().read("foo").equals(new StringMessage("cat dog"));
-//
-//        user.hear("d1 with\\:\\ space");
-//        assert dish.sent.get(1).getValue().read(0).equals(new StringMessage("with: space"));
-//
-//        user.hear("d2 with\\\"quote");
-//        assert dish.sent.get(2).getValue().read(0).equals(new StringMessage("with\"quote"));
-//
-//        user.hear("d3 \"a \\\"quoted\\\" message\"");
-//        assert dish.sent.get(3).getValue().read(0).equals(new StringMessage("a \"quoted\" message"));
-//    }
+public class SendMessagesTest extends BaseTest {
+
+    @Test
+    public void invalidMessage() throws Exception {
+        try {
+            send(". !not");
+        } catch (Exception e) {
+            assert log.isEmpty();
+            assert e.getMessage().contains("Unrecognized token 'not'");
+            return;
+        }
+
+        assert false;
+    }
+
+    @Test
+    public void invalidAddress() throws Exception {
+        try {
+            send("not");
+        } catch (Exception e) {
+            assert log.isEmpty();
+            assert e.getCause().getMessage().equals("Invalid hex string: not");
+            return;
+        }
+
+        assert false;
+    }
+
+    @Test
+    public void nonExistingAddress() throws Exception {
+        send("dada", new Listener() {
+            @Override
+            protected void onFailure(Exception e) {
+                super.onFailure(e);
+                assert e.getMessage().equals("Could not find 0xdada");
+            }
+        });
+
+        assert log.equals(Arrays.asList("parsed", "sending", "failure"));
+    }
+
+    @Test
+    public void sendToAddress() throws Exception {
+        dish.put(Address.fromString("fade"), new Zell() {
+            public void receive(Message message) {
+                received.add(message);
+            }
+        });
+
+        send("fade", new Listener() {
+            protected void onParsed(String receiver, Message message) {
+                super.onParsed(receiver, message);
+                assert receiver.equals("fade");
+                assert message.equals(new NullMessage());
+            }
+        });
+
+        assert received.equals(Collections.singletonList(new NullMessage()));
+        assert log.equals(Arrays.asList("parsed", "sending", "success"));
+    }
+
+    @Test
+    public void sendToAddressWithoutPrefix() throws Exception {
+        dish.put(Address.fromString("fade"), new Zell() {
+            public void receive(Message message) {
+                received.add(message);
+            }
+        });
+
+        send("fade", new Listener() {
+            protected void onParsed(String receiver, Message message) {
+                super.onParsed(receiver, message);
+                assert receiver.equals("fade");
+                assert message.equals(new NullMessage());
+            }
+        });
+
+        assert received.equals(Collections.singletonList(new NullMessage()));
+        assert log.equals(Arrays.asList("parsed", "sending", "success"));
+    }
+
+    @Test
+    public void sendToTarget() throws Exception {
+        send(".", new Listener() {
+            protected void onParsed(String receiver, Message message) {
+                super.onParsed(receiver, message);
+                assert receiver.equals(".");
+                assert message.equals(new NullMessage());
+            }
+        });
+
+        assert received.equals(Collections.singletonList(new NullMessage()));
+        assert log.equals(Arrays.asList("parsed", "sending", "success"));
+    }
+
+    @Test
+    public void parseScalarJson() throws Exception {
+        send(". !null");
+        assert received.get(0).equals(new NullMessage());
+
+        send(". !\"foo\"");
+        assert received.get(1).equals(new StringMessage("foo"));
+
+        send(". !42  ");
+        assert received.get(2).equals(new IntegerMessage(42));
+
+        send(". !true");
+        assert received.get(3).equals(new BooleanMessage(true));
+
+        send(". !false");
+        assert received.get(4).equals(new BooleanMessage(false));
+
+        send(". !\"0xbaba\"");
+        assert received.get(5).equals(BinaryMessage.fromString("baba"));
+
+        send(". !\"@0xbaba\"");
+        assert received.get(6).equals(new AddressMessage(Address.fromString("baba")));
+    }
+
+    @Test
+    public void sendWithArrow() throws Exception {
+        send(". < !\"hello\"");
+        assert received.equals(Collections.singletonList(new StringMessage("hello")));
+    }
+
+    @Test
+    public void parseCompositeJson() throws Exception {
+        send(". !{\"one\": \"uno\", \"and\": {\"two\": 2}, \"2\": [4, 2]}");
+
+        assert received.get(0).read("one").equals(new StringMessage("uno"));
+        assert received.get(0).read("and").read("two").equals(new IntegerMessage(2));
+        assert received.get(0).read(2).read(0).equals(new IntegerMessage(4));
+        assert received.get(0).read(2).read(1).equals(new IntegerMessage(2));
+    }
+
+    @Test
+    public void parseShortSyntax() throws Exception {
+        send(".  foo");
+        assert received.get(0).read(0).equals(new StringMessage("foo"));
+
+        send(".  42");
+        assert received.get(1).read(0).equals(new IntegerMessage(42));
+
+        send(".  yes");
+        assert received.get(2).read(0).equals(new BooleanMessage(true));
+
+        send(".  no");
+        assert received.get(3).read(0).equals(new BooleanMessage(false));
+
+        send(".  0xbaba");
+        assert received.get(4).read(0).equals(BinaryMessage.fromString("baba"));
+
+        send(".  foo bar");
+        assert received.get(5).read(0).equals(new StringMessage("foo"));
+        assert received.get(5).read(1).equals(new StringMessage("bar"));
+
+        send(".  foo:bar");
+        assert received.get(6).read("foo").equals(new StringMessage("bar"));
+
+        send(".  foo bar:yes");
+        assert received.get(7).read(0).equals(new StringMessage("foo"));
+        assert received.get(7).read("bar").equals(new BooleanMessage(true));
+
+        send(".  foo:bar foo:baz");
+        assert received.get(8).read("foo").read(0).equals(new StringMessage("bar"));
+        assert received.get(8).read("foo").read(1).equals(new StringMessage("baz"));
+
+        send(".  foo:yes bar");
+        assert received.get(9).read("foo").equals(new BooleanMessage(true));
+        assert received.get(9).read(0).equals(new StringMessage("bar"));
+    }
+
+    @Test
+    public void parseQuotedSyntax() throws Exception {
+        send(".  \"foo: bar\" foo:\"cat dog\"");
+        assert received.get(0).read(0).equals(new StringMessage("foo: bar"));
+        assert received.get(0).read("foo").equals(new StringMessage("cat dog"));
+
+        send(".  with\\:\\ space");
+        assert received.get(1).read(0).equals(new StringMessage("with: space"));
+
+        send(".  with\\\"quote");
+        assert received.get(2).read(0).equals(new StringMessage("with\"quote"));
+
+        send(".  \"a \\\"quoted\\\" message\"");
+        assert received.get(3).read(0).equals(new StringMessage("a \"quoted\" message"));
+    }
 }

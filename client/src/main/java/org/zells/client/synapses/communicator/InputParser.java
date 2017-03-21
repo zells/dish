@@ -65,6 +65,8 @@ class InputParser {
             return new NullMessage();
         } else if (json.isTextual() && json.asText().startsWith("0x")) {
             return BinaryMessage.fromString(json.asText());
+        } else if (json.isTextual() && json.asText().startsWith("@0x")) {
+            return new AddressMessage(Address.fromString(json.asText().substring(1)));
         } else if (json.isTextual()) {
             return new StringMessage(json.asText());
         } else if (json.isInt()) {

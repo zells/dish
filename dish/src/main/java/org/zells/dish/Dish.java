@@ -79,7 +79,10 @@ public class Dish {
     }
 
     public Address add(Zell zell) {
-        Address address = new Address(generator.generate());
+        return put(new Address(generator.generate()), zell);
+    }
+
+    public Address put(Address address, Zell zell) {
         culture.put(address, zell);
         return address;
     }

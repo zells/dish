@@ -25,14 +25,14 @@ public class Communicator {
         Map<String, Address> aliases = prepareAliases(listener);
 
         InputParser parser = new InputParser(input, new ArrayList<Message>(), aliases);
-        listener.onParsed(parser.getReceiver(), parser.getMessage());
-
         Address receiver = resolveAddress(aliases, parser.getReceiver());
+        listener.onParsed(parser.getReceiver(), parser.getMessage());
 
         waitFor(dish.send(receiver, parser.getMessage()), listener);
     }
 
     private void waitFor(Messenger messenger, final Listener listener) {
+        listener.onSending(messenger);
         messenger.when(new Messenger.Delivered() {
             @Override
             public void then() {
@@ -85,6 +85,9 @@ public class Communicator {
     }
 
     public abstract static class Listener {
+
+        protected void onSending(Messenger messenger) {
+        }
 
         protected void onParsed(String receiver, Message message) {
         }
