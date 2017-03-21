@@ -6,16 +6,17 @@ import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
 import org.zells.dish.network.connecting.ConnectionRepository;
-import org.zells.dish.network.connecting.implementations.socket.TcpSocketServer;
+import org.zells.dish.network.connecting.Server;
 
-import java.io.IOException;
-import java.net.ServerSocket;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CortexZell implements Zell {
 
     private Cortex cortex;
     private Dish dish;
     private ConnectionRepository connections;
+    private Map<Integer, Server> servers = new HashMap<Integer, Server>();
 
     public CortexZell(Cortex cortex, Dish dish, ConnectionRepository connections) {
         this.cortex = cortex;
@@ -45,13 +46,10 @@ public class CortexZell implements Zell {
             System.out.println("Left " + description);
         } else if (!message.read("listen").isNull()) {
             int port = message.read("listen").asInteger();
-
-            try {
-                new TcpSocketServer(new ServerSocket(port)).start(dish);
-                System.out.println("Started server on port " + port);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            servers.put(port, connections.buildServer(port).start(dish));
+        } else if (!message.read("stop").isNull()) {
+            int port = message.read("stop").asInteger();
+            servers.get(port).stop();
         }
     }
 }

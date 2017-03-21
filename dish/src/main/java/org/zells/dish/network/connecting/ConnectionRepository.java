@@ -13,6 +13,7 @@ public class ConnectionRepository {
 
     private List<ConnectionFactory> factories = new ArrayList<ConnectionFactory>();
     private Map<String, Connection> connections = new HashMap<String, Connection>();
+    private ServerFactory serverFactory;
 
     public void add(ConnectionFactory factory) {
         factories.add(factory);
@@ -61,10 +62,27 @@ public class ConnectionRepository {
         return factories;
     }
 
+    public ConnectionRepository setServerFactory(ServerFactory serverFactory) {
+        this.serverFactory = serverFactory;
+        return this;
+    }
+
+    public Server buildServer(int port) {
+        if (serverFactory == null) {
+            throw new RuntimeException("No server factory set");
+        }
+        return serverFactory.build(port);
+    }
+
     public interface ConnectionFactory {
 
         boolean canBuild(String description);
 
         Connection build(String description) throws IOException;
+    }
+
+    public interface ServerFactory {
+
+        Server build(int port);
     }
 }
