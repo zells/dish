@@ -5,7 +5,6 @@ import org.zells.client.zells.AddressBookZell;
 import org.zells.dish.Dish;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
-import org.zells.dish.delivery.Messenger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,24 +12,17 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class CommunicatorSynapse extends Synapse {
 
-    private final Address target;
-    private final Dish dish;
-    private final AddressBookZell book;
+    private final Communicator model;
 
     private JPanel historyBox;
     private JScrollPane historyScrollPane;
 
     public CommunicatorSynapse(final Address target, Dish dish, AddressBookZell book) {
         super("Communicator: " + (book.contains(target) ? book.nameOf(target) : target));
-        this.target = target;
-        this.dish = dish;
-        this.book = book;
+        this.model = new Communicator(target, dish, book);
 
         setLayout(new BorderLayout());
         add(createSplitPane());
@@ -71,86 +63,55 @@ public class CommunicatorSynapse extends Synapse {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     e.consume();
-
-                    String input = textArea.getText().trim();
-                    textArea.setText("");
-
-                    if (input.isEmpty()) {
-                        return;
-                    }
-
-                    try {
-                        sendMessage(input);
-                    } catch (Exception err) {
-                        String message = err.getMessage() != null ? err.getMessage() : "Invalid input";
-                        textArea.setText(input + " [" + message + "]");
-                        textArea.select(input.length(), textArea.getText().length());
-                    }
+                    processInput(textArea);
                 }
             }
         });
         return textArea;
     }
 
-    private void sendMessage(String input) throws Exception {
-        JTextArea output = new JTextArea();
+    private void processInput(JTextArea textArea) {
+        String input = textArea.getText().trim();
+        textArea.setText("");
 
-        Map<String, Address> aliases = prepareAliases(output);
-
-        InputParser parser = new InputParser(input, new ArrayList<Message>(), aliases);
-        Address receiver = resolveAddress(aliases, parser.getReceiver());
-
-        output.setText(parser.getReceiver() + " < " + parser.getMessage());
-
-        waitFor(dish.send(receiver, parser.getMessage()), output);
-
-        historyBox.add(output);
-        updateScrollPane();
+        try {
+            sendMessage(input);
+        } catch (Exception err) {
+            String message = err.getMessage() != null ? err.getMessage() : "Invalid input";
+            textArea.setText(input + " [" + message + "]");
+            textArea.select(input.length(), textArea.getText().length());
+        }
     }
 
-    private void waitFor(Messenger messenger, final JTextArea output) {
-        messenger.when(new Messenger.Delivered() {
-            @Override
-            public void then() {
+    private void sendMessage(String input) throws Exception {
+        if (input.isEmpty()) {
+            return;
+        }
+
+        final JTextArea output = new JTextArea();
+        historyBox.add(output);
+        updateScrollPane();
+
+        model.send(input, new Communicator.Listener() {
+            protected void onParsed(String receiver, Message message) {
+                output.setText(receiver + " < " + message);
+            }
+
+            protected void onSuccess() {
                 output.insert("\u2713 ", 0);
             }
-        });
-        messenger.when(new Messenger.Failed() {
-            @Override
-            public void then(Exception e) {
+
+            protected void onFailure(Exception e) {
                 e.printStackTrace();
                 output.insert("\u2718 ", 0);
                 output.append(" [" + e.getMessage() + "]");
             }
+
+            protected void onResponse(Message message) {
+                output.append("\n >> " + message);
+                updateScrollPane();
+            }
         });
-    }
-
-    private Map<String, Address> prepareAliases(final JTextArea output) {
-        Map<String, Address> addresses = new HashMap<String, Address>(book.getAddresses()) {
-            public Address get(Object key) {
-                if (key.equals("+")) {
-                    ReceiverZell receiver = new ReceiverZell(dish) {
-                        @Override
-                        protected void received(Message message) {
-                            output.append("\n >> " + message);
-                            updateScrollPane();
-                        }
-                    };
-                    Address receiverAddress = dish.add(receiver);
-                    receiver.setAddress(receiverAddress);
-                    return receiverAddress;
-                }
-                return super.get(key);
-            }
-
-            @Override
-            public boolean containsKey(Object key) {
-                return key.equals("+") || super.containsKey(key);
-            }
-        };
-        addresses.put(".", target);
-
-        return addresses;
     }
 
     synchronized private void updateScrollPane() {
@@ -159,16 +120,6 @@ public class CommunicatorSynapse extends Synapse {
         sb.setValue(sb.getMaximum());
         JScrollBar hsb = historyScrollPane.getHorizontalScrollBar();
         hsb.setValue(hsb.getMinimum());
-    }
-
-    private Address resolveAddress(Map<String, Address> aliases, String receiver) {
-        if (receiver.startsWith("0x")) {
-            return Address.fromString(receiver);
-        } else if (aliases.containsKey(receiver)) {
-            return aliases.get(receiver);
-        } else {
-            return Address.fromString(receiver);
-        }
     }
 }
 
