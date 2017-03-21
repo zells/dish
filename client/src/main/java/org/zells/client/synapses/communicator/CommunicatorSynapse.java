@@ -1,8 +1,8 @@
-package org.zells.client.synapses;
+package org.zells.client.synapses.communicator;
 
-import org.zells.client.Cortex;
 import org.zells.client.Synapse;
-import org.zells.dish.Zell;
+import org.zells.client.zells.AddressBookZell;
+import org.zells.dish.Dish;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
 import org.zells.dish.delivery.Messenger;
@@ -19,15 +19,18 @@ import java.util.Map;
 
 public class CommunicatorSynapse extends Synapse {
 
-    private final Cortex cortex;
     private final Address target;
+    private final Dish dish;
+    private final AddressBookZell book;
+
     private JPanel historyBox;
     private JScrollPane historyScrollPane;
 
-    public CommunicatorSynapse(final Cortex cortex, final Address target) {
-        super("Communicator: " + (cortex.book.contains(target) ? cortex.book.nameOf(target) : " *"));
-        this.cortex = cortex;
+    public CommunicatorSynapse(final Address target, Dish dish, AddressBookZell book) {
+        super("Communicator: " + (book.contains(target) ? book.nameOf(target) : " *"));
         this.target = target;
+        this.dish = dish;
+        this.book = book;
 
         setLayout(new BorderLayout());
         add(createSplitPane());
@@ -98,7 +101,7 @@ public class CommunicatorSynapse extends Synapse {
 
         output.setText(parser.getReceiver() + " < " + parser.getMessage());
 
-        waitFor(cortex.dish.send(receiver, parser.getMessage()), output);
+        waitFor(dish.send(receiver, parser.getMessage()), output);
 
         historyBox.add(output);
         updateScrollPane();
@@ -111,7 +114,6 @@ public class CommunicatorSynapse extends Synapse {
                 output.insert("\u2713 ", 0);
             }
         });
-
         messenger.when(new Messenger.Failed() {
             @Override
             public void then(Exception e) {
@@ -123,11 +125,17 @@ public class CommunicatorSynapse extends Synapse {
     }
 
     private Map<String, Address> prepareAliases(final JTextArea output) {
-        Map<String, Address> addresses = new HashMap<String, Address>(cortex.book.getAddresses()) {
+        Map<String, Address> addresses = new HashMap<String, Address>(book.getAddresses()) {
             public Address get(Object key) {
                 if (key.equals("+")) {
-                    ReceiverZell receiver = new ReceiverZell(output);
-                    Address receiverAddress = cortex.dish.add(receiver);
+                    ReceiverZell receiver = new ReceiverZell(dish) {
+                        @Override
+                        protected void received(Message message) {
+                            output.append("\n >> " + message);
+                            updateScrollPane();
+                        }
+                    };
+                    Address receiverAddress = dish.add(receiver);
                     receiver.setAddress(receiverAddress);
                     return receiverAddress;
                 }
@@ -154,26 +162,6 @@ public class CommunicatorSynapse extends Synapse {
             return aliases.get(receiver);
         } else {
             return Address.fromString(receiver);
-        }
-    }
-
-    private class ReceiverZell implements Zell {
-        private JTextArea output;
-        private Address address;
-
-        ReceiverZell(JTextArea output) {
-            this.output = output;
-        }
-
-        @Override
-        public void receive(Message message) {
-            cortex.dish.remove(address);
-            output.append("\n >> " + message);
-            updateScrollPane();
-        }
-
-        void setAddress(Address address) {
-            this.address = address;
         }
     }
 }

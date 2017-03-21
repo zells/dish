@@ -1,6 +1,6 @@
 package org.zells.client;
 
-import org.zells.client.synapses.CommunicatorSynapse;
+import org.zells.client.synapses.communicator.CommunicatorSynapse;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -31,7 +31,7 @@ class CortexGui extends JFrame {
 
         addMenuItem(menu, "New communicator...", KeyEvent.VK_N, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                addSynapse(new CommunicatorSynapse(cortex, cortex.book.get("cortex")));
+                addSynapse(new CommunicatorSynapse(cortex.book.get("cortex"), cortex.dish, cortex.book));
             }
         });
         addMenuItem(menu, "Quit", KeyEvent.VK_Q, new ActionListener() {
@@ -74,7 +74,7 @@ class CortexGui extends JFrame {
                 frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                 frame.setVisible(true);
 
-                frame.addSynapse(new CommunicatorSynapse(cortex, cortex.book.get("cortex")));
+                frame.addSynapse(new CommunicatorSynapse(cortex.book.get("cortex"), cortex.dish, cortex.book));
             }
         });
     }

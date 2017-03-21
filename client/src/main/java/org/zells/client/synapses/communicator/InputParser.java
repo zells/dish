@@ -1,4 +1,4 @@
-package org.zells.client.synapses;
+package org.zells.client.synapses.communicator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
