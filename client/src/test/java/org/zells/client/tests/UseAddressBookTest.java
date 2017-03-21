@@ -3,7 +3,7 @@ package org.zells.client.tests;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class AliasAddressesTest {
+public class UseAddressBookTest {
 
     @Test
     @Ignore

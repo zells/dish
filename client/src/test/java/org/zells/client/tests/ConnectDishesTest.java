@@ -3,7 +3,12 @@ package org.zells.client.tests;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class JoinPeersTest {
+public class ConnectDishesTest {
+
+    @Test
+    @Ignore
+    public void listenOnPort() {
+    }
 
     @Test
     @Ignore

@@ -16,22 +16,24 @@ import java.util.List;
 
 abstract public class BaseTest {
 
-    Dish dish;
     List<Message> received = new ArrayList<Message>();
     List<String> log = new ArrayList<String>();
+
+    Dish dish;
+    Address target;
 
     private Communicator communicator;
 
     @Before
     public void SetUp() {
         dish = new Dish(new BasicUuidGenerator(), new EncodingRepository());
-        AddressBookZell book = new AddressBookZell(dish);
-        Address target = dish.add(new Zell() {
+        target = dish.add(new Zell() {
             @Override
             public void receive(Message message) {
                 received.add(message);
             }
         });
+        AddressBookZell book = new AddressBookZell(dish);
         communicator = new Communicator(target, dish, book);
     }
 
