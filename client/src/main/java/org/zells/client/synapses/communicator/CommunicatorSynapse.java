@@ -82,7 +82,8 @@ public class CommunicatorSynapse extends Synapse {
                     try {
                         sendMessage(input);
                     } catch (Exception err) {
-                        textArea.setText(input + " [" + err.getMessage() + "]");
+                        String message = err.getMessage() != null ? err.getMessage() : "Invalid input";
+                        textArea.setText(input + " [" + message + "]");
                         textArea.select(input.length(), textArea.getText().length());
                     }
                 }
