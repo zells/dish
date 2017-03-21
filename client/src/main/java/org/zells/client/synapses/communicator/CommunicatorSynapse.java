@@ -142,6 +142,11 @@ public class CommunicatorSynapse extends Synapse {
                 }
                 return super.get(key);
             }
+
+            @Override
+            public boolean containsKey(Object key) {
+                return key.equals("+") || super.containsKey(key);
+            }
         };
         addresses.put(".", target);
 

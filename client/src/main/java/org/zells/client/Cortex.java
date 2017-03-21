@@ -10,18 +10,17 @@ import java.io.IOException;
 public class Cortex {
 
     public Dish dish;
-    public AddressBookZell book;
+    AddressBookZell book;
 
     public static void main(String[] args) throws IOException {
         CortexGui.start(new Cortex(
                 Dish.buildDefault(),
-                new AddressBookZell(),
                 new ConnectionRepository().addAll(ConnectionRepository.supportedConnections())));
     }
 
-    private Cortex(Dish dish, AddressBookZell book, ConnectionRepository connections) {
+    private Cortex(Dish dish, ConnectionRepository connections) {
         this.dish = dish;
-        this.book = book;
+        this.book = new AddressBookZell(dish);
 
         book.put("book", dish.add(book));
         book.put("cortex", dish.add(new CortexZell(this, dish, connections)));

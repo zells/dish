@@ -1,8 +1,11 @@
 package org.zells.client.zells;
 
+import org.zells.dish.Dish;
 import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
+import org.zells.dish.delivery.messages.AddressMessage;
+import org.zells.dish.delivery.messages.CompositeMessage;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,9 +13,28 @@ import java.util.Map;
 public class AddressBookZell implements Zell {
 
     private Map<String, Address> addresses = new HashMap<String, Address>();
+    private Dish dish;
+
+    public AddressBookZell(Dish dish) {
+        this.dish = dish;
+    }
 
     @Override
     public void receive(Message message) {
+        if (!message.read("use").isNull() && !message.read("for").isNull()) {
+            String name = message.read("use").asString();
+            Address address = message.read("for").asAddress();
+            addresses.put(name, address);
+        } else if (!message.read("forget").isNull()) {
+            String name = message.read("forget").asString();
+            addresses.remove(name);
+        } else if (message.read(0).asString().equals("tell") && !message.read("to").isNull()) {
+            CompositeMessage book = new CompositeMessage();
+            for (String name : addresses.keySet()) {
+                book.put(name, new AddressMessage(addresses.get(name)));
+            }
+            dish.send(message.read("to").asAddress(), book);
+        }
     }
 
     public void put(String name, Address address) {
