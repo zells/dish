@@ -51,6 +51,7 @@ public class EncodeSignalsTest {
         assertEncodeDecode(deliverSignal(new BooleanMessage(true)));
         assertEncodeDecode(deliverSignal(new IntegerMessage(42)));
         assertEncodeDecode(deliverSignal(new BinaryMessage(new byte[]{1, 42, 27})));
+        assertEncodeDecode(deliverSignal(new AddressMessage(Address.fromString("fade"))));
         assertEncodeDecode(deliverSignal(new CompositeMessage()
                 .put("one", new StringMessage("uno"))
                 .put("and", new CompositeMessage()
@@ -83,7 +84,8 @@ public class EncodeSignalsTest {
 
     private void assertEncodeDecode(Signal signal) {
         for (Encoding encoding : encodings) {
-            assert encoding.decode(encoding.encode(signal)).equals(signal);
+            Signal decoded = encoding.decode(encoding.encode(signal));
+            assert decoded.equals(signal);
         }
     }
 }

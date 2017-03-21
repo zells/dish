@@ -4,6 +4,7 @@ import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
 import org.zells.dish.util.ByteArray;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class BinaryMessage extends Message {
@@ -22,6 +23,14 @@ public class BinaryMessage extends Message {
     @Override
     public boolean isTrue() {
         return value.length != 0;
+    }
+
+    @Override
+    public int asInteger() {
+        if (value.length == 0) {
+            return 0;
+        }
+        return ByteBuffer.wrap(value).getShort();
     }
 
     @Override

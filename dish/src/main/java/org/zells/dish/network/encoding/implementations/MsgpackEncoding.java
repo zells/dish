@@ -117,7 +117,9 @@ public class MsgpackEncoding implements Encoding {
         } else if (message instanceof IntegerMessage) {
             return message.asInteger();
         } else if (message instanceof BinaryMessage) {
-            return message.asBytes();
+            return prefixed(0, message.asBytes());
+        } else if (message instanceof AddressMessage) {
+            return prefixed(1, message.asBytes());
         } else if (message instanceof CompositeMessage) {
             HashMap<String, Object> map = new HashMap<String, Object>();
             for (String key : message.keys()) {
@@ -127,6 +129,19 @@ public class MsgpackEncoding implements Encoding {
         }
 
         throw new RuntimeException("unsupported message type: " + message.getClass());
+    }
+
+    private Object prefixed(int prefix, byte[] bytes) {
+        byte[] prefixed = new byte[bytes.length + 1];
+        prefixed[0] = (byte) prefix;
+        System.arraycopy(bytes, 0, prefixed, 1, bytes.length);
+        return prefixed;
+    }
+
+    private byte[] unPrefix(byte[] bytes) {
+        byte[] slice = new byte[bytes.length - 1];
+        System.arraycopy(bytes, 1, slice, 0, bytes.length - 1);
+        return slice;
     }
 
     private Message inflateMessage(Object object) {
@@ -139,7 +154,12 @@ public class MsgpackEncoding implements Encoding {
         } else if (object instanceof Integer) {
             return new IntegerMessage((Integer) object);
         } else if (object instanceof byte[]) {
-            return new BinaryMessage((byte[]) object);
+            byte[] bytes = (byte[]) object;
+            if (bytes[0] == 0) {
+                return new BinaryMessage(unPrefix(bytes));
+            } else if (bytes[0] == 1) {
+                return new AddressMessage(Address.fromBytes(unPrefix(bytes)));
+            }
         } else if (object instanceof Map) {
             CompositeMessage message = new CompositeMessage();
             for (Object key : ((Map) object).keySet()) {

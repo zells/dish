@@ -28,7 +28,7 @@ public abstract class Message {
     }
 
     public Address asAddress() {
-        return Address.fromBytes(new byte[0]);
+        return Address.fromBytes(asBytes());
     }
 
     public Set<String> keys() {

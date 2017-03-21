@@ -1,5 +1,6 @@
 package org.zells.dish.delivery.messages;
 
+import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
 
 public class BooleanMessage extends Message {
@@ -18,6 +19,11 @@ public class BooleanMessage extends Message {
     @Override
     public int hashCode() {
         return getClass().hashCode() + (value ? 1 : 0);
+    }
+
+    @Override
+    public Address asAddress() {
+        return Address.fromBytes(new byte[0]);
     }
 
     @Override

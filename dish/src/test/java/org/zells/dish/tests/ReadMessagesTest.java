@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
 import org.zells.dish.delivery.messages.*;
+import org.zells.dish.util.ByteArray;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -19,6 +20,7 @@ public class ReadMessagesTest {
         assert m.asString().equals("");
         assert m.asInteger() == 0;
         assert Arrays.equals(m.asBytes(), new byte[0]);
+        assert m.asAddress().equals(Address.fromBytes(new byte[0]));
         assert m.keys().isEmpty();
         assert m.read("foo").read("bar").isNull();
     }
@@ -32,6 +34,7 @@ public class ReadMessagesTest {
         assert m.asString().equals("true");
         assert m.asInteger() == 1;
         assert Arrays.equals(m.asBytes(), new byte[]{1});
+        assert m.asAddress().equals(Address.fromBytes(new byte[0]));
         assert m.keys().isEmpty();
     }
 
@@ -44,6 +47,7 @@ public class ReadMessagesTest {
         assert m.asString().equals("");
         assert m.asInteger() == 0;
         assert Arrays.equals(m.asBytes(), new byte[]{0});
+        assert m.asAddress().equals(Address.fromBytes(new byte[0]));
         assert m.keys().isEmpty();
     }
 
@@ -56,6 +60,7 @@ public class ReadMessagesTest {
         assert m.asString().equals("");
         assert m.asInteger() == 0;
         assert Arrays.equals(m.asBytes(), new byte[0]);
+        assert m.asAddress().equals(Address.fromBytes(new byte[0]));
         assert m.keys().isEmpty();
     }
 
@@ -68,6 +73,7 @@ public class ReadMessagesTest {
         assert m.asString().equals("foo");
         assert m.asInteger() == 1;
         assert Arrays.equals(m.asBytes(), "foo".getBytes());
+        assert m.asAddress().equals(Address.fromBytes("foo".getBytes()));
         assert m.keys().isEmpty();
     }
 
@@ -80,6 +86,7 @@ public class ReadMessagesTest {
         assert m.asString().equals("42");
         assert m.asInteger() == 42;
         assert Arrays.equals(m.asBytes(), new byte[]{0, 0, 0, 42});
+        assert m.asAddress().equals(Address.fromBytes(new byte[]{0, 0, 0, 42}));
         assert m.keys().isEmpty();
     }
 
@@ -92,18 +99,20 @@ public class ReadMessagesTest {
         assert m.asString().equals("0");
         assert m.asInteger() == 0;
         assert Arrays.equals(m.asBytes(), new byte[]{0, 0, 0, 0});
+        assert m.asAddress().equals(Address.fromBytes(new byte[]{0, 0, 0, 0}));
         assert m.keys().isEmpty();
     }
 
     @Test
     public void binaryMessage() {
-        Message m = new BinaryMessage("foo".getBytes());
+        Message m = new BinaryMessage("mu".getBytes());
 
         assert !m.isNull();
         assert m.isTrue();
-        assert m.asString().equals("0x666f6f");
-        assert m.asInteger() == 1;
-        assert Arrays.equals(m.asBytes(), "foo".getBytes());
+        assert m.asString().equals("0x6d75");
+        assert m.asInteger() == 0x6d75;
+        assert Arrays.equals(m.asBytes(), "mu".getBytes());
+        assert m.asAddress().equals(Address.fromBytes("mu".getBytes()));
         assert m.keys().isEmpty();
     }
 
@@ -116,19 +125,21 @@ public class ReadMessagesTest {
         assert m.asString().equals("0x");
         assert m.asInteger() == 0;
         assert Arrays.equals(m.asBytes(), new byte[0]);
+        assert m.asAddress().equals(Address.fromBytes(new byte[0]));
         assert m.keys().isEmpty();
     }
 
     @Test
-    public void addressBinaryMessage() {
-        Message m = new BinaryMessage(Address.fromString("dada").toBytes());
-        assert m.asAddress().equals(Address.fromString("dada"));
+    public void addressMessage() {
+        Message m = new AddressMessage(Address.fromString("42de"));
 
-        Message m2 = new BooleanMessage(true);
-        assert m2.asAddress().equals(Address.fromBytes(new byte[0]));
-
-        Message m3 = new StringMessage("fade");
-        assert m3.asAddress().equals(Address.fromBytes(new byte[0]));
+        assert !m.isNull();
+        assert m.isTrue();
+        assert m.asString().equals("0x42de");
+        assert m.asInteger() == 0x42de;
+        assert Arrays.equals(m.asBytes(), ByteArray.fromHexString("42de"));
+        assert m.asAddress().equals(Address.fromString("42de"));
+        assert m.keys().isEmpty();
     }
 
     @Test
