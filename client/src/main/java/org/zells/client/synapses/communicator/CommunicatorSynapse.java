@@ -27,7 +27,7 @@ public class CommunicatorSynapse extends Synapse {
     private JScrollPane historyScrollPane;
 
     public CommunicatorSynapse(final Address target, Dish dish, AddressBookZell book) {
-        super("Communicator: " + (book.contains(target) ? book.nameOf(target) : " *"));
+        super("Communicator: " + (book.contains(target) ? book.nameOf(target) : target));
         this.target = target;
         this.dish = dish;
         this.book = book;

@@ -1,6 +1,7 @@
 package org.zells.client;
 
 import org.zells.client.synapses.communicator.CommunicatorSynapse;
+import org.zells.dish.delivery.Address;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -31,7 +32,24 @@ class CortexGui extends JFrame {
 
         addMenuItem(menu, "New communicator...", KeyEvent.VK_N, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                addSynapse(new CommunicatorSynapse(cortex.book.get("cortex"), cortex.dish, cortex.book));
+                String nameOrAddress = JOptionPane.showInputDialog(
+                        CortexGui.this,
+                        "Name of Address of Zell",
+                        "New Communicator...",
+                        JOptionPane.PLAIN_MESSAGE);
+
+                if (nameOrAddress == null) {
+                    return;
+                }
+
+                Address target;
+                if (cortex.book.has(nameOrAddress)) {
+                    target = CortexGui.this.cortex.book.get(nameOrAddress);
+                } else {
+                    target = Address.fromString(nameOrAddress);
+                }
+
+                addSynapse(new CommunicatorSynapse(target, CortexGui.this.cortex.dish, CortexGui.this.cortex.book));
             }
         });
         addMenuItem(menu, "Quit", KeyEvent.VK_Q, new ActionListener() {

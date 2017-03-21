@@ -48,7 +48,7 @@ public class AddressBookZell implements Zell {
         return addresses.get(name);
     }
 
-    private boolean has(String name) {
+    public boolean has(String name) {
         return addresses.containsKey(name);
     }
 
