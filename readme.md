@@ -1,13 +1,13 @@
 # zells (prototype three) [![Build Status](https://travis-ci.org/zells/three.svg?branch=master)](https://travis-ci.org/zells/three)
 
-This is a prototype of the *zells* system used to explore the design of the *zells messaging protocol* and the implementation of a distributed peer-to-peer network based on it.
+This is a prototype of the *zells* system used to explore the design of the *zells messaging protocol*, implementation of a distributed peer-to-peer network based on it. The goal of this project is to create a software development environment that avoids most if not all incidental complications of existing environments.
 
 
 ## Concepts
 
-A *Zell* encapsulates behaviour. Each zell has a unique *Address* which can be used to send it asynchronous *Messages* with arbitrary but structured content. Each Message is then exactly once if the receiver can be found.
+A *Zell* encapsulates behaviour. Each zell has a unique *Address* which can be used to send it asynchronous *Messages* with arbitrary but structured content. Each Message is delivered exactly once if the receiver can be found.
 
-Zells live on a *Dish*. A Dish can be connected to other Dish, forming a *Network* of Zells. Messages can be sent to any Zell on the Network using its Address, regardless of the physical location of the Zell's Dish.
+Zells live on a *Dish*. A Dish can be connected to other Dishes, forming a *Network* of Zells. Messages can be sent to any Zell on the Network using its Address, regardless of the physical location of the Zell's Dish.
 
 
 ## Installation
@@ -27,11 +27,11 @@ The project can be downloaded with [git] and built with [gradle].
 The usage of each module is described in the module. They are
 
 - **[dish]** - Library for sending and receiving Messages on a Zells Network
-- **[client]** - Minimal user interface to the Dish
+- **[cortex]** - Provides a user interface to the Dish
 - **[samples]** - Samples demonstrating how zells can be used
 
 [dish]: https://github.com/zells/interface/tree/master/dish
-[client]: https://github.com/zells/interface/tree/master/client
+[cortex]: https://github.com/zells/interface/tree/master/cortex
 [samples]: https://github.com/zells/interface/tree/master/samples
 
 

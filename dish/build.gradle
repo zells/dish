@@ -8,7 +8,7 @@ dependencies {
 
 task buildDish(type: Jar) {
     manifest {
-        attributes 'Implementation-Title': 'zells messaging protocol (zmp) client library'
+        attributes 'Implementation-Title': 'zells messaging protocol (zmp) cortex library'
     }
     baseName = 'dish'
     destinationDir = file("$rootDir/build")

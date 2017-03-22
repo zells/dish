@@ -1,0 +1,18 @@
+version '0.1'
+sourceCompatibility = 1.6
+
+dependencies {
+    compile project(':dish')
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.8.7'
+}
+
+task buildCortex(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'zells command line cortex',
+                'Main-Class': 'org.zells.cortex.Cortex'
+    }
+    baseName = 'zells-cortex'
+    destinationDir = file("$rootDir/build")
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
