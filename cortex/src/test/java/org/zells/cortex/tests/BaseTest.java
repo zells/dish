@@ -21,6 +21,7 @@ abstract public class BaseTest {
 
     public Dish dish;
     protected Address target;
+    protected AddressBookZell book;
 
     private Communicator communicator;
 
@@ -33,7 +34,7 @@ abstract public class BaseTest {
                 received.add(message);
             }
         });
-        AddressBookZell book = new AddressBookZell(dish);
+        book = new AddressBookZell(dish);
         communicator = new Communicator(target, dish, book);
     }
 

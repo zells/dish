@@ -180,10 +180,11 @@ class InputParser {
             return BinaryMessage.fromString(part);
         } else if (part.startsWith("@")) {
             String alias = part.substring(1);
-            if (!aliases.containsKey(alias)) {
-                throw new RuntimeException("Not an alias: " + alias);
+            if (aliases.containsKey(alias)) {
+                return new AddressMessage(aliases.get(alias));
+            } else {
+                return new AddressMessage(Address.fromString(alias));
             }
-            return new BinaryMessage(aliases.get(alias).toBytes());
         } else {
             return new StringMessage(part);
         }
