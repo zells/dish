@@ -112,7 +112,7 @@ public class ConnectOverSocketsTest {
         long start = System.currentTimeMillis();
         while (executed < i) {
             Thread.yield();
-            assert System.currentTimeMillis() - start < 4000;
+            assert System.currentTimeMillis() - start < 7000;
         }
     }
 }
