@@ -2,6 +2,8 @@
 
 A graphical user interface to send and receive messages.
 
+*this document is work-in-progress*
+
 ## Zells
 
 ### Cortex
