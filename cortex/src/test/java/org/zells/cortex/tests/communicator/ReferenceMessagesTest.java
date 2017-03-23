@@ -28,26 +28,26 @@ public class ReferenceMessagesTest extends BaseTest {
 
     @Test
     public void notAReference() {
-        send(". \"#0\"");
+        send("\"#0\"");
         assert received.equals(Collections.singletonList(new CompositeMessage(new StringMessage("#0"))));
     }
 
     @Test
     public void invalidReference() {
-        fail(". #0", "Invalid reference: 0");
+        fail("#0", "Invalid reference: 0");
     }
 
     @Test
     public void countResponses() {
         final String[] received = new String[2];
 
-        send("dada @+ one", new Listener() {
+        send("dada < @+ one", new Listener() {
             @Override
             protected void onResponse(int sequence, Message message) {
                 received[sequence] = message.asString();
             }
         });
-        send("dada @+ two", new Listener() {
+        send("dada < @+ two", new Listener() {
             @Override
             protected void onResponse(int sequence, Message message) {
                 received[sequence] = message.asString();
@@ -59,16 +59,16 @@ public class ReferenceMessagesTest extends BaseTest {
 
     @Test
     public void referenceMessage() {
-        send("dada @+ one");
-        send(". #0");
+        send("dada < @+ one");
+        send("#0");
 
         assert received.equals(Collections.singletonList(new CompositeMessage(new StringMessage("one"))));
     }
 
     @Test
     public void mixedContent() {
-        send("dada @+ one");
-        send(". foo #0 bar");
+        send("dada < @+ one");
+        send("foo #0 bar");
 
         assert received.equals(Collections.singletonList(new CompositeMessage(
                 new StringMessage("foo"),
@@ -79,8 +79,8 @@ public class ReferenceMessagesTest extends BaseTest {
 
     @Test
     public void partOfMessage() {
-        send("dada ![\"@+\", {\"0\":42, \"foo\":\"bar\"}]");
-        send(". #0.0 #0.foo");
+        send("dada < ![\"@+\", {\"0\":42, \"foo\":\"bar\"}]");
+        send("#0.0 #0.foo");
 
         assert received.equals(Collections.singletonList(new CompositeMessage(
                 new IntegerMessage(42),
@@ -90,8 +90,8 @@ public class ReferenceMessagesTest extends BaseTest {
 
     @Test
     public void deepReference() {
-        send("dada ![\"@+\", {\"foo\":{\"bar\":[1, 42]}}]");
-        send(". #0.foo.bar.1");
+        send("dada < ![\"@+\", {\"foo\":{\"bar\":[1, 42]}}]");
+        send("#0.foo.bar.1");
 
         assert received.equals(Collections.singletonList(new CompositeMessage(
                 new IntegerMessage(42)
@@ -100,8 +100,8 @@ public class ReferenceMessagesTest extends BaseTest {
 
     @Test
     public void useReferenceAsReceiver() {
-        send("dada @+ .");
-        send("#0 foo");
+        send("dada < @+ .");
+        send("#0 < foo");
 
         assert received.equals(Collections.singletonList(new CompositeMessage(
                 new StringMessage("foo")

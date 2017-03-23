@@ -42,10 +42,10 @@ class CortexGui extends JFrame {
                     return;
                 }
 
-                Address target;
+                Address target = null;
                 if (cortex.book.has(nameOrAddress)) {
                     target = CortexGui.this.cortex.book.get(nameOrAddress);
-                } else {
+                } else if (!nameOrAddress.isEmpty()) {
                     target = Address.fromString(nameOrAddress);
                 }
 

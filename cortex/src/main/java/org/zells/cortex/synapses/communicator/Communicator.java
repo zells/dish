@@ -70,7 +70,10 @@ public class Communicator {
                 return key.equals("+") || super.containsKey(key);
             }
         };
-        addresses.put(".", target);
+
+        if (target != null) {
+            addresses.put(".", target);
+        }
 
         return addresses;
     }

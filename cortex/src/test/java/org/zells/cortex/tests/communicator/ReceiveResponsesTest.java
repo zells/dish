@@ -22,7 +22,7 @@ public class ReceiveResponsesTest extends BaseTest {
                 dish.send(message.read(0).asAddress(), new StringMessage("Hello World"));
             }
         });
-        send(". @+", new Listener() {
+        send("@+", new Listener() {
             @Override
             protected void onResponse(int sequence, Message message) {
                 super.onResponse(sequence, message);
@@ -42,7 +42,7 @@ public class ReceiveResponsesTest extends BaseTest {
         });
 
         final List<String> responded = new ArrayList<String>();
-        send(". @+ @+", new Listener() {
+        send("@+ @+", new Listener() {
             @Override
             protected void onResponse(int sequence, Message message) {
                 super.onResponse(sequence, message);
@@ -71,7 +71,7 @@ public class ReceiveResponsesTest extends BaseTest {
         });
 
         final List<String> responded = new ArrayList<String>();
-        send(". @+", new Listener() {
+        send("@+", new Listener() {
             @Override
             protected void onResponse(int sequence, Message message) {
                 super.onResponse(sequence, message);

@@ -14,8 +14,9 @@ import java.util.Map;
 
 class InputParser {
 
-    private String receiver;
-    private Message message;
+    private String receiver = ".";
+    private Message message = new NullMessage();
+
     private List<Message> receivedMessages;
     private Map<String, Address> aliases;
 
@@ -23,24 +24,21 @@ class InputParser {
         this.receivedMessages = receivedMessages;
         this.aliases = aliases;
 
-        int separation = input.indexOf("<");
-        if (separation < 0) {
-            separation = input.indexOf(" ");
+        String rawMessage = input;
+        String[] parts = rawMessage.split(" ", 2);
+        if (parts.length >= 2 && parts[1].startsWith("<")) {
+            receiver = parts[0];
+            if (receiver.startsWith("#")) {
+                receiver = resolveReference(receiver.substring(1)).asString();
+            }
+
+            rawMessage = parts[1].substring(1).trim();
+
+            if (rawMessage.isEmpty()) {
+                return;
+            }
         }
 
-        if (separation < 0) {
-            receiver = input;
-            message = new NullMessage();
-            return;
-        }
-
-        receiver = input.substring(0, separation).trim();
-
-        if (receiver.startsWith("#")) {
-            receiver = resolveReference(receiver.substring(1)).asString();
-        }
-
-        String rawMessage = input.substring(separation + 1).trim();
         if (rawMessage.startsWith("!")) {
             message = parseJsonMessage(rawMessage.substring(1));
         } else {

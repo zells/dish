@@ -14,19 +14,19 @@ public class SendMessagesTest extends BaseTest {
 
     @Test
     public void invalidMessage() throws Exception {
-        fail(". !not", "Unrecognized token 'not'");
+        fail("!not", "Unrecognized token 'not'");
         assert log.isEmpty();
     }
 
     @Test
     public void invalidAddress() throws Exception {
-        fail("not", "Invalid hex string: not");
+        fail("not <", "Invalid hex string: not");
         assert log.isEmpty();
     }
 
     @Test
     public void nonExistingAddress() throws Exception {
-        send("dada", new Listener() {
+        send("dada <", new Listener() {
             @Override
             protected void onFailure(Exception e) {
                 super.onFailure(e);
@@ -45,10 +45,10 @@ public class SendMessagesTest extends BaseTest {
             }
         });
 
-        send("fade", new Listener() {
+        send("0xfade <", new Listener() {
             protected void onParsed(String receiver, Message message) {
                 super.onParsed(receiver, message);
-                assert receiver.equals("fade");
+                assert receiver.equals("0xfade");
                 assert message.equals(new NullMessage());
             }
         });
@@ -65,7 +65,7 @@ public class SendMessagesTest extends BaseTest {
             }
         });
 
-        send("fade", new Listener() {
+        send("fade <", new Listener() {
             protected void onParsed(String receiver, Message message) {
                 super.onParsed(receiver, message);
                 assert receiver.equals("fade");
@@ -79,7 +79,7 @@ public class SendMessagesTest extends BaseTest {
 
     @Test
     public void sendToTarget() throws Exception {
-        send(".", new Listener() {
+        send(". <", new Listener() {
             protected void onParsed(String receiver, Message message) {
                 super.onParsed(receiver, message);
                 assert receiver.equals(".");
@@ -92,42 +92,72 @@ public class SendMessagesTest extends BaseTest {
     }
 
     @Test
+    public void implyTarget() {
+        send("foo", new Listener() {
+            @Override
+            protected void onParsed(String receiver, Message message) {
+                super.onParsed(receiver, message);
+                assert receiver.equals(".");
+                assert message.equals(new CompositeMessage(new StringMessage("foo")));
+            }
+        });
+
+        assert received.equals(Collections.singletonList(new CompositeMessage(new StringMessage("foo"))));
+        assert log.equals(Arrays.asList("parsed", "sending", "success"));
+    }
+
+    @Test
+    public void sendADot() {
+        send(".", new Listener() {
+            @Override
+            protected void onParsed(String receiver, Message message) {
+                super.onParsed(receiver, message);
+                assert receiver.equals(".");
+                assert message.equals(new CompositeMessage(new StringMessage(".")));
+            }
+        });
+
+        assert received.equals(Collections.singletonList(new CompositeMessage(new StringMessage("."))));
+        assert log.equals(Arrays.asList("parsed", "sending", "success"));
+    }
+
+    @Test
     public void parseScalarJson() throws Exception {
-        send(". !null");
+        send("!null");
         assert received.get(0).equals(new NullMessage());
 
-        send(". !\"foo\"");
+        send("!\"foo\"");
         assert received.get(1).equals(new StringMessage("foo"));
 
-        send(". !42  ");
+        send("!42  ");
         assert received.get(2).equals(new IntegerMessage(42));
 
-        send(". !true");
+        send("!true");
         assert received.get(3).equals(new BooleanMessage(true));
 
-        send(". !false");
+        send("!false");
         assert received.get(4).equals(new BooleanMessage(false));
 
-        send(". !\"0xbaba\"");
+        send("!\"0xbaba\"");
         assert received.get(5).equals(BinaryMessage.fromString("baba"));
 
-        send(". !\"@0xbaba\"");
+        send("!\"@0xbaba\"");
         assert received.get(6).equals(new AddressMessage(Address.fromString("baba")));
 
         book.put("foo", Address.fromString("dada"));
-        send(". !\"@foo\"");
+        send("!\"@foo\"");
         assert received.get(7).equals(new AddressMessage(Address.fromString("dada")));
     }
 
     @Test
-    public void sendWithArrow() throws Exception {
+    public void sendExplicitly() throws Exception {
         send(". < !\"hello\"");
         assert received.equals(Collections.singletonList(new StringMessage("hello")));
     }
 
     @Test
     public void parseCompositeJson() throws Exception {
-        send(". !{\"one\": \"uno\", \"and\": {\"two\": 2}, \"2\": [4, 2]}");
+        send("!{\"one\": \"uno\", \"and\": {\"two\": 2}, \"2\": [4, 2]}");
 
         assert received.get(0).read("one").equals(new StringMessage("uno"));
         assert received.get(0).read("and").read("two").equals(new IntegerMessage(2));
@@ -137,61 +167,61 @@ public class SendMessagesTest extends BaseTest {
 
     @Test
     public void parseShortSyntax() throws Exception {
-        send(".  foo");
+        send("foo");
         assert received.get(0).read(0).equals(new StringMessage("foo"));
 
-        send(".  42");
+        send("42");
         assert received.get(1).read(0).equals(new IntegerMessage(42));
 
-        send(".  yes");
+        send("yes");
         assert received.get(2).read(0).equals(new BooleanMessage(true));
 
-        send(".  no");
+        send("no");
         assert received.get(3).read(0).equals(new BooleanMessage(false));
 
-        send(".  0xbaba");
+        send("0xbaba");
         assert received.get(4).read(0).equals(BinaryMessage.fromString("baba"));
 
-        send(".  foo bar");
+        send("foo bar");
         assert received.get(5).read(0).equals(new StringMessage("foo"));
         assert received.get(5).read(1).equals(new StringMessage("bar"));
 
-        send(".  foo:bar");
+        send("foo:bar");
         assert received.get(6).read("foo").equals(new StringMessage("bar"));
 
-        send(".  foo bar:yes");
+        send("foo bar:yes");
         assert received.get(7).read(0).equals(new StringMessage("foo"));
         assert received.get(7).read("bar").equals(new BooleanMessage(true));
 
-        send(".  foo:bar foo:baz");
+        send("foo:bar foo:baz");
         assert received.get(8).read("foo").read(0).equals(new StringMessage("bar"));
         assert received.get(8).read("foo").read(1).equals(new StringMessage("baz"));
 
-        send(".  foo:yes bar");
+        send("foo:yes bar");
         assert received.get(9).read("foo").equals(new BooleanMessage(true));
         assert received.get(9).read(0).equals(new StringMessage("bar"));
 
-        send(". @0xbaba");
+        send("@0xbaba");
         assert received.get(10).read(0).equals(new AddressMessage(Address.fromString("baba")));
 
         book.put("foo", Address.fromString("dada"));
-        send(". @foo");
+        send("@foo");
         assert received.get(11).read(0).equals(new AddressMessage(Address.fromString("dada")));
     }
 
     @Test
     public void parseQuotedSyntax() throws Exception {
-        send(".  \"foo: bar\" foo:\"cat dog\"");
+        send("\"foo: bar\" foo:\"cat dog\"");
         assert received.get(0).read(0).equals(new StringMessage("foo: bar"));
         assert received.get(0).read("foo").equals(new StringMessage("cat dog"));
 
-        send(".  with\\:\\ space");
+        send("with\\:\\ space");
         assert received.get(1).read(0).equals(new StringMessage("with: space"));
 
-        send(".  with\\\"quote");
+        send("with\\\"quote");
         assert received.get(2).read(0).equals(new StringMessage("with\"quote"));
 
-        send(".  \"a \\\"quoted\\\" message\"");
+        send("\"a \\\"quoted\\\" message\"");
         assert received.get(3).read(0).equals(new StringMessage("a \"quoted\" message"));
     }
 }
