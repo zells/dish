@@ -27,7 +27,7 @@ public class AddressBookZell implements Zell {
     public void receive(Message message) {
         if (message.read(0).equals(new StringMessage("entries"))) {
 
-            if (!message.read("at").isNull() && !message.read("put").isNull()) {
+            if (!message.read("at").isNull() && message.keys().contains("put")) {
                 String name = message.read("at").asString().replace(" ", "");
                 Address address = message.read("put").asAddress();
                 boolean replaced = addresses.containsKey(name);
@@ -55,8 +55,8 @@ public class AddressBookZell implements Zell {
 
         } else if (message.read(0).equals(new StringMessage("observers"))) {
 
-            if (!message.read("put").isNull()) {
-                observers.add(message.read("put").asAddress());
+            if (!message.read("add").isNull()) {
+                observers.add(message.read("add").asAddress());
             }
         }
     }

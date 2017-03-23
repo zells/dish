@@ -10,6 +10,7 @@ import org.zells.dish.delivery.Message;
 import org.zells.dish.delivery.Messenger;
 import org.zells.dish.delivery.messages.AddressMessage;
 import org.zells.dish.delivery.messages.CompositeMessage;
+import org.zells.dish.delivery.messages.NullMessage;
 import org.zells.dish.delivery.messages.StringMessage;
 import org.zells.dish.network.encoding.EncodingRepository;
 import org.zells.dish.util.BasicUuidGenerator;
@@ -41,9 +42,12 @@ public class EditKeyValuePairsTest {
         });
         new KeyValueEditor(target, dish);
 
-        assert received.size() == 1;
+        assert received.size() == 2;
         assert received.get(0).read(0).equals(new StringMessage("observers"));
-        assert received.get(0).read("put") instanceof AddressMessage;
+        assert received.get(0).read("add") instanceof AddressMessage;
+
+        assert received.get(1).read(0).equals(new StringMessage("entries"));
+        assert received.get(1).read("tell") instanceof AddressMessage;
     }
 
     @Test
@@ -51,14 +55,14 @@ public class EditKeyValuePairsTest {
         Address target = dish.add(new Zell() {
             @Override
             public void receive(Message message) {
-                if (message.read(0).equals(new StringMessage("tellEntries"))) {
-                    dish.send(message.read("to").asAddress(), new CompositeMessage()
+                if (message.read(0).equals(new StringMessage("entries"))) {
+                    dish.send(message.read("tell").asAddress(), new CompositeMessage()
                             .put("foo", new StringMessage("bar")));
                 } else {
-                    dish.send(message.read("put").asAddress(),
+                    dish.send(message.read("add").asAddress(),
                             new CompositeMessage(new StringMessage("observer"))
                                     .put("stateChanged", new CompositeMessage()));
-                    dish.send(message.read("put").asAddress(),
+                    dish.send(message.read("add").asAddress(),
                             new CompositeMessage(new StringMessage("observer")));
                 }
             }
@@ -71,7 +75,7 @@ public class EditKeyValuePairsTest {
             }
         };
 
-        assert updated.size() == 1;
+        assert updated.size() == 2;
         assert updated.get(0).keySet().equals(new HashSet<String>(Collections.singletonList("foo")));
         assert updated.get(0).get("foo").equals(new StringMessage("bar"));
     }
@@ -85,11 +89,11 @@ public class EditKeyValuePairsTest {
                 received.add(message);
             }
         });
-        new KeyValueEditor(target, dish).put("foo", new StringMessage("bar"));
+        new KeyValueEditor(target, dish).put("foo", new NullMessage());
 
         assert received.contains(new CompositeMessage(new StringMessage("entries"))
                 .put("at", new StringMessage("foo"))
-                .put("put", new StringMessage("bar")));
+                .put("put", new NullMessage()));
     }
 
     @Test

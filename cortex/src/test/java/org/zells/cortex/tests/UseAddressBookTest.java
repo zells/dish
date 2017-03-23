@@ -84,7 +84,7 @@ public class UseAddressBookTest extends BaseTest {
             }
         });
 
-        send("observers put:0xbaba");
+        send("observers add:0xbaba");
         assert got.isEmpty();
 
         send("entries at:foo put:0xdada");

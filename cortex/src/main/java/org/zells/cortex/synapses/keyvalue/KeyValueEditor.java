@@ -4,6 +4,7 @@ import org.zells.dish.Dish;
 import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
+import org.zells.dish.delivery.Messenger;
 import org.zells.dish.delivery.messages.AddressMessage;
 import org.zells.dish.delivery.messages.CompositeMessage;
 import org.zells.dish.delivery.messages.StringMessage;
@@ -23,13 +24,20 @@ public class KeyValueEditor {
 
         updater = dish.add(new UpdatedZell());
         Address me = dish.add(new ReceiverZell());
+
         dish.send(target, new CompositeMessage()
                 .put(0, new StringMessage("observers"))
-                .put("put", new AddressMessage(me)));
-
+                .put("add", new AddressMessage(me)));
+        getEntries();
     }
 
     protected void onUpdate(Map<String, Message> entries) {
+    }
+
+    private Messenger getEntries() {
+        return dish.send(target, new CompositeMessage()
+                .put(0, new StringMessage("entries"))
+                .put("tell", new AddressMessage(updater)));
     }
 
     public void put(String key, Message value) {
@@ -47,9 +55,7 @@ public class KeyValueEditor {
         @Override
         public void receive(Message message) {
             if (message.read(0).equals(new StringMessage("observer")) && !message.read("stateChanged").isNull()) {
-                dish.send(target, new CompositeMessage()
-                        .put(0, new StringMessage("tellEntries"))
-                        .put("to", new AddressMessage(updater)));
+                getEntries();
             }
         }
     }

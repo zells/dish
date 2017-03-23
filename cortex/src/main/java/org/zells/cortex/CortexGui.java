@@ -1,6 +1,7 @@
 package org.zells.cortex;
 
 import org.zells.cortex.synapses.communicator.CommunicatorSynapse;
+import org.zells.cortex.synapses.keyvalue.KeyValueEditorSynapse;
 import org.zells.cortex.synapses.listener.ListenerSynapse;
 import org.zells.cortex.zells.ReceiverZell;
 import org.zells.dish.delivery.Address;
@@ -30,50 +31,19 @@ class CortexGui extends JFrame {
     private JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
 
-        JMenu menu = new JMenu("Zells");
-        menu.setMnemonic(KeyEvent.VK_Z);
-        menuBar.add(menu);
-
-        addMenuItem(menu, "New Receiver...", KeyEvent.VK_R, new ActionListener() {
+        JMenu cortexMenu = new JMenu("Cortex");
+        cortexMenu.setMnemonic(KeyEvent.VK_C);
+        menuBar.add(cortexMenu);
+        addMenuItem(cortexMenu, "Quit", KeyEvent.VK_Q, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String name = JOptionPane.showInputDialog(
-                        CortexGui.this,
-                        "Name",
-                        "New Receiver...",
-                        JOptionPane.PLAIN_MESSAGE);
-
-                if (name == null) {
-                    return;
-                }
-
-                Address receiver = cortex.dish.add(new ReceiverZell(cortex.dish));
-                cortex.book.put(name, receiver);
-                addSynapse(new ListenerSynapse(name, receiver, cortex.dish));
+                quit();
             }
         });
-        addMenuItem(menu, "New Listener...", KeyEvent.VK_L, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String nameOrAddress = JOptionPane.showInputDialog(
-                        CortexGui.this,
-                        "Name of Address of Zell",
-                        "New Listener...",
-                        JOptionPane.PLAIN_MESSAGE);
 
-                if (nameOrAddress == null) {
-                    return;
-                }
-
-                Address target;
-                if (cortex.book.has(nameOrAddress)) {
-                    target = cortex.book.get(nameOrAddress);
-                } else {
-                    target = Address.fromString(nameOrAddress);
-                }
-
-                addSynapse(new ListenerSynapse(nameOrAddress, target, cortex.dish));
-            }
-        });
-        addMenuItem(menu, "New communicator...", KeyEvent.VK_T, new ActionListener() {
+        JMenu synapsesMenu = new JMenu("Synapses");
+        synapsesMenu.setMnemonic(KeyEvent.VK_S);
+        menuBar.add(synapsesMenu);
+        addMenuItem(synapsesMenu, "Communicator...", KeyEvent.VK_T, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String nameOrAddress = JOptionPane.showInputDialog(
                         CortexGui.this,
@@ -95,9 +65,70 @@ class CortexGui extends JFrame {
                 addSynapse(new CommunicatorSynapse(target, cortex.dish, cortex.book));
             }
         });
-        addMenuItem(menu, "Quit", KeyEvent.VK_Q, new ActionListener() {
+        addMenuItem(synapsesMenu, "Listener...", KeyEvent.VK_L, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                quit();
+                String nameOrAddress = JOptionPane.showInputDialog(
+                        CortexGui.this,
+                        "Name of Address of Zell",
+                        "New Listener...",
+                        JOptionPane.PLAIN_MESSAGE);
+
+                if (nameOrAddress == null) {
+                    return;
+                }
+
+                Address target;
+                if (cortex.book.has(nameOrAddress)) {
+                    target = cortex.book.get(nameOrAddress);
+                } else {
+                    target = Address.fromString(nameOrAddress);
+                }
+
+                addSynapse(new ListenerSynapse(nameOrAddress, target, cortex.dish));
+            }
+        });
+        addMenuItem(synapsesMenu, "KeyValueEditor...", 0, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String nameOrAddress = JOptionPane.showInputDialog(
+                        CortexGui.this,
+                        "Name of Address of Zell",
+                        "New KeyValueEditor...",
+                        JOptionPane.PLAIN_MESSAGE);
+
+                if (nameOrAddress == null) {
+                    return;
+                }
+
+                Address target;
+                if (cortex.book.has(nameOrAddress)) {
+                    target = cortex.book.get(nameOrAddress);
+                } else {
+                    target = Address.fromString(nameOrAddress);
+                }
+
+                addSynapse(new KeyValueEditorSynapse(nameOrAddress, target, cortex.dish));
+            }
+        });
+
+
+        JMenu zellsMenu = new JMenu("Zells");
+        zellsMenu.setMnemonic(KeyEvent.VK_Z);
+        menuBar.add(zellsMenu);
+        addMenuItem(zellsMenu, "Receiver...", KeyEvent.VK_R, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String name = JOptionPane.showInputDialog(
+                        CortexGui.this,
+                        "Name",
+                        "New Receiver...",
+                        JOptionPane.PLAIN_MESSAGE);
+
+                if (name == null) {
+                    return;
+                }
+
+                Address receiver = cortex.dish.add(new ReceiverZell(cortex.dish));
+                cortex.book.put(name, receiver);
+                addSynapse(new ListenerSynapse(name, receiver, cortex.dish));
             }
         });
 
@@ -106,10 +137,13 @@ class CortexGui extends JFrame {
 
     private void addMenuItem(JMenu menu, String caption, int shortCut, ActionListener action) {
         JMenuItem menuItem = new JMenuItem(caption);
-        menuItem.setMnemonic(shortCut);
-        menuItem.setAccelerator(KeyStroke.getKeyStroke(shortCut, ActionEvent.CTRL_MASK));
-        menuItem.addActionListener(action);
         menu.add(menuItem);
+        menuItem.addActionListener(action);
+
+        if (shortCut != 0) {
+            menuItem.setMnemonic(shortCut);
+            menuItem.setAccelerator(KeyStroke.getKeyStroke(shortCut, ActionEvent.CTRL_MASK));
+        }
     }
 
     private void addSynapse(Synapse synapse) {
@@ -152,6 +186,8 @@ class CortexGui extends JFrame {
                 Address receiver = cortex.dish.add(new ReceiverZell(cortex.dish));
                 cortex.book.put("me", receiver);
                 frame.addSynapse(new ListenerSynapse("me", receiver, cortex.dish));
+
+                frame.addSynapse(new KeyValueEditorSynapse("book", cortex.book.get("book"), cortex.dish));
             }
         });
     }
