@@ -44,12 +44,12 @@ class CortexGui extends JFrame {
 
                 Address target = null;
                 if (cortex.book.has(nameOrAddress)) {
-                    target = CortexGui.this.cortex.book.get(nameOrAddress);
+                    target = cortex.book.get(nameOrAddress);
                 } else if (!nameOrAddress.isEmpty()) {
                     target = Address.fromString(nameOrAddress);
                 }
 
-                addSynapse(new CommunicatorSynapse(target, CortexGui.this.cortex.dish, CortexGui.this.cortex.book));
+                addSynapse(new CommunicatorSynapse(target, cortex.dish, cortex.book));
             }
         });
         addMenuItem(menu, "Quit", KeyEvent.VK_Q, new ActionListener() {

@@ -24,7 +24,7 @@ public class CommunicatorSynapse extends Synapse {
         super(target == null
                 ? "Communicator"
                 : ("Communicator: " + (book.contains(target) ? book.nameOf(target) : target)));
-        this.model = new Communicator(target, dish, book);
+        model = new Communicator(target, dish, book);
 
         setLayout(new BorderLayout());
         add(createSplitPane());
