@@ -115,7 +115,7 @@ class CortexGui extends JFrame {
     private void addSynapse(Synapse synapse) {
         synapse.setSize(400, 300);
         synapse.setLocation(nextLocation);
-        calculateNextPosition();
+        calculateNextPosition(synapse);
         synapse.setVisible(true);
         desktop.add(synapse);
         try {
@@ -124,12 +124,12 @@ class CortexGui extends JFrame {
         }
     }
 
-    private void calculateNextPosition() {
-        nextLocation = new Point(nextLocation.x + 400, nextLocation.y);
-        if (nextLocation.x > getWidth()) {
-            nextLocation = new Point(0, nextLocation.y + 300);
+    private void calculateNextPosition(Synapse synapse) {
+        nextLocation = new Point(nextLocation.x + synapse.getWidth(), nextLocation.y);
+        if (nextLocation.x + synapse.getWidth() > getWidth()) {
+            nextLocation = new Point(0, nextLocation.y + synapse.getHeight());
         }
-        if (nextLocation.y > getHeight()) {
+        if (nextLocation.y + synapse.getHeight() > getHeight()) {
             nextLocation = new Point(40, 40);
         }
     }
