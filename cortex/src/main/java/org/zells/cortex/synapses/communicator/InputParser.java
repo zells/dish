@@ -63,10 +63,15 @@ class InputParser {
     private Message parseJsonNode(JsonNode json) throws IOException {
         if (json.isNull()) {
             return new NullMessage();
+        } else if (json.isTextual() && json.asText().startsWith("@")) {
+            String alias = json.asText().substring(1);
+            if (aliases.containsKey(alias)) {
+                return new AddressMessage(aliases.get(alias));
+            } else {
+                return new AddressMessage(Address.fromString(alias));
+            }
         } else if (json.isTextual() && json.asText().startsWith("0x")) {
             return BinaryMessage.fromString(json.asText());
-        } else if (json.isTextual() && json.asText().startsWith("@0x")) {
-            return new AddressMessage(Address.fromString(json.asText().substring(1)));
         } else if (json.isTextual()) {
             return new StringMessage(json.asText());
         } else if (json.isInt()) {

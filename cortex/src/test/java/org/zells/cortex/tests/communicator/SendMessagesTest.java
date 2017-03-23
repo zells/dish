@@ -14,28 +14,14 @@ public class SendMessagesTest extends BaseTest {
 
     @Test
     public void invalidMessage() throws Exception {
-        try {
-            send(". !not");
-        } catch (Exception e) {
-            assert log.isEmpty();
-            assert e.getMessage().contains("Unrecognized token 'not'");
-            return;
-        }
-
-        assert false;
+        fail(". !not", "Unrecognized token 'not'");
+        assert log.isEmpty();
     }
 
     @Test
     public void invalidAddress() throws Exception {
-        try {
-            send("not");
-        } catch (Exception e) {
-            assert log.isEmpty();
-            assert e.getCause().getMessage().equals("Invalid hex string: not");
-            return;
-        }
-
-        assert false;
+        fail("not", "Invalid hex string: not");
+        assert log.isEmpty();
     }
 
     @Test
@@ -127,6 +113,10 @@ public class SendMessagesTest extends BaseTest {
 
         send(". !\"@0xbaba\"");
         assert received.get(6).equals(new AddressMessage(Address.fromString("baba")));
+
+        book.put("foo", Address.fromString("dada"));
+        send(". !\"@foo\"");
+        assert received.get(7).equals(new AddressMessage(Address.fromString("dada")));
     }
 
     @Test

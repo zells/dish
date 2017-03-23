@@ -107,8 +107,8 @@ public class CommunicatorSynapse extends Synapse {
                 output.append(" [" + e.getMessage() + "]");
             }
 
-            protected void onResponse(Message message) {
-                output.append("\n >> " + message);
+            protected void onResponse(int sequence, Message message) {
+                output.append("\n[" + sequence +"] >> " + message);
                 updateScrollPane();
             }
         });

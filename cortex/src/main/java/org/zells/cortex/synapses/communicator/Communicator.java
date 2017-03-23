@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Communicator {
+    private final ArrayList<Message> receivedMessages = new ArrayList<Message>();
     private final Address target;
     private final Dish dish;
     private final AddressBookZell book;
@@ -24,7 +25,7 @@ public class Communicator {
     public void send(String input, Listener listener) throws Exception {
         Map<String, Address> aliases = prepareAliases(listener);
 
-        InputParser parser = new InputParser(input, new ArrayList<Message>(), aliases);
+        InputParser parser = new InputParser(input, receivedMessages, aliases);
         Address receiver = resolveAddress(aliases, parser.getReceiver());
         listener.onParsed(parser.getReceiver(), parser.getMessage());
 
@@ -54,7 +55,7 @@ public class Communicator {
                     ReceiverZell receiver = new ReceiverZell(dish) {
                         @Override
                         protected void received(Message message) {
-                            listener.onResponse(message);
+                            receiveResponse(message, listener);
                         }
                     };
                     Address receiverAddress = dish.add(receiver);
@@ -72,6 +73,11 @@ public class Communicator {
         addresses.put(".", target);
 
         return addresses;
+    }
+
+    synchronized private void receiveResponse(Message message, Listener listener) {
+        receivedMessages.add(message);
+        listener.onResponse(receivedMessages.size() - 1, message);
     }
 
     private Address resolveAddress(Map<String, Address> aliases, String receiver) {
@@ -98,7 +104,7 @@ public class Communicator {
         protected void onFailure(Exception e) {
         }
 
-        protected void onResponse(Message message) {
+        protected void onResponse(int sequence, Message message) {
         }
     }
 }

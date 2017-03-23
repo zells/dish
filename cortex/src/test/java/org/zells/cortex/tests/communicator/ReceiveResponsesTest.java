@@ -24,8 +24,8 @@ public class ReceiveResponsesTest extends BaseTest {
         });
         send(". @+", new Listener() {
             @Override
-            protected void onResponse(Message message) {
-                super.onResponse(message);
+            protected void onResponse(int sequence, Message message) {
+                super.onResponse(sequence, message);
                 assert message.equals(new StringMessage("Hello World"));
             }
         });
@@ -44,8 +44,8 @@ public class ReceiveResponsesTest extends BaseTest {
         final List<String> responded = new ArrayList<String>();
         send(". @+ @+", new Listener() {
             @Override
-            protected void onResponse(Message message) {
-                super.onResponse(message);
+            protected void onResponse(int sequence, Message message) {
+                super.onResponse(sequence, message);
                 responded.add(message.asString());
             }
         });
@@ -73,8 +73,8 @@ public class ReceiveResponsesTest extends BaseTest {
         final List<String> responded = new ArrayList<String>();
         send(". @+", new Listener() {
             @Override
-            protected void onResponse(Message message) {
-                super.onResponse(message);
+            protected void onResponse(int sequence, Message message) {
+                super.onResponse(sequence, message);
                 responded.add(message.asString());
             }
         });

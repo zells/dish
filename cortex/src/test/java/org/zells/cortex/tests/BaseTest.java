@@ -50,11 +50,20 @@ abstract public class BaseTest {
         }
     }
 
-    protected class Listener extends Communicator.Listener {
+    protected void fail(String input, String errorMessage) {
+        try {
+            send(input);
+            assert false;
+        } catch (Exception e) {
+            assert e.getMessage().contains(errorMessage);
+        }
+    }
+
+    public class Listener extends Communicator.Listener {
 
         protected void onSending(Messenger messenger) {
             log.add("sending");
-            messenger.sync(2);
+            messenger.sync(1);
         }
 
         protected void onParsed(String receiver, Message message) {
@@ -69,7 +78,7 @@ abstract public class BaseTest {
             log.add("failure");
         }
 
-        protected void onResponse(Message message) {
+        protected void onResponse(int sequence, Message message) {
             log.add("response");
         }
     }

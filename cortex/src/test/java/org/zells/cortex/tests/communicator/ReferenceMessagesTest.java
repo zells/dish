@@ -1,72 +1,110 @@
 package org.zells.cortex.tests.communicator;
 
-import org.junit.Ignore;
 import org.junit.Test;
+import org.zells.cortex.tests.BaseTest;
+import org.zells.dish.Zell;
+import org.zells.dish.delivery.Address;
+import org.zells.dish.delivery.Message;
+import org.zells.dish.delivery.messages.CompositeMessage;
+import org.zells.dish.delivery.messages.IntegerMessage;
+import org.zells.dish.delivery.messages.StringMessage;
 
-public class ReferenceMessagesTest {
+import java.util.Arrays;
+import java.util.Collections;
+
+public class ReferenceMessagesTest extends BaseTest {
+
+    @Override
+    public void SetUp() {
+        super.SetUp();
+
+        dish.put(Address.fromString("dada"), new Zell() {
+            @Override
+            public void receive(Message message) {
+                dish.send(message.read(0).asAddress(), message.read(1)).sync();
+            }
+        });
+    }
 
     @Test
-    @Ignore
     public void notAReference() {
-//        user.hear("a0 \"#0\"");
-//
-//        assert dish.lastMessage.read(0).equals(new StringMessage("#0"));
+        send(". \"#0\"");
+        assert received.equals(Collections.singletonList(new CompositeMessage(new StringMessage("#0"))));
     }
 
     @Test
-    @Ignore
     public void invalidReference() {
-//        user.hear("a0 #0");
-//
-//        assert user.told.contains("Parsing error: Invalid reference: 0");
+        fail(". #0", "Invalid reference: 0");
     }
 
     @Test
-    @Ignore
-    public void wholeMessage() {
-//        user.hear("me !42");
-//        user.hear("a0 #0");
-//
-//        assert user.told.contains("0> 42");
-//        assert dish.lastMessage.read(0).equals(new IntegerMessage(42));
+    public void countResponses() {
+        final String[] received = new String[2];
+
+        send("dada @+ one", new Listener() {
+            @Override
+            protected void onResponse(int sequence, Message message) {
+                received[sequence] = message.asString();
+            }
+        });
+        send("dada @+ two", new Listener() {
+            @Override
+            protected void onResponse(int sequence, Message message) {
+                received[sequence] = message.asString();
+            }
+        });
+
+        assert Arrays.equals(received, new String[]{"one", "two"});
     }
 
     @Test
-    @Ignore
+    public void referenceMessage() {
+        send("dada @+ one");
+        send(". #0");
+
+        assert received.equals(Collections.singletonList(new CompositeMessage(new StringMessage("one"))));
+    }
+
+    @Test
     public void mixedContent() {
-//        user.hear("me !42");
-//        user.hear("a0 foo #0 bar");
-//
-//        assert dish.lastMessage.read(0).equals(new StringMessage("foo"));
-//        assert dish.lastMessage.read(1).equals(new IntegerMessage(42));
-//        assert dish.lastMessage.read(2).equals(new StringMessage("bar"));
+        send("dada @+ one");
+        send(". foo #0 bar");
+
+        assert received.equals(Collections.singletonList(new CompositeMessage(
+                new StringMessage("foo"),
+                new StringMessage("one"),
+                new StringMessage("bar")
+        )));
     }
 
     @Test
-    @Ignore
     public void partOfMessage() {
-//        user.hear("me 42 foo:bar");
-//        user.hear("a0 #0.0 #0.foo");
-//
-//        assert dish.lastMessage.read(0).equals(new IntegerMessage(42));
-//        assert dish.lastMessage.read(1).equals(new StringMessage("bar"));
+        send("dada ![\"@+\", {\"0\":42, \"foo\":\"bar\"}]");
+        send(". #0.0 #0.foo");
+
+        assert received.equals(Collections.singletonList(new CompositeMessage(
+                new IntegerMessage(42),
+                new StringMessage("bar")
+        )));
     }
 
     @Test
-    @Ignore
     public void deepReference() {
-//        user.hear("me !{\"foo\":{\"bar\":[1, 42]}}");
-//        user.hear("a0 #0.foo.bar.1");
-//
-//        assert dish.lastMessage.read(0).equals(new IntegerMessage(42));
+        send("dada ![\"@+\", {\"foo\":{\"bar\":[1, 42]}}]");
+        send(". #0.foo.bar.1");
+
+        assert received.equals(Collections.singletonList(new CompositeMessage(
+                new IntegerMessage(42)
+        )));
     }
 
     @Test
-    @Ignore
     public void useReferenceAsReceiver() {
-//        user.hear("me 0xdada");
-//        user.hear("#0.0 foo");
-//
-//        assert dish.sent.get(2).getKey().equals(Address.fromString("dada"));
+        send("dada @+ .");
+        send("#0 foo");
+
+        assert received.equals(Collections.singletonList(new CompositeMessage(
+                new StringMessage("foo")
+        )));
     }
 }
