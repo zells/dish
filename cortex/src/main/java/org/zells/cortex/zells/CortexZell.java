@@ -34,16 +34,12 @@ public class CortexZell implements Zell {
             String host = message.read("host").isNull() ? "localhost" : message.read("host").asString();
             String port = message.read("port").isNull() ? "42420" : message.read("port").asString();
             String description = "tcp:" + host + ":" + port;
-
             dish.join(connections.getConnectionOf(description));
-            System.out.println("Joined " + description);
         } else if (message.read(0).asString().equals("leave")) {
             String host = message.read("host").isNull() ? "localhost" : message.read("host").asString();
             String port = message.read("port").isNull() ? "42420" : message.read("port").asString();
             String description = "tcp:" + host + ":" + port;
-
             dish.leave(connections.getConnectionOf(description));
-            System.out.println("Left " + description);
         } else if (!message.read("listen").isNull()) {
             int port = message.read("listen").asInteger();
             servers.put(port, connections.buildServer(port).start(dish));

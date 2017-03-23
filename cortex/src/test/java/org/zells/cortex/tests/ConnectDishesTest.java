@@ -1,13 +1,16 @@
 package org.zells.cortex.tests;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.zells.cortex.Cortex;
+import org.zells.cortex.tests.fakes.FakeConnection;
+import org.zells.cortex.tests.fakes.FakeConnectionRepository;
 import org.zells.dish.Dish;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.messages.CompositeMessage;
 import org.zells.dish.delivery.messages.IntegerMessage;
+import org.zells.dish.delivery.messages.StringMessage;
+import org.zells.dish.network.connecting.Connection;
 import org.zells.dish.network.connecting.ConnectionRepository;
 import org.zells.dish.network.connecting.Server;
 import org.zells.dish.network.encoding.EncodingRepository;
@@ -21,14 +24,26 @@ public class ConnectDishesTest {
 
     private Dish dish;
 
-    private List<Integer> started = new ArrayList<Integer>();
-    private List<Integer> stopped = new ArrayList<Integer>();
     private Address cortex;
+    private List<Integer> stopped = new ArrayList<Integer>();
+    private List<Integer> started = new ArrayList<Integer>();
+    private List<Connection> joined = new ArrayList<Connection>();
+    private List<Connection> left = new ArrayList<Connection>();
 
     @Before
     public void SetUp() {
-        dish = new Dish(new BasicUuidGenerator(), new EncodingRepository());
-        Cortex cortex = new Cortex(dish, new ConnectionRepository()
+        dish = new Dish(new BasicUuidGenerator(), new EncodingRepository()) {
+            @Override
+            public void join(Connection connection) {
+                joined.add(connection);
+            }
+
+            @Override
+            public void leave(Connection connection) {
+                left.add(connection);
+            }
+        };
+        Cortex cortex = new Cortex(dish, new FakeConnectionRepository()
                 .setServerFactory(new ConnectionRepository.ServerFactory() {
                     @Override
                     public Server build(final int port) {
@@ -68,53 +83,47 @@ public class ConnectDishesTest {
     }
 
     @Test
-    @Ignore
     public void joinPeer() {
-//        user.hear("fade join host:foo port:12345");
-//        assert dish.joined.contains(new FakeConnection("tcp:foo:12345"));
+        send(new CompositeMessage(new StringMessage("join"))
+                .put("host", new StringMessage("foo"))
+                .put("port", new IntegerMessage(12345)));
+        assert joined.contains(new FakeConnection("tcp:foo:12345"));
     }
 
     @Test
-    @Ignore
-    public void leavePeer() {
-//        user.hear("fade leave host:foo port:12345");
-//        assert dish.left.contains(new FakeConnection("tcp:foo:12345"));
-    }
-
-    @Test
-    @Ignore
     public void joinPeerDefaultHost() {
-//        user.hear("fade join port:12345");
-//        assert dish.joined.contains(new FakeConnection("tcp:localhost:12345"));
+        send(new CompositeMessage(new StringMessage("join"))
+                .put("port", new IntegerMessage(12345)));
+        assert joined.contains(new FakeConnection("tcp:localhost:12345"));
     }
 
     @Test
-    @Ignore
-    public void leavePeerDefaultHost() {
-//        user.hear("fade leave port:12345");
-//        assert dish.left.contains(new FakeConnection("tcp:localhost:12345"));
-    }
-
-    @Test
-    @Ignore
     public void voidJoinPeerDefaultPort() {
-//        user.hear("fade join host:foo");
-//        assert dish.joined.contains(new FakeConnection("tcp:foo:42420"));
+        send(new CompositeMessage(new StringMessage("join"))
+                .put("host", new StringMessage("foo")));
+        assert joined.contains(new FakeConnection("tcp:foo:42420"));
     }
 
     @Test
-    @Ignore
+    public void leavePeer() {
+        send(new CompositeMessage(new StringMessage("leave"))
+                .put("host", new StringMessage("foo"))
+                .put("port", new IntegerMessage(12345)));
+        assert left.contains(new FakeConnection("tcp:foo:12345"));
+    }
+
+    @Test
+    public void leavePeerDefaultHost() {
+        send(new CompositeMessage(new StringMessage("leave"))
+                .put("port", new IntegerMessage(12345)));
+        assert left.contains(new FakeConnection("tcp:localhost:12345"));
+    }
+
+    @Test
     public void leavePeerDefaultPort() {
-//        user.hear("fade leave host:foo");
-//        assert dish.left.contains(new FakeConnection("tcp:foo:42420"));
-    }
-
-    @Test
-    @Ignore
-    public void exit() {
-//        user.hear("fade stop");
-//        assert dish.leftAll;
-//        assert user.stopped;
+        send(new CompositeMessage(new StringMessage("leave"))
+                .put("host", new StringMessage("foo")));
+        assert left.contains(new FakeConnection("tcp:foo:42420"));
     }
 
     private void send(CompositeMessage message) {
