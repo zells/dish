@@ -21,9 +21,9 @@ abstract public class BaseTest {
 
     public Dish dish;
     protected Address target;
-    protected AddressBookZell book;
+    AddressBookZell book;
 
-    private Communicator communicator;
+    Communicator communicator;
 
     @Before
     public void SetUp() {

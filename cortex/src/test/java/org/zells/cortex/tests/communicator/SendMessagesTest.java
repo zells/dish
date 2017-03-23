@@ -65,6 +65,7 @@ public class SendMessagesTest extends BaseTest {
             }
         });
 
+
         send("fade <", new Listener() {
             protected void onParsed(String receiver, Message message) {
                 super.onParsed(receiver, message);
@@ -140,13 +141,6 @@ public class SendMessagesTest extends BaseTest {
 
         send("!\"0xbaba\"");
         assert received.get(5).equals(BinaryMessage.fromString("baba"));
-
-        send("!\"@0xbaba\"");
-        assert received.get(6).equals(new AddressMessage(Address.fromString("baba")));
-
-        book.put("foo", Address.fromString("dada"));
-        send("!\"@foo\"");
-        assert received.get(7).equals(new AddressMessage(Address.fromString("dada")));
     }
 
     @Test
@@ -200,13 +194,6 @@ public class SendMessagesTest extends BaseTest {
         send("foo:yes bar");
         assert received.get(9).read("foo").equals(new BooleanMessage(true));
         assert received.get(9).read(0).equals(new StringMessage("bar"));
-
-        send("@0xbaba");
-        assert received.get(10).read(0).equals(new AddressMessage(Address.fromString("baba")));
-
-        book.put("foo", Address.fromString("dada"));
-        send("@foo");
-        assert received.get(11).read(0).equals(new AddressMessage(Address.fromString("dada")));
     }
 
     @Test
