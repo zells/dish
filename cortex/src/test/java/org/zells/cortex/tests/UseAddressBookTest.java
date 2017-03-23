@@ -18,7 +18,7 @@ public class UseAddressBookTest extends BaseTest {
     @Test
     public void addEntry() {
         targetBook();
-        send("use:foo for:0xdada");
+        send("entries at:foo put:0xdada");
 
         assert book.has("foo");
         assert book.get("foo").equals(Address.fromString("dada"));
@@ -27,7 +27,7 @@ public class UseAddressBookTest extends BaseTest {
     @Test
     public void ignoreSpaces() {
         targetBook();
-        send("use:\"foo bar\" for:0xdada");
+        send("entries at:\"foo bar\" put:0xdada");
 
         assert book.has("foobar");
         assert book.get("foobar").equals(Address.fromString("dada"));
@@ -36,8 +36,8 @@ public class UseAddressBookTest extends BaseTest {
     @Test
     public void replaceEntry() {
         targetBook();
-        send("use:foo for:0xdada");
-        send("use:foo for:0xfade");
+        send("entries at:foo put:0xdada");
+        send("entries at:foo put:0xfade");
 
         assert book.get("foo").equals(Address.fromString("fade"));
     }
@@ -45,16 +45,10 @@ public class UseAddressBookTest extends BaseTest {
     @Test
     public void removeEntry() {
         targetBook();
-        send("use:foo for:0xdada");
-        send("forget:foo");
+        send("entries at:foo put:0xdada");
+        send("entries remove:foo");
 
         assert !book.has("foo");
-    }
-
-    @Test
-    public void removeNonExistingEntry() {
-        targetBook();
-        send("forget:foo");
     }
 
     @Test
@@ -69,9 +63,9 @@ public class UseAddressBookTest extends BaseTest {
             }
         });
 
-        send("use:foo for:0xdada");
-        send("use:bar for:0xfade");
-        send("tellEntries to:0xbaba");
+        send("entries at:foo put:0xdada");
+        send("entries at:bar put:0xfade");
+        send("entries tell:0xbaba");
 
         assert got.equals(Collections.singletonList(new CompositeMessage()
                 .put("foo", new AddressMessage(Address.fromString("dada")))
@@ -90,28 +84,28 @@ public class UseAddressBookTest extends BaseTest {
             }
         });
 
-        send("observers add:0xbaba");
+        send("observers put:0xbaba");
         assert got.isEmpty();
 
-        send("use:foo for:0xdada");
+        send("entries at:foo put:0xdada");
         assert got.get(0).equals(new CompositeMessage(new StringMessage("observer"))
                 .put("stateChanged", new CompositeMessage()
                         .put("added", new CompositeMessage()
                                 .put("foo", new AddressMessage(Address.fromString("dada"))))));
 
-        send("use:foo for:0xfade");
+        send("entries at:foo put:0xfade");
         assert got.get(1).equals(new CompositeMessage(new StringMessage("observer"))
                 .put("stateChanged", new CompositeMessage()
                         .put("replaced", new CompositeMessage()
                                 .put("foo", new AddressMessage(Address.fromString("fade"))))));
 
-        send("forget:foo");
+        send("entries remove:foo");
         assert got.get(2).equals(new CompositeMessage(new StringMessage("observer"))
                 .put("stateChanged", new CompositeMessage()
                         .put("removed", new CompositeMessage()
                                 .put("foo", new AddressMessage(Address.fromString("fade"))))));
 
-        send("forget:foo");
+        send("entries remove:foo");
         assert got.size() == 3;
     }
 

@@ -25,31 +25,38 @@ public class AddressBookZell implements Zell {
 
     @Override
     public void receive(Message message) {
-        if (!message.read("use").isNull() && !message.read("for").isNull()) {
-            String name = message.read("use").asString().replace(" ", "");
-            Address address = message.read("for").asAddress();
-            boolean replaced = addresses.containsKey(name);
-            addresses.put(name, address);
-            notifyObservers(new CompositeMessage()
-                    .put(replaced ? "replaced" : "added", new CompositeMessage()
-                            .put(name, new AddressMessage(address))));
-        } else if (!message.read("forget").isNull()) {
-            String name = message.read("forget").asString();
-            Address removed = addresses.remove(name);
-            if (removed != null) {
+        if (message.read(0).equals(new StringMessage("entries"))) {
+
+            if (!message.read("at").isNull() && !message.read("put").isNull()) {
+                String name = message.read("at").asString().replace(" ", "");
+                Address address = message.read("put").asAddress();
+                boolean replaced = addresses.containsKey(name);
+                addresses.put(name, address);
                 notifyObservers(new CompositeMessage()
-                        .put("removed", new CompositeMessage()
-                                .put(name, new AddressMessage(removed))));
+                        .put(replaced ? "replaced" : "added", new CompositeMessage()
+                                .put(name, new AddressMessage(address))));
+
+            } else if (!message.read("remove").isNull()) {
+                String name = message.read("remove").asString();
+                Address removed = addresses.remove(name);
+                if (removed != null) {
+                    notifyObservers(new CompositeMessage()
+                            .put("removed", new CompositeMessage()
+                                    .put(name, new AddressMessage(removed))));
+                }
+
+            } else if (!message.read("tell").isNull()) {
+                CompositeMessage book = new CompositeMessage();
+                for (String name : addresses.keySet()) {
+                    book.put(name, new AddressMessage(addresses.get(name)));
+                }
+                dish.send(message.read("tell").asAddress(), book);
             }
-        } else if (message.read(0).asString().equals("tellEntries") && !message.read("to").isNull()) {
-            CompositeMessage book = new CompositeMessage();
-            for (String name : addresses.keySet()) {
-                book.put(name, new AddressMessage(addresses.get(name)));
-            }
-            dish.send(message.read("to").asAddress(), book);
+
         } else if (message.read(0).equals(new StringMessage("observers"))) {
-            if (!message.read("add").isNull()) {
-                observers.add(message.read("add").asAddress());
+
+            if (!message.read("put").isNull()) {
+                observers.add(message.read("put").asAddress());
             }
         }
     }

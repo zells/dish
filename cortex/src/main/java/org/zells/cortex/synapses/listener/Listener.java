@@ -28,25 +28,22 @@ public class Listener {
         return receivedMessages;
     }
 
-    private void doReceive(Message message) {
-        ReceivedMessage receivedMessage = new ReceivedMessage(
-                message.read("sequence").asInteger(),
-                message.read("message"),
-                message.read("time").asString());
-        receivedMessages.add(receivedMessage);
-        Collections.sort(receivedMessages, new Comparator<ReceivedMessage>() {
-            @Override
-            public int compare(ReceivedMessage o1, ReceivedMessage o2) {
-                return o1.getSequence() - o2.getSequence();
-            }
-        });
-        onReceive(receivedMessage);
-    }
-
     private class ReceiverZell implements Zell {
         @Override
         public void receive(Message message) {
-            doReceive(message);
+
+            ReceivedMessage receivedMessage = new ReceivedMessage(
+                    message.read("sequence").asInteger(),
+                    message.read("message"),
+                    message.read("time").asString());
+            receivedMessages.add(receivedMessage);
+            Collections.sort(receivedMessages, new Comparator<ReceivedMessage>() {
+                @Override
+                public int compare(ReceivedMessage o1, ReceivedMessage o2) {
+                    return o1.getSequence() - o2.getSequence();
+                }
+            });
+            onReceive(receivedMessage);
         }
 
     }
