@@ -3,7 +3,7 @@ package org.zells.samples.tests.fakes;
 import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
-import org.zells.dish.delivery.messages.BinaryMessage;
+import org.zells.dish.delivery.messages.AddressMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +13,8 @@ public class FakeZell implements Zell {
     public List<Message> received = new ArrayList<Message>();
     public Address address;
 
-    public BinaryMessage addressMessage() {
-        return new BinaryMessage(address.toBytes());
+    public Message addressMessage() {
+        return new AddressMessage(address);
     }
 
     @Override

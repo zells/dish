@@ -5,40 +5,40 @@ import org.zells.dish.Zell;
 import org.zells.dish.delivery.Address;
 import org.zells.dish.delivery.Message;
 import org.zells.dish.delivery.Messenger;
-import org.zells.dish.delivery.messages.BinaryMessage;
+import org.zells.dish.delivery.messages.AddressMessage;
 import org.zells.dish.delivery.messages.CompositeMessage;
+import org.zells.dish.delivery.messages.IntegerMessage;
 import org.zells.dish.delivery.messages.StringMessage;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class LobbyZell implements Zell {
 
     private Dish dish;
     private Map<String, AvatarZell> avatars = new HashMap<String, AvatarZell>();
-    private Map<String, Set<AvatarZell>> subscribers = new HashMap<String, Set<AvatarZell>>();
+    private Map<String, Set<String>> topics = new HashMap<String, Set<String>>();
 
     public LobbyZell(Dish dish) {
         this.dish = dish;
     }
 
     public void receive(Message message) {
-        if (!message.read("enter").isNull() && !message.read("as").isNull()) {
-            Address address = message.read("enter").asAddress();
+        if (message.read(0).asString().equals("enter") && !message.read("from").isNull() && !message.read("as").isNull()) {
+            Address address = message.read("from").asAddress();
             final String name = message.read("as").asString();
 
-            if (avatars.containsKey(name)) {
+            try {
+                Address avatarAddress = enter(name);
                 dish.send(address, new CompositeMessage()
-                        .put("error", new StringMessage("There is already somebody here with that name.")));
-                return;
+                        .put(0, new StringMessage("Hello, " + name))
+                        .put("avatar", new AddressMessage(avatarAddress)));
+            } catch (Exception e) {
+                dish.send(address, new CompositeMessage()
+                        .put("error", new StringMessage(e.getMessage())));
             }
 
-            AvatarZell avatar = new AvatarZell(name, address);
-            avatars.put(name, avatar);
-
-            Address avatarAddress = dish.add(avatar);
-            dish.send(address, new CompositeMessage()
-                    .put(0, new StringMessage("Hello, " + name))
-                    .put("avatar", new BinaryMessage(avatarAddress.toBytes())));
 
         } else if (message.read(0).asString().equals("hello") && !message.read("from").isNull()) {
             Address address = message.read("from").asAddress();
@@ -55,87 +55,139 @@ public class LobbyZell implements Zell {
         }
     }
 
+    private Address enter(String name) {
+        if (avatars.containsKey(name)) {
+            throw new RuntimeException("There is already somebody here with that name.");
+        }
+
+        AvatarZell avatar = new AvatarZell(name);
+        avatars.put(name, avatar);
+
+        Address address = dish.add(avatar);
+        avatar.address = address;
+
+        return address;
+    }
+
+    private void leave(String name) {
+        dish.remove(avatars.get(name).address);
+        avatars.remove(name);
+        for (String topic : topics.keySet()) {
+            topics.get(topic).remove(name);
+        }
+    }
+
+    private void sayToAll(Message message, String from) {
+        for (String name : avatars.keySet()) {
+            if (!name.equals(from)) {
+                sayToOne(message, from, name);
+            }
+        }
+    }
+
+    private void sayToOne(Message message, String from, String to) {
+        avatars.get(to).hear(message, from);
+    }
+
+    private void sayOnTopic(Message message, String from, String topic) {
+        if (!topics.containsKey(topic)) {
+            return;
+        }
+
+        for (String name : topics.get(topic)) {
+            if (!name.equals(from)) {
+                avatars.get(name).hearOnTopic(message, from, topic);
+            }
+        }
+    }
+
+    private void joinTopic(String name, String topic) {
+        if (!topics.containsKey(topic)) {
+            topics.put(topic, new HashSet<String>());
+        }
+        topics.get(topic).add(name);
+    }
+
+    private void ignoreTopic(String name, String topic) {
+        if (topics.containsKey(topic)) {
+            topics.get(topic).remove(name);
+        }
+    }
+
     private class AvatarZell implements Zell {
 
         private final String name;
+        private Set<Address> subscribers = new HashSet<Address>();
+        private LinkedList<Message> heard = new LinkedList<Message>();
+        private int sequence = 1;
         private Address address;
-        private boolean connected = true;
-        private LinkedList<Message> mailbox = new LinkedList<Message>();
 
-        AvatarZell(String name, Address address) {
+        AvatarZell(String name) {
             this.name = name;
-            this.address = address;
+        }
+
+        private void hear(Message message, String from) {
+            notifySubscribers(new CompositeMessage()
+                    .put("message", message)
+                    .put("from", new StringMessage(from)));
+        }
+
+        private void hearOnTopic(Message message, String from, String topic) {
+            notifySubscribers(new CompositeMessage()
+                    .put("message", message)
+                    .put("from", new StringMessage(from))
+                    .put("on", new StringMessage(topic)));
         }
 
         @Override
         public void receive(Message message) {
-            if (message.read(0).asString().equals("leave")) {
-                avatars.remove(name);
-                for (Set<AvatarZell> subscribed : subscribers.values()) {
-                    subscribed.remove(this);
+            if (message.read("subscribe") instanceof AddressMessage) {
+                Address subscriber = message.read("subscribe").asAddress();
+                subscribers.add(subscriber);
+                for (Message m : heard) {
+                    dish.send(subscriber, m);
                 }
-                dish.send(address, new StringMessage("Good-bye"));
-            } else if (!message.read("join").isNull()) {
-                String topic = message.read("join").asString();
-                if (!subscribers.containsKey(topic)) {
-                    subscribers.put(topic, new HashSet<AvatarZell>());
-                }
-                subscribers.get(topic).add(this);
-            } else if (!message.read("ignore").isNull()) {
-                String topic = message.read("ignore").asString();
-                if (subscribers.containsKey(topic)) {
-                    subscribers.get(topic).remove(this);
-                }
-            } else if (!message.read("connect").isNull()) {
-                connected = true;
-                address = message.read("connect").asAddress();
-                while (!mailbox.isEmpty()) {
-                    send(mailbox.removeFirst());
-                }
-            } else if (!message.read("say").isNull()) {
-                CompositeMessage relay = new CompositeMessage()
-                        .put("message", message.read("say"))
-                        .put("from", new StringMessage(name));
-
-                if (message.read("on").isNull()) {
-                    if (message.read("to").isNull()) {
-                        for (AvatarZell avatar : avatars.values()) {
-                            if (!avatar.name.equals(name)) {
-                                avatar.send(relay);
-                            }
-                        }
-                    } else {
-                        String to = message.read("to").asString();
-                        avatars.get(to).send(relay);
-                    }
+            } else if (message.read("say") instanceof StringMessage) {
+                Message said = message.read("say");
+                if (message.read("to") instanceof StringMessage) {
+                    sayToOne(said, name, message.read("to").asString());
+                } else if (message.read("on") instanceof StringMessage) {
+                    sayOnTopic(said, name, message.read("on").asString());
                 } else {
-                    String topic = message.read("on").asString();
-                    relay.put("on", new StringMessage(topic));
-                    if (subscribers.containsKey(topic)) {
-                        for (AvatarZell avatar : subscribers.get(topic)) {
-                            if (!avatar.name.equals(name)) {
-                                avatar.send(relay);
-                            }
-                        }
-                    }
+                    sayToAll(said, name);
                 }
+            } else if (message.read("join") instanceof StringMessage) {
+                joinTopic(name, message.read("join").asString());
+            } else if (message.read("ignore") instanceof StringMessage) {
+                ignoreTopic(name, message.read("ignore").asString());
+            } else if (message.read(0).equals(new StringMessage("leave"))) {
+                leave(name);
+                notifySubscribers(new StringMessage("Good-bye"));
             }
         }
 
-        private void send(final Message message) {
-            if (!connected) {
-                mailbox.add(message);
-                return;
-            }
+        private void notifySubscribers(Message about) {
+            CompositeMessage message = new CompositeMessage()
+                    .put("message", about)
+                    .put("time", new StringMessage(getTimeAsIsoString()))
+                    .put("sequence", new IntegerMessage(sequence++));
+            heard.add(message);
 
-            dish.send(address, message)
-                    .when(new Messenger.Failed() {
-                        @Override
-                        public void then(Exception e) {
-                            connected = false;
-                            mailbox.add(message);
-                        }
-                    });
+            for (final Address subscriber : subscribers) {
+                dish.send(subscriber, message)
+                        .when(new Messenger.Failed() {
+                            @Override
+                            public void then(Exception e) {
+                                subscribers.remove(subscriber);
+                            }
+                        });
+            }
+        }
+
+        private String getTimeAsIsoString() {
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+            df.setTimeZone(TimeZone.getTimeZone("UTC"));
+            return df.format(new Date());
         }
 
     }
