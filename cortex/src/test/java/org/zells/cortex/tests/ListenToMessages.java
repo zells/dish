@@ -65,7 +65,7 @@ public class ListenToMessages {
             protected void onReceive(Listener.ReceivedMessage message) {
                 assert message.getSequence() == 1;
                 assert message.getMessage().equals(new StringMessage("foo"));
-                assert message.getTimeIsoString().equals("2011-12-13T14:15:16Z");
+                assert message.getTimeAsIsoString().equals("2011-12-13T14:15:16Z");
                 received.add(message);
             }
         };

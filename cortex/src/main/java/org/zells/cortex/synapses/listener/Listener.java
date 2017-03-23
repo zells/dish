@@ -71,7 +71,7 @@ public class Listener {
             return message;
         }
 
-        public String getTimeIsoString() {
+        public String getTimeAsIsoString() {
             return time;
         }
 
