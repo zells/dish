@@ -91,8 +91,6 @@ public class CommunicatorSynapse extends Synapse {
         }
 
         final JTextArea output = new JTextArea();
-        historyBox.add(output);
-        updateScrollPane();
 
         model.send(input, new Communicator.Listener() {
             protected void onParsed(String receiver, Message message) {
@@ -114,6 +112,9 @@ public class CommunicatorSynapse extends Synapse {
                 updateScrollPane();
             }
         });
+
+        historyBox.add(output);
+        updateScrollPane();
     }
 
     synchronized private void updateScrollPane() {
