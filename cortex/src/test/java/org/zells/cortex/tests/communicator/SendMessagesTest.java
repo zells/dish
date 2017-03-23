@@ -34,7 +34,7 @@ public class SendMessagesTest extends BaseTest {
             }
         });
 
-        assert log.equals(Arrays.asList("parsed", "sending", "failure"));
+        assert log.equals(Arrays.asList("parsed", "failure"));
     }
 
     @Test
@@ -54,7 +54,7 @@ public class SendMessagesTest extends BaseTest {
         });
 
         assert received.equals(Collections.singletonList(new NullMessage()));
-        assert log.equals(Arrays.asList("parsed", "sending", "success"));
+        assert log.equals(Arrays.asList("parsed", "success"));
     }
 
     @Test
@@ -74,7 +74,7 @@ public class SendMessagesTest extends BaseTest {
         });
 
         assert received.equals(Collections.singletonList(new NullMessage()));
-        assert log.equals(Arrays.asList("parsed", "sending", "success"));
+        assert log.equals(Arrays.asList("parsed", "success"));
     }
 
     @Test
@@ -88,7 +88,7 @@ public class SendMessagesTest extends BaseTest {
         });
 
         assert received.equals(Collections.singletonList(new NullMessage()));
-        assert log.equals(Arrays.asList("parsed", "sending", "success"));
+        assert log.equals(Arrays.asList("parsed", "success"));
     }
 
     @Test
@@ -103,7 +103,7 @@ public class SendMessagesTest extends BaseTest {
         });
 
         assert received.equals(Collections.singletonList(new CompositeMessage(new StringMessage("foo"))));
-        assert log.equals(Arrays.asList("parsed", "sending", "success"));
+        assert log.equals(Arrays.asList("parsed", "success"));
     }
 
     @Test
@@ -118,7 +118,7 @@ public class SendMessagesTest extends BaseTest {
         });
 
         assert received.equals(Collections.singletonList(new CompositeMessage(new StringMessage("."))));
-        assert log.equals(Arrays.asList("parsed", "sending", "success"));
+        assert log.equals(Arrays.asList("parsed", "success"));
     }
 
     @Test

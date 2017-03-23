@@ -27,7 +27,12 @@ abstract public class BaseTest {
 
     @Before
     public void SetUp() {
-        dish = new Dish(new BasicUuidGenerator(), new EncodingRepository());
+        dish = new Dish(new BasicUuidGenerator(), new EncodingRepository()) {
+            @Override
+            public Messenger send(Address receiver, Message message) {
+                return super.send(receiver, message).sync();
+            }
+        };
         target = dish.add(new Zell() {
             @Override
             public void receive(Message message) {
@@ -60,11 +65,6 @@ abstract public class BaseTest {
     }
 
     public class Listener extends Communicator.Listener {
-
-        protected void onSending(Messenger messenger) {
-            log.add("sending");
-            messenger.sync(1);
-        }
 
         protected void onParsed(String receiver, Message message) {
             log.add("parsed");
