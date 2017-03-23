@@ -10,6 +10,13 @@ public class CompositeMessage extends Message {
 
     private Map<String, Message> map = new HashMap<String, Message>();
 
+    public CompositeMessage(Message... messages) {
+        int i = 0;
+        for (Message message : messages) {
+            put(i++, message);
+        }
+    }
+
     public CompositeMessage put(String key, Message value) {
         map.put(key, value);
         return this;

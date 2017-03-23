@@ -168,11 +168,12 @@ public class ReadMessagesTest {
         Message m = new CompositeMessage()
                 .put(1, new StringMessage("one"))
                 .put(42, new StringMessage("fourty-two"))
-                .put("21", new IntegerMessage(21));
+                .put("21", new CompositeMessage(new IntegerMessage(21), new IntegerMessage(22)));
 
         assert m.keys().equals(new HashSet<String>(Arrays.asList("1", "42", "21")));
         assert m.read(1).asString().equals("one");
         assert m.read("1").asString().equals("one");
-        assert m.read(21).asString().equals("21");
+        assert m.read(21).read(0).asString().equals("21");
+        assert m.read(21).read(1).asString().equals("22");
     }
 }
