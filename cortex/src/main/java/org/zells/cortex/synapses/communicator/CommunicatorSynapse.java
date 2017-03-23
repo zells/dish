@@ -21,13 +21,17 @@ public class CommunicatorSynapse extends Synapse {
     private JScrollPane historyScrollPane;
 
     public CommunicatorSynapse(final Address target, Dish dish, AddressBookZell book) {
-        super(target == null
-                ? "Communicator"
-                : ("Communicator: " + (book.contains(target) ? book.nameOf(target) : target)));
+        super(getTitle(target, book), target);
         model = new Communicator(target, dish, book);
 
         setLayout(new BorderLayout());
         add(createSplitPane());
+    }
+
+    private static String getTitle(Address target, AddressBookZell book) {
+        return target == null
+                ? "Communicator"
+                : ("Communicator: " + (book.contains(target) ? book.nameOf(target) : target));
     }
 
     private Component createSplitPane() {

@@ -14,7 +14,7 @@ public class ListenerSynapse extends Synapse {
     private final JScrollPane scrollPane;
 
     public ListenerSynapse(String name, Address target, Dish dish) {
-        super("Listener: " + name);
+        super("Listener: " + name, target);
 
         list = new JPanel();
         list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));

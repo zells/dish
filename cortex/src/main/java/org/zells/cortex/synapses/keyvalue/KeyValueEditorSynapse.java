@@ -23,7 +23,7 @@ public class KeyValueEditorSynapse extends Synapse {
     private List<String> keys;
 
     public KeyValueEditorSynapse(String nameOrAddress, Address target, Dish dish) {
-        super("KeyValueEditor: " + nameOrAddress);
+        super("KeyValueEditor: " + nameOrAddress, target);
 
         final TableModel tableModel = new TableModel();
 
@@ -37,6 +37,7 @@ public class KeyValueEditorSynapse extends Synapse {
                 tableModel.fireTableDataChanged();
             }
         };
+        setModel(model);
 
         setLayout(new BorderLayout());
         add(new JScrollPane(new JTable(tableModel)));
@@ -101,7 +102,7 @@ public class KeyValueEditorSynapse extends Synapse {
                 if (col == 1) {
                     model.put(keys.get(row), new AddressMessage(Address.fromString(string)));
                     fireTableCellUpdated(row, col);
-                } else {
+                } else if (!keys.get(row).equals(string)) {
                     model.remove(keys.get(row));
                     if (!string.trim().isEmpty()) {
                         model.put(string, entries.get(keys.get(row)));

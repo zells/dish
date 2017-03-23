@@ -146,24 +146,36 @@ class CortexGui extends JFrame {
         }
     }
 
-    private void addSynapse(Synapse synapse) {
-        synapse.setSize(400, 300);
-        synapse.setLocation(nextLocation);
-        calculateNextPosition(synapse);
-        synapse.setVisible(true);
-        desktop.add(synapse);
+    private void addSynapse(final Synapse synapse) {
+        addInternalFrame(synapse);
+
+        synapse.onOpenInspector(new Runnable() {
+            @Override
+            public void run() {
+                JInternalFrame inspector = new MessageInspector(synapse);
+                addInternalFrame(inspector);
+            }
+        });
+    }
+
+    private void addInternalFrame(JInternalFrame frame) {
+        frame.setSize(400, 300);
+        frame.setLocation(nextLocation);
+        calculateNextPosition(frame);
+        frame.setVisible(true);
+        desktop.add(frame);
         try {
-            synapse.setSelected(true);
+            frame.setSelected(true);
         } catch (java.beans.PropertyVetoException ignored) {
         }
     }
 
-    private void calculateNextPosition(Synapse synapse) {
-        nextLocation = new Point(nextLocation.x + synapse.getWidth(), nextLocation.y);
-        if (nextLocation.x + synapse.getWidth() > getWidth()) {
-            nextLocation = new Point(0, nextLocation.y + synapse.getHeight());
+    private void calculateNextPosition(JInternalFrame frame) {
+        nextLocation = new Point(nextLocation.x + frame.getWidth(), nextLocation.y);
+        if (nextLocation.x + frame.getWidth() > getWidth()) {
+            nextLocation = new Point(0, nextLocation.y + frame.getHeight());
         }
-        if (nextLocation.y + synapse.getHeight() > getHeight()) {
+        if (nextLocation.y + frame.getHeight() > getHeight()) {
             nextLocation = new Point(40, 40);
         }
     }
