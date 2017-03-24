@@ -15,6 +15,8 @@ import java.util.List;
 
 abstract public class Canvas extends SynapseModel {
 
+    private int scale = 5;
+
     Canvas(Address target, Dish dish) {
         super(target, dish);
     }
@@ -44,8 +46,8 @@ abstract public class Canvas extends SynapseModel {
                         ));
                     } else if (shape.read(0).asString().equals("circle")) {
                         brushes.add(new CircleBrush(
-                                shape.read("startX").asInteger(),
-                                shape.read("startY").asInteger(),
+                                shape.read("centerX").asInteger(),
+                                shape.read("centerY").asInteger(),
                                 shape.read("radius").asInteger()
                         ));
                     }
@@ -77,7 +79,7 @@ abstract public class Canvas extends SynapseModel {
 
         @Override
         public void drawOn(Graphics2D g) {
-            g.drawLine(startX / 10, startY / 10, endX / 10, endY / 10);
+            g.drawLine(startX / scale, startY / scale, endX / scale, endY / scale);
         }
     }
 
@@ -94,7 +96,7 @@ abstract public class Canvas extends SynapseModel {
 
         @Override
         public void drawOn(Graphics2D g) {
-            g.drawOval((startX - radius) / 10, (startY - radius) / 10, (radius * 2) / 10, (radius * 2) / 10);
+            g.drawOval((startX - radius) / scale, (startY - radius) / scale, (radius * 2) / scale, (radius * 2) / scale);
         }
     }
 }

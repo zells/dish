@@ -238,6 +238,10 @@ class CortexGui extends JFrame {
                 frame.addSynapse(new ListenerSynapse("me", receiver, cortex.dish));
 
                 frame.addSynapse(new KeyValueEditorSynapse("book", cortex.book.get("book"), cortex.dish));
+
+                cortex.book.put("turtle", cortex.dish.add(new TurtleZell(cortex.dish)));
+                frame.addSynapse(new CanvasSynapse("turtle", cortex.book.get("turtle"), cortex.dish));
+                frame.addSynapse(new CommunicatorSynapse(cortex.book.get("turtle"), cortex.dish, cortex.book));
             }
         });
     }
