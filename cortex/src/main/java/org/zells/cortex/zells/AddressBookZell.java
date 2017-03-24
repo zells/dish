@@ -30,21 +30,10 @@ public class AddressBookZell implements Zell {
             if (!message.read("at").isNull() && message.keys().contains("put")) {
                 String name = message.read("at").asString().replace(" ", "");
                 Address address = message.read("put").asAddress();
-                boolean replaced = addresses.containsKey(name);
-                addresses.put(name, address);
-                notifyObservers(new CompositeMessage()
-                        .put(replaced ? "replaced" : "added", new CompositeMessage()
-                                .put(name, new AddressMessage(address))));
-
+                put(name, address);
             } else if (!message.read("remove").isNull()) {
                 String name = message.read("remove").asString();
-                Address removed = addresses.remove(name);
-                if (removed != null) {
-                    notifyObservers(new CompositeMessage()
-                            .put("removed", new CompositeMessage()
-                                    .put(name, new AddressMessage(removed))));
-                }
-
+                remove(name);
             } else if (!message.read("tell").isNull()) {
                 CompositeMessage book = new CompositeMessage();
                 for (String name : addresses.keySet()) {
@@ -69,7 +58,20 @@ public class AddressBookZell implements Zell {
     }
 
     public void put(String name, Address address) {
+        boolean replaced = addresses.containsKey(name);
         addresses.put(name, address);
+        notifyObservers(new CompositeMessage()
+                .put(replaced ? "replaced" : "added", new CompositeMessage()
+                        .put(name, new AddressMessage(address))));
+    }
+
+    private void remove(String name) {
+        Address removed = addresses.remove(name);
+        if (removed != null) {
+            notifyObservers(new CompositeMessage()
+                    .put("removed", new CompositeMessage()
+                            .put(name, new AddressMessage(removed))));
+        }
     }
 
     public Address get(String name) {

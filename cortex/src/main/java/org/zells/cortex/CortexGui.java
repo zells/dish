@@ -128,7 +128,6 @@ class CortexGui extends JFrame {
 
                 Address receiver = cortex.dish.add(new ReceiverZell(cortex.dish));
                 cortex.book.put(name, receiver);
-                addSynapse(new ListenerSynapse(name, receiver, cortex.dish));
             }
         });
 
