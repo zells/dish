@@ -1,9 +1,11 @@
 package org.zells.cortex;
 
+import org.zells.cortex.synapses.canvas.CanvasSynapse;
 import org.zells.cortex.synapses.communicator.CommunicatorSynapse;
 import org.zells.cortex.synapses.keyvalue.KeyValueEditorSynapse;
 import org.zells.cortex.synapses.listener.ListenerSynapse;
 import org.zells.cortex.zells.ReceiverZell;
+import org.zells.cortex.zells.TurtleZell;
 import org.zells.dish.delivery.Address;
 
 import javax.swing.*;
@@ -109,6 +111,28 @@ class CortexGui extends JFrame {
                 addSynapse(new KeyValueEditorSynapse(nameOrAddress, target, cortex.dish));
             }
         });
+        addMenuItem(synapsesMenu, "Canvas...", 0, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String nameOrAddress = JOptionPane.showInputDialog(
+                        CortexGui.this,
+                        "Name of Address of Zell",
+                        "New Canvas...",
+                        JOptionPane.PLAIN_MESSAGE);
+
+                if (nameOrAddress == null) {
+                    return;
+                }
+
+                Address target;
+                if (cortex.book.has(nameOrAddress)) {
+                    target = cortex.book.get(nameOrAddress);
+                } else {
+                    target = Address.fromString(nameOrAddress);
+                }
+
+                addSynapse(new CanvasSynapse(nameOrAddress, target, cortex.dish));
+            }
+        });
 
 
         JMenu zellsMenu = new JMenu("Zells");
@@ -128,6 +152,21 @@ class CortexGui extends JFrame {
 
                 Address receiver = cortex.dish.add(new ReceiverZell(cortex.dish));
                 cortex.book.put(name, receiver);
+            }
+        });
+        addMenuItem(zellsMenu, "Turtle...", KeyEvent.VK_R, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String name = JOptionPane.showInputDialog(
+                        CortexGui.this,
+                        "Name",
+                        "New Turtle...",
+                        JOptionPane.PLAIN_MESSAGE);
+
+                if (name == null) {
+                    return;
+                }
+
+                cortex.book.put(name, cortex.dish.add(new TurtleZell(cortex.dish)));
             }
         });
 

@@ -91,45 +91,40 @@ public class TurtleZell implements Zell {
     }
 
     private void redraw() {
-        clear();
-        drawLines();
-        drawMyself();
+        CompositeMessage brush = new CompositeMessage();
+        drawLines(brush);
+        drawMyself(brush);
+        send(new CompositeMessage(new StringMessage("draw"), brush));
     }
 
-    private void drawLines() {
+    private void drawLines(CompositeMessage brush) {
         for (List<Integer> line : lines) {
-            drawLine(line.get(0), line.get(1), line.get(2), line.get(3));
+            drawLine(brush, line.get(0), line.get(1), line.get(2), line.get(3));
         }
     }
 
-    private void drawMyself() {
-        drawCircle(x, y, 50);
-        drawLine(dx(40), dy(40), dx(50), dy(50));
+    private void drawMyself(CompositeMessage brush) {
+        drawCircle(brush, x, y, 50);
+        drawLine(brush, dx(40), dy(40), dx(50), dy(50));
     }
 
-    private void drawLine(int startX, int startY, int endX, int endY) {
-        draw(new CompositeMessage()
-                .put(1, new StringMessage("line"))
+    private void drawLine(CompositeMessage brush, int startX, int startY, int endX, int endY) {
+        draw(brush, new CompositeMessage(new StringMessage("line"))
                 .put("startX", new IntegerMessage(startX))
                 .put("startY", new IntegerMessage(startY))
                 .put("endX", new IntegerMessage(endX))
                 .put("endY", new IntegerMessage(endY)));
     }
 
-    private void drawCircle(int x, int y, int radius) {
-        draw(new CompositeMessage()
-                .put(1, new StringMessage("circle"))
+    private void drawCircle(CompositeMessage brush, int x, int y, int radius) {
+        draw(brush, new CompositeMessage(new StringMessage("circle"))
                 .put("centerX", new IntegerMessage(x))
                 .put("centerY", new IntegerMessage(y))
                 .put("radius", new IntegerMessage(radius)));
     }
 
-    private void clear() {
-        send(new CompositeMessage(new StringMessage("clear")));
-    }
-
-    private void draw(CompositeMessage message) {
-        send(message.put(0, new StringMessage("draw")));
+    private void draw(CompositeMessage brush, CompositeMessage message) {
+        brush.put(brush.keys().size(), message);
     }
 
     private void send(Message message) {
