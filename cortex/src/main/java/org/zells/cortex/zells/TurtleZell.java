@@ -15,13 +15,14 @@ public class TurtleZell implements Zell {
 
     private Dish dish;
     private Set<Address> canvases = new HashSet<Address>();
-    private int x = 500;
-    private int y = 500;
-    private int a = 90;
+    private int x;
+    private int y;
+    private int a;
     private List<List<Integer>> lines = new ArrayList<List<Integer>>();
 
     public TurtleZell(Dish dish) {
         this.dish = dish;
+        reset();
     }
 
     @Override
@@ -74,8 +75,8 @@ public class TurtleZell implements Zell {
     }
 
     private void reset() {
-        x = 50;
-        y = 50;
+        x = 600;
+        y = 200;
         a = 90;
         lines.clear();
     }

@@ -12,6 +12,8 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 public class CommunicatorSynapse extends Synapse {
 
@@ -38,13 +40,28 @@ public class CommunicatorSynapse extends Synapse {
         final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 createHistoryPane(), createInputField());
 
-        final int[] height = new int[]{100};
+        final int[] height = new int[]{0};
+        final int[] pos = new int[]{0};
 
         addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent e) {
-                int diff = getHeight() - height[0];
+                if (height[0] == 0) {
+                    pos[0] = getHeight() - 100 - splitPane.getDividerSize();
+                } else {
+                    int diff = getHeight() - height[0];
+                    pos[0] = pos[0] + diff;
+                }
                 height[0] = getHeight();
-                splitPane.setDividerLocation(splitPane.getDividerLocation() + diff);
+                splitPane.setDividerLocation(pos[0]);
+            }
+        });
+
+        splitPane.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if (evt.getPropertyName().equals("dividerLocation")) {
+                    pos[0] = splitPane.getDividerLocation();
+                }
             }
         });
 

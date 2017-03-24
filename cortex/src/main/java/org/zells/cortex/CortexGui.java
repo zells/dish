@@ -1,5 +1,6 @@
 package org.zells.cortex;
 
+import org.zells.cortex.synapses.KeyboardSynapse;
 import org.zells.cortex.synapses.canvas.CanvasSynapse;
 import org.zells.cortex.synapses.communicator.CommunicatorSynapse;
 import org.zells.cortex.synapses.keyvalue.KeyValueEditorSynapse;
@@ -133,6 +134,28 @@ class CortexGui extends JFrame {
                 addSynapse(new CanvasSynapse(nameOrAddress, target, cortex.dish));
             }
         });
+        addMenuItem(synapsesMenu, "Keyboard...", 0, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String nameOrAddress = JOptionPane.showInputDialog(
+                        CortexGui.this,
+                        "Name of Address of Zell",
+                        "New Keyboard...",
+                        JOptionPane.PLAIN_MESSAGE);
+
+                if (nameOrAddress == null) {
+                    return;
+                }
+
+                Address target;
+                if (cortex.book.has(nameOrAddress)) {
+                    target = cortex.book.get(nameOrAddress);
+                } else {
+                    target = Address.fromString(nameOrAddress);
+                }
+
+                addSynapse(new KeyboardSynapse(nameOrAddress, target, cortex.dish));
+            }
+        });
 
 
         JMenu zellsMenu = new JMenu("Zells");
@@ -238,10 +261,6 @@ class CortexGui extends JFrame {
                 frame.addSynapse(new ListenerSynapse("me", receiver, cortex.dish));
 
                 frame.addSynapse(new KeyValueEditorSynapse("book", cortex.book.get("book"), cortex.dish));
-
-                cortex.book.put("turtle", cortex.dish.add(new TurtleZell(cortex.dish)));
-                frame.addSynapse(new CanvasSynapse("turtle", cortex.book.get("turtle"), cortex.dish));
-                frame.addSynapse(new CommunicatorSynapse(cortex.book.get("turtle"), cortex.dish, cortex.book));
             }
         });
     }

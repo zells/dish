@@ -41,7 +41,7 @@ public class CanvasSynapse extends Synapse {
         canvas.setBackground(Color.white);
         add(canvas);
 
-        new Canvas(target, dish) {
+        setModel(new Canvas(target, dish) {
 
             @Override
             public void draw(final List<Brush> newBrushes) {
@@ -49,6 +49,6 @@ public class CanvasSynapse extends Synapse {
                 validate();
                 repaint();
             }
-        };
+        });
     }
 }
